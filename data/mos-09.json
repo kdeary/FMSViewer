@@ -1,0 +1,9 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "09U": [
+      "Unqualified in Authorized Army MOS (09U)",
+      "This code (09U) will be used in place of a Primary MOS (PMOS) to report enlisted Soldiers who lose their MOS qualifications and cannot be or are not qualified to be classified in any MOS contained in DA Pam 611-21. Refer to chapter 14 for specifications, applications and restrictions."
+    ]
+  }
+}

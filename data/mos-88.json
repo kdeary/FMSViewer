@@ -1,0 +1,37 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "88H": [
+      "Cargo Specialist",
+      "The cargo specialist transfers or supervises the transfer of passengers and cargo to and from air, land, and water transport by manual and mechanical methods."
+    ],
+    "88K": [
+      "Watercraft Operator",
+      "The watercraft operator performs mariner duties and supervises other personnel on Army watercraft and amphibians."
+    ],
+    "88L": [
+      "Watercraft Engineer",
+      "The watercraft engineer supervises or performs) field and sustainment level maintenance. Service Army watercraft, amphibians and auxiliary equipment on marine vessels."
+    ],
+    "88M": [
+      "Motor Transport Operator",
+      "The motor transport operator supervises or operates wheel vehicles to transport personnel and cargo."
+    ],
+    "88N": [
+      "Transportation Management Coordinator (Trans Mgt Coord)",
+      "The transportation management coordinator coordinates, monitors, controls and supervises the movement of personnel, equipment and cargo by air, rail, highway and water. Determine the most efficient mode of transport that accomplishes mission requirements."
+    ],
+    "88P": [
+      "Railway Equipment Repairer (USAR only)",
+      "The railroad equipment repairer supervises or performs unit and direct support/general support (DS/GS) maintenance on diesel-electric locomotives and railway cars."
+    ],
+    "88U": [
+      "Railway Specialist (USAR only)",
+      "The Railway Specialist provides rail network capability and infrastructure assessments. Performs and assists with rail planning. Coordinates the use of Host nation or contracted rail assets. Performs Contracting Officer’s Representative (COR) duties to oversee contracts."
+    ],
+    "88Z": [
+      "Transportation Senior Sergeant (Transportation Sr SGT)",
+      "The transportation senior sergeant supervises the operation and control of movement for personnel and cargo by air, rail, motor transport and water, maintenance-of-way, maintenance of equipment and technical expert on all matters relating to railway operations. Manages and coordinates the operation and maintenance of Army watercraft and maintains records of strength, location and employment of railway personnel and equipment. Provide direct assistance and advice related to Host Nation (HN) rail infrastructure and the employment of HN assets in support of nation building and military operations; coordinates and communicate with the HN, supported unit, or contracted entity to facilitate rail operations. Serves as the principal NCO associated with SQI M in transportation companies. Assist in the coordination and implementation of operations, administration, training programs and communications activities. Account for location, employment and deployment of organic operating equipment and maintenance activities. Plans and lays out a maintenance shop and facilities. Coordinate transportation actions with subordinate and serviced activities. Consolidates, prepares, reviews and processes regular and special reports of command transportation and watercraft activities. Plans, manages, and monitors unit motor transport operations as the senior truckmaster. Establishes and organizes the unit motor park. Prepares and implements the truck company security and defense plan. Prepares map overlays. Receives and prepares highway reconnaissance data for motor convoy transport. Supervises and directs unit dispatching of vehicles. Coordinates engineer requirements to support a truck battalion."
+    ]
+  }
+}

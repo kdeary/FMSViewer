@@ -1,0 +1,29 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "18B": [
+      "Special Forces Weapons Sergeant (SF Wpns SGT)",
+      "Special Forces Weapons Sergeant employs U.S. and foreign small arms, light and heavy crew served weapons, anti-aircraft and anti-armor weapons. Controls emplacement and supervises employment during tactical offensive and defensive combat operations; reads, interprets, and prepares combat orders; coordinates organic and supporting fire power, performs standard and non-standard air delivery, airborne operations, and air-ground operations; ensures collection and proper reporting of intelligence data to unit and staff sections."
+    ],
+    "18C": [
+      "Special Forces Engineer Sergeant (SF Engr SGT)",
+      "The Special Forces Engineer Sergeant employs offensive/defensive combat engineer capabilities; performs and instructs in demolitions, explosives, improvised munitions, U.S. and foreign landmines, mine/countermine operations, construction, field fortification, bridging, rigging, electrical wiring, reconnaissance, target analysis and civil action projects; instructs and performs land and water navigation duties by interpreting maps, overlays, photos, charts and using standard and nonstandard navigational techniques and equipment; proficient in sabotage operations with standard, nonstandard, and improvised munitions and explosives; plans, prepares and conducts the target analysis portion of the area study; collects and disseminates engineer intelligence data; prepares and reviews target folders; prepares and reviews target analysis folders."
+    ],
+    "18D": [
+      "Special Forces Medical Sergeant, (SF Med SGT)",
+      "Special Forces Medical Sergeant ensures detachment medical readiness; establishes and supervises temporary, fixed and unconventional warfare medical/dental facilities to support conventional or unconventional operations with emergency, routine, and long term medical care; provides initial medical/dental screening and evaluation of allied and indigenous personnel; manages detachment, allied, or indigenous patients, administration, admission and discharge, care, laboratory and pharmacological requirements and the initiation, maintenance and transfer of records; orders, stores, catalogs, safeguards and distributes medical/dental supplies, equipment and pharmaceuticals; supervises medical care and treatment during split detachment missions; operates combat laboratory and treats emergency and trauma patients in accordance with established surgical principles; diagnoses and treats various medical/veterinary dermatological, pediatric, infectious and obstetric conditions using appropriate medications, intravenous fluid support and physical measures; manages and supervise all aspects of deployed preventive medicine; develops and provides medical intelligence as required; in unconventional warfare environment, instructs medical personnel, manages guerilla hospital, and field evacuation nets; coordinates the operation, interaction and activities of medical/dental facilities within an area of operation; manages battalion size troop medical/dental clinic and its administrative and logistical support; establishes a base stock of medical supplies and equipment, internal or external procurement, storage, security and distribution of those items; coordinates veterinary training and support for area requiring animal transportation or use; provides guidance and training of medical personnel and preventive medicine specialists."
+    ],
+    "18E": [
+      "Special Forces Communications Sergeant (SF Comm SGT)",
+      "Special Forces Communications Sergeant provides conventional and unconventional tactical communications support during unilateral, combined, coalition, joint, interagency and multinational operations; employs ODA communications equipment to include HF, VHF, and UHF/SHF radio communications systems to transmit and receive radio messages in voice, continuous wave, and burst radio nets; trains, advises, and supervises the installation and operation of radios, communications procedures, facsimile, wire communications and computer networks; plans, manages, and advises the commander on C4I architecture, communications matters, and communications security up to Special Forces Operating Base (SFOB) level; prepares communications plan and annexes; prepares Signal Operations Instructions/Communication Electronics Operations Instructions (SOI/CEOI); serves as Communications-Electronics (C-E) NCOIC for FOB communications."
+    ],
+    "18F": [
+      "Special Forces Intelligence Sergeant (SF Intel SGT)",
+      "Special Forces Intelligence Sergeant prepares intelligence estimate (analysis) during mission planning and preparation (isolation); employs conventional and unconventional techniques of intelligence collection and processing during unilateral, combined, coalition, joint, interagency, and multi-national operations; plans, organizes, trains, advises, assists, and supervises indigenous and allied personnel on collection and processing of intelligence information; establishes intelligence networks, capable of establishing personnel identification through fingerprinting and other means; processes prisoners of war and detainees; establishes security plan and performs security duties; maintains all classified documents in the operational area and establishes destruction and evacuation plans; conducts threat vulnerability assessments; provides area specialist assistance to U.S. forces and outside agencies."
+    ],
+    "18Z": [
+      "Special Forces Operations Sergeant, (SF OPS SGT)",
+      "The Special Forces Operations Sergeant supervises, leads and serves as a member of an Operational Detachment of a Special Forces unit."
+    ]
+  }
+}

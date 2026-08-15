@@ -68,9 +68,22 @@ body { overflow: hidden; }
     var(--bs-body-bg);
   cursor: grab; touch-action: none; user-select: none;
 }
-.map-surface.is-panning { cursor: grabbing; }
-.map-surface.is-flying { cursor: progress; }
+/* The pointer says what a click will do, rather than reading "grab" over the
+   whole map when grabbing is the one thing most clicks don't do:
+     empty surface -- drag to pan
+     a unit        -- click to open it
+     a soldier or empty crew -- click to inspect it in the side panel
+   A gesture in progress outranks all of it. */
+.nb { cursor: zoom-in; }
+.nb.is-leaf { cursor: pointer; }
+.map-surface.is-panning, .map-surface.is-panning .nb { cursor: grabbing; }
+.map-surface.is-flying, .map-surface.is-flying .nb { cursor: progress; }
 
+/* No `will-change: transform` here. It pins the layer's raster and scales that
+   texture rather than re-rastering, which leaves every glyph in the map blurred
+   the moment you zoom past the scale it was drawn at. The translate3d() on this
+   element already gets it composited for panning; the raster has to stay live
+   because the scale is part of the same transform. */
 .world { position: absolute; top: 0; left: 0; width: 0; height: 0; transform-origin: 0 0; }
 
 .map-count {
@@ -78,6 +91,19 @@ body { overflow: hidden; }
   font-size: 0.7rem; color: var(--bs-secondary-color);
   pointer-events: none; opacity: 0.6;
 }
+
+.perf-hud {
+  position: absolute; right: 0.5rem; top: 0.5rem; z-index: 4;
+  min-width: 15rem; padding: 0.4rem 0.55rem;
+  border: 1px solid var(--bs-border-color); border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.62);
+  font-size: 0.72rem; font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.perf-row { display: flex; align-items: baseline; gap: 0.4rem; }
+.perf-row span { width: 4rem; color: var(--bs-secondary-color); }
+.perf-row b { width: 4.5rem; text-align: right; font-weight: 600; }
+.perf-row i { color: var(--bs-secondary-color); font-style: normal; }
 
 /* ------------------------------------------------------------------ a box */
 
@@ -87,8 +113,13 @@ body { overflow: hidden; }
   contain: layout paint style;
   border: calc(1px / var(--k)) solid var(--nb-line);
   border-radius: calc(5px / var(--k));
-  background: linear-gradient(180deg, var(--nb-fill-2), var(--nb-fill));
-  box-shadow: 0 calc(1px / var(--k)) calc(3px / var(--k)) rgba(0, 0, 0, 0.35);
+  /* Flat fills, not gradients, and no drop shadow. Boxes tile the whole
+     viewport and overlap their parents, so every pixel is painted several times
+     over; a blurred shadow per box is the most expensive thing in that stack
+     and almost entirely hidden behind the children drawn on top of it. The
+     lighter top edge below gives the same relief for the cost of one line. */
+  background: var(--nb-fill);
+  box-shadow: inset 0 calc(1px / var(--k)) 0 rgba(255, 255, 255, 0.05);
   color: var(--bs-body-color);
   line-height: 1.25;
 }
@@ -98,7 +129,10 @@ body { overflow: hidden; }
 
 .nb.is-selected { outline: calc(2px / var(--k)) solid var(--bs-info); outline-offset: calc(-1px / var(--k)); }
 .nb.is-focused { border-color: var(--bs-info); }
-.nb:hover { filter: brightness(1.12); }
+/* Lightening the fill, not `filter: brightness()` -- a filter puts the box in
+   its own paint pass, and under the cursor during a pan that is every box the
+   pointer crosses. */
+.nb:hover { --nb-fill: var(--nb-fill-2); }
 
 .nb.is-hq { border-color: rgba(126, 166, 196, 0.5); }
 .nb.is-hq .nb-head { background: rgba(126, 166, 196, 0.16); }
@@ -230,14 +264,23 @@ body { overflow: hidden; }
 .side-panel .card-body { min-height: 0; }
 @keyframes panel-in { from { transform: translateX(1.5rem); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* Duties run long -- a looser measure keeps a 300-word paragraph readable. */
+.mos-spec p { line-height: 1.5; text-wrap: pretty; }
+.mos-spec-src { font-size: 0.6875rem; }
+
 .legend {
   position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 5;
-  width: 15rem; max-height: 60%;
+  width: 19rem; max-height: 60%;
   display: flex; flex-direction: column;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   animation: panel-in 0.18s ease-out;
 }
 .legend-swatch { width: 0.7rem; height: 0.7rem; border-radius: 0.2rem; flex: none; }
+/* MOS titles wrap rather than truncate, so the swatch and count sit against
+   the first line instead of centring on a two-line row. */
+.legend-mos { align-items: flex-start; line-height: 1.35; }
+.legend-mos .legend-swatch { margin-top: 0.28em; }
+.legend-mos .font-monospace, .legend-mos .fw-semibold { flex: none; }
 
 /* ------------------------------------------------------------------ gear */
 

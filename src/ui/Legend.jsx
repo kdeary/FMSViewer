@@ -4,6 +4,8 @@ import { useMosInfo } from '../view/MosPalette.jsx';
 
 /** Colour key for the whole loaded structure, ordered by how common each MOS is. */
 export default function Legend({ model, onClose }) {
+  // Titles come with the palette; the branch is only a fallback for codes
+  // outside the enlisted chapter.
   const mosInfo = useMosInfo();
   const root = model.byId.get(model.rootId);
 
@@ -28,11 +30,16 @@ export default function Legend({ model, onClose }) {
         <ul className="list-unstyled mb-0">
           {root.topMos.map(({ mos, n }) => {
             const info = mosInfo(mos);
+            const full = info.title || info.label;
             return (
-              <li key={mos} className="d-flex align-items-center gap-2 mb-1">
+              <li key={mos} className="legend-mos d-flex gap-2 mb-1">
                 <i className="legend-swatch" style={{ background: info.color }} />
                 <span className="font-monospace">{mos}</span>
-                <span className="text-body-secondary text-truncate flex-grow-1">{info.label}</span>
+                {/* The full title, parentheticals and all -- rows wrap, so
+                    there is room here that a tooltip doesn't have. */}
+                <span className="text-body-secondary flex-grow-1" title={full}>
+                  {full}
+                </span>
                 <span className="fw-semibold">{n}</span>
               </li>
             );

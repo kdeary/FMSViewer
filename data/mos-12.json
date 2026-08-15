@@ -1,0 +1,73 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "12A": [
+      "Engineer Senior Sergeant",
+      "The engineer senior sergeant inspects and advises on bridging, rafting, and river crossing operations. Supervises general engineering activities related to all construction and utility operations. Formulates and maintains construction schedules. Assist in supervision of troops in assault operations. Perform ground and aerial reconnaissance. Advises engineer staff section personnel in matters involving combat engineer operations. Assist engineering officer in construction planning, scheduling, and material estimating. Assist in the preparation of operation orders, standing operating procedures, and contingency plans. Coordinates with staff agencies for engineer operational and tactical support. Coordinates employment of engineer elements operating with infantry and armored units. Inspects construction sites and enforces job specification and safety standards. Collects, interprets, analyzes, evaluates, and disseminates intelligence data. Provides staff supervision and principal noncommissioned officer direction to units engaged in performing engineering missions. Inspects construction and training activities. Supervises performance of combat engineering missions."
+    ],
+    "12B": [
+      "Combat Engineer",
+      "Combat engineers supervise, or serve, as a member of a team, squad, section, or platoon. They are engaged in providing mobility, counter-mobility and survivability support to combat forces."
+    ],
+    "12C": [
+      "Bridge Crewmember",
+      "Bridge crewmembers supervise or serve as a member of a squad, section or platoon. They provide conventional and powered bridge and rafting support for wet and dry gap crossing operations."
+    ],
+    "12D": [
+      "Diver",
+      "The diver performs or supervises SCUBA or Surface-Supplied diving operations for underwater reconnaissance, demolition, port construction and rehabilitation, harbor clearance, ship’s husbandry, river crossing, hydrographic survey, and salvage operations to a depth of 190FSW. Conducts Soldiers common tasks outlined in STP 21-1 SMCT and STP 21-24 SMCT."
+    ],
+    "12G": [
+      "Quarrying Specialist (National Guard Only)",
+      "The quarrying specialist supervises or operates electric, pneumatic, and internal combustion powered machines used in drilling, crushing, grading, and washing gravel aggregate for construction projects.. Detonates explosives to blast rock in quarries and construction sites."
+    ],
+    "12H": [
+      "Construction Engineering Supervisor (Const Engr Supv)",
+      "The construction engineering supervisor supervises construction, repair, and utility services of buildings, warehouses, fixed bridges, port facilities, and petroleum pipelines, tanks, and related equipment."
+    ],
+    "12K": [
+      "Plumber",
+      "The plumber installs and repairs pipe systems and fixtures, and petroleum pipeline systems."
+    ],
+    "12M": [
+      "Firefighter",
+      "The firefighter supervises or provides fire prevention and protection, firefighting, technical rescue, urban search and rescue and hazardous materials response capabilities to prevent or minimize injury, loss of life, and property and the environment throughout a range of military operations."
+    ],
+    "12N": [
+      "Horizontal Construction Engineer (Horiz Const Engineer)",
+      "The horizontal construction engineer supervises or serves as a member of a squad, team, section, or platoon. Duties start with operating heavy equipment at an intern level and progress to senior equipment operator level with supervisory responsibilities for personnel, construction projects, obstacle emplacement, and counter-obstacle operations involving construction equipment."
+    ],
+    "12P": [
+      "Prime Power Production Specialist (PPPS)",
+      "The prime power production specialist performs electrical assessments, facilities maintenance, QA/QC operations: supervises, operates, installs, and performs DS/GS level maintenance on electric power plants, consisting of prime power generator sets of 500 KW and higher; and associated auxiliary systems and equipment. Other duties include LNO and technical advisor to FEMA and other federal organizations."
+    ],
+    "12Q": [
+      "Powerline Distribution Specialist (Reserve Components) (Powerline Dist Sp)",
+      "The powerline distribution specialist supervises or installs and maintains electrical distribution systems; performs duties as a member of a transmission and distribution team."
+    ],
+    "12R": [
+      "Interior Electrician",
+      "The interior electrician supervises or performs installation and maintenance of interior electrical systems and equipment."
+    ],
+    "12T": [
+      "Technical Engineer (Tech Engr)",
+      "The technical engineer supervises or participates in construction and airfield site development, establishing permanent survey control stations, producing construction plans, performing quality control inspections, and performing field and laboratory testing on construction materials."
+    ],
+    "12W": [
+      "Carpentry and Masonry Specialist (Carpentry & Masonry Sp)",
+      "The carpentry and masonry specialist performs general heavy carpentry and masonry duties."
+    ],
+    "12X": [
+      "General Engineering Supervisor (Gen Engr Supv)",
+      "at skill level 5. The general engineering supervisor supervises general engineering activities related to all construction and utility operations. Assist engineering officer in construction planning, scheduling, and material estimating. Assist in the preparation of operation orders, standing operating procedures, and contingency plans. Provides staff supervision and principal noncommissioned officer direction to units engaged in performing general engineering missions. Inspect construction and training activities. Supervise performance of combat engineering missions."
+    ],
+    "12Y": [
+      "Geospatial Engineer",
+      "Geospatial engineers manage the enterprise geospatial database; compiled from all sources including National Geospatial Agency, Topographical Engineering Center and other services, coalition allies, as well as exploiting new collection and production from deployed Soldiers and sensors. Geospatial engineers manage the geospatial foundation of the Common Operating Picture (COP), synchronizing hard and soft copy products and are a necessary component of All Source Intelligence and Battle Command. Finish compilation of geospatial data into a printable map/product and prints (maps, overlays and special products) hardcopy geospatial information."
+    ],
+    "12Z": [
+      "Combat Engineering Senior Sergeant (Combat Engr Sr SGT)",
+      "at skill level 5. The combat engineering senior sergeant inspects and advises on bridging, rafting, and river crossing operations. Formulates and maintains construction schedules. Assist in supervision of troops in assault operations. Perform ground and aerial reconnaissance. Advises engineer staff section personnel in matters involving combat engineer operations. Coordinate with staff agencies for engineer operational and tactical support. Coordinate employment of engineer elements operating with infantry and armored units. Inspects construction sites and enforces job specification and safety standards. Collects, interprets, analyzes, evaluates, and disseminates intelligence data."
+    ]
+  }
+}

@@ -31,7 +31,8 @@ function headerFontSize(node, hh, k) {
 
 /**
  * One box, positioned in world units. The camera transform lives on an ancestor,
- * so nothing here changes while panning.
+ * so nothing here changes while panning, and `k` arrives quantised so nothing
+ * here changes on most frames of a zoom either.
  *
  * Exactly one view is mounted at a time -- `view` says which, `face` is how far
  * through its fade it is. Two views are never on screen together.
@@ -117,7 +118,10 @@ export default React.memo(NodeBox, (a, b) => (
   && a.focused === b.focused
   && Math.abs(a.face - b.face) < 0.004
   && Math.abs(a.appear - b.appear) < 0.004
-  && Math.abs(a.s - b.s) < 8
-  // Only the header size depends on zoom, so sub-percent changes are invisible.
-  && Math.abs(a.k - b.k) < b.k * 0.004
+  // `s` is only ever compared against one threshold, in the mini label. Testing
+  // the threshold rather than the value keeps a box off the re-render list
+  // through a whole zoom instead of every few percent of it.
+  && (a.s < 90) === (b.s < 90)
+  // Already quantised by the caller, so this is normally an exact match.
+  && a.k === b.k
 ));

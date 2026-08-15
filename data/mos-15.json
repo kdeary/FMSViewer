@@ -1,0 +1,85 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "15B": [
+      "Aircraft Powerplant Repairer (Acft Powerplant Rep)",
+      "The aircraft powerplant repairer performs and/or supervises inspections, testing, cleaning, repairs, maintenance and storage according to drawings, blueprints, directives, technical manuals, and safety procedures of aircraft powerplant subsystems, assemblies, and components. Requisitions and maintains shop and bench stock for repair of aircraft powerplant equipment. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15C": [
+      "MQ-1 Operator",
+      "A Soldier in MOS 15C engages in operating and remotely piloting of the UAS. Perform pre-flight, in-flight, post-flight checks and procedures. Conducts site selection, emplacement and deployment of the air vehicles and ground equipment of the UAS. Participates in launch/recovery ground crew operations. Performs mission commander duties to include planning, analyzing and execution of reconnaissance surveillance, targeting and acquisition (RSTA) missions. Applies and assists in the military intelligence collection process and acts as a liaison to supported units. Operates, troubleshoots and performs limited unit-level maintenance on communication equipment, power sources, light and heavy wheeled vehicles."
+    ],
+    "15D": [
+      "Aircraft Powertrain Repairer (Acft Powertrain Rep)",
+      "The aircraft powertrain repairer performs and/or supervises inspections, repairs and maintenance according to drawings, blueprints, directives, technical manuals, and safety procedures on aircraft powertrain systems to include the lubrication of required components and the removal and installation of aircraft subsystems such as main and tail rotor hub assemblies. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15E": [
+      "RQ-7 Repairer",
+      "The Unmanned Aircraft Systems Repairer supervises, inspects and performs UAS field and sustainment maintenance. Repairs the aircraft electrical, avionics, radio frequency, propulsion, fuel, removes and replaces optical payload, and weapons systems to include the electrical, electronic, and mechanical systems associated with those systems; the Ground Control Station electrical and electronic systems; the Ground Data Terminal electrical, electronic, and radio frequency systems; takeoff and landing systems; and associated ground support equipment. Prepares UAS related maintenance forms and records."
+    ],
+    "15F": [
+      "Aircraft Electrician (Acft Elec)",
+      "The aircraft electrician performs and/or supervises inspections, repairs, maintenance and testing according to drawings, blueprints, directives, technical manuals, and safety procedures of aircraft electrical systems and electronic components to include associated subsystems by applying the principles of electricity/electronics, hydrostatic motion, pneumatics, and hydraulics. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15G": [
+      "Aircraft Structural Repairer (Acft Structural Rep)",
+      "The aircraft structural repairer performs and/or supervises inspections, fabrication, repairs and maintenance on aircraft structures according to drawings, blueprints, directives, technical manuals, and safety procedures. Uses and performs operator maintenance on common and special tools. Requisitions and maintains shop and bench stock for repair of aircraft structures and maintain facilities for storage of flammable and hazardous materials. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15H": [
+      "Aircraft Pneudraulics Repairer (Acft Pneudraulics Rep)",
+      "The aircraft pneudraulics repairer performs and/or supervises inspections, fabrication, repairs and maintenance on aircraft pneudraulic subsystems, assemblies, and components according to drawings, blueprints, directives, technical manuals, and safety procedures. Uses and performs operator maintenance on common and special tools. Requisitions and maintains shop and bench stock for repair of aircraft structures and maintain facilities for storage of flammable and hazardous materials. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15K": [
+      "Aircraft Components Repair Supervisor (Acft Comp Repair Supv)",
+      "The aircraft component repair supervisor must be knowledgeable of the duties performed by personnel in MOSs 15B, 15D, 15G, and 15H. Performs administrative duties such as planning aircraft maintenance areas, component and avionics repair shops/facilities as well as determining man-hours, personnel management, parts and facility requirements while maintaining supply economy and discipline. Prepares evaluations, special reports, records and recommends and/or administers plans and policies pertaining to aircraft component repair. Instructs and supervises maintenance, repairs and inspections of aircraft components and other systems according to drawings, blueprints, directives, technical manuals, and safety procedures. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15L": [
+      "Armament/Electrical/Avionics Repair Supervisor (Arm/Elect/Avionics Rep Supv)",
+      "The aircraft component repair supervisor must be knowledgeable of the duties performed by personnel in MOSs 15F, 15N, and 15Y. Performs administrative duties such as planning aircraft maintenance, and avionics repair shops/facilities as well as determining man-hours, personnel management, parts and facility requirements while maintaining supply economy and discipline. Prepares evaluations, special reports, records and recommends and/or administers plans and policies pertaining to aircraft component repair. Instructs and supervises maintenance, repairs and inspections of aircraft armament, aviation communications and other electronic/electrical systems according to drawings, blueprints, directives, technical manuals, and safety procedures. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15M": [
+      "MQ-1 Repairer",
+      "The Unmanned Aircraft Systems Repairer supervises, inspects and performs UAS field and sustainment maintenance. Repairs the aircraft electrical, avionics, radio frequency, propulsion, fuel, removes and replaces optical payload, and weapons systems to include the electrical, electronic, and mechanical systems associated with those systems; the Ground Control Station electrical and electronic systems; the Ground Data Terminal electrical, electronic, and radio frequency systems; takeoff and landing systems; and associated ground support equipment. Prepares UAS related maintenance forms and records."
+    ],
+    "15N": [
+      "Avionic Mechanic",
+      "The avionic mechanic conducts inspections and/or maintenance according to drawings, blueprints, directives, technical manuals, and safety procedures on aircraft flight controls, stabilization systems, avionics and controlled cryptographic equipment such as Identification friend or foe (IFF). Tests, troubleshoots, and repairs test sets and diagnostic equipment. Maintains facilities for storage of flammable and hazardous materials. Uses and performs operator maintenance on common and special tools. Requisitions and maintains shop and bench stock for repair of aircraft avionics equipment. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15P": [
+      "Aviation Operations Specialist (Aviation Ops Sp)",
+      "A Soldier in MOS 15P supervises and/or conducts operation and maintenance of flight operations equipment. Performs duties such as conducting aircraft mission planning and maintaining individual aircrew flight records and assists in development of operation, warning, and fragmentary orders, prepares and updates appropriate maps, overlays, and charts, current DOD flight publications, encodes, decodes, and posts notices to airman (NOTAMS). Provides air traffic advisory services and interprets teletype weather reports."
+    ],
+    "15Q": [
+      "Air Traffic Control (ATC) Operator",
+      "A Soldier in MOS 15Q supervises and/or conducts Air Traffic Services (ATS) following Federal Aviation Administration (FAA) and DoD policy procedures. Issues flight instructions and clearances via Visual Flight Rules (VFR), Instrument Flight Rules (IFR), and Special Visual Flight Rules (SVFR), Formulates data for Terminal Instrument Procedures (TERPS). Assists Air Control Authority (ACA) with the Army Airspace Command and Control (A2C2) system using Airspace Control Measures (ACM). Operates various facilities to include Air Traffic Control Towers (ATCT), Ground Controlled Approach (GCA) Radars, and Airspace Information Centers (AIC). Maintains United States Air Force certification as limited weather observer; compiles, controls information and conducts emergency notification and assistance in the event of aviation accidents or incidents."
+    ],
+    "15R": [
+      "AH-64 Attack Helicopter Repairer (AH-64 Attack Hel Rep)",
+      "A Soldier in MOS 15R performs and/or supervises inspections, maintenance and modifications according to drawings, blueprints, directives, technical manuals, and safety procedures on the AH-64A/D armament, electrical and avionics systems and cryptographic equipment to include the electrical, electronic, mechanical, and pneudraulics systems associated with AH-64A/D Armament/Missile Fire Control Systems. Tests, troubleshoots and repairs test sets and diagnostic equipment. Maintains records on weapons and subsystems. Uses and performs operator maintenance on common and special tools. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15S": [
+      "OH-58D Helicopter Repairer (OH-58D Hel Rep)",
+      "A Soldier in MOS 15S performs and/or supervises inspections, repairs and maintenance according to drawings, blueprints, directives, technical manuals, and safety procedures (excluding repair of armament, avionic, electrical and cryptographic equipment/system components) to include the removal and installation of aircraft subsystems, using special tools and equipment as required. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15T": [
+      "UH-60 Helicopter Repairer (UH-60 Hel Rep)",
+      "A Soldier in MOS 15T performs and/or supervises inspections, repairs and maintenance according to drawings, blueprints, directives, technical manuals, and safety procedures (excluding repair of armament, avionic, electrical and cryptographic equipment/system components) to include the lubrication of required components and the removal and installation of aircraft subsystems, using special tools and equipment as required. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units. Performs non-rated crewmember duties as a Crew Chief. Select Soldiers perform nonrated crewmember duties on the aircraft that are essential to its operation and or specific flight mission."
+    ],
+    "15U": [
+      "CH-47 Helicopter Repairer (CH-47 Hel Rep)",
+      "A Soldier in MOS 15U performs and/or supervises inspections, repairs and maintenance according to drawings, blueprints, directives, technical manuals, and safety procedures (excluding repair of armament, avionic, electrical and cryptographic equipment/system components) to include the lubrication of required components and the removal and installation of aircraft subsystems, using special tools and equipment as required. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units. Select Soldiers perform nonrated crewmember duties on the aircraft that are essential to its operation and or specific flight mission."
+    ],
+    "15W": [
+      "RQ-7 Operator",
+      "A Soldier in MOS 15W engages in operating and remotely piloting of the UAS. Perform pre-flight, in-flight, post-flight checks and procedures. Conducts site selection, emplacement and deployment of the air vehicles and ground equipment of the UAS. Participates in launch/recovery ground crew operations. Performs mission commander duties to include planning, analyzing and execution of reconnaissance surveillance, targeting and acquisition (RSTA) missions. Applies and assists in the military intelligence collection process and acts as a liaison to supported units. Operates, troubleshoots and performs limited unit-level maintenance on communication equipment, power sources, light and heavy wheeled vehicles."
+    ],
+    "15Y": [
+      "AH-64 Armament/Electrical/Avionics Systems Repairer (AH-64 Arm/Elect/Avionics Sys Rep)",
+      "A Soldier in MOS 15Y performs and/or supervises inspections, maintenance and modifications according to drawings, blueprints, directives, technical manuals, and safety procedures on the AH-64D armament, electrical and avionics systems and cryptographic equipment to include the electrical, electronic, mechanical, and pneudraulics systems associated with AH-64D Armament/Missile Fire Control Systems. Tests, troubleshoots and repairs test sets and diagnostic equipment. Maintains records on weapons and subsystems. Uses and performs operator maintenance on common and special tools. Prepares aircraft related maintenance forms and records. Typically assigned to Aviation Field or Sustainment maintenance units."
+    ],
+    "15Z": [
+      "Aviation Senior Sergeant (Avn Sr SGT)",
+      "The aviation senior sergeant supervises aviation activities in a maintenance company/troop, aviation support company/troop and depot maintenance having a mix of aircraft maintenance and/or component repair MOS. Prepares studies, evaluations, special reports, and records pertaining to aircraft maintenance, component repair, and related activities. Plans aircraft maintenance areas, components repair shops, and facilities. Apply production control, quality control and other maintenance management principles and procedures to aircraft maintenance and shop operations. Supervise the verification and validation of technical manuals, training devices and contractor furnished training material pertaining to new aircraft and/or component fielding. Supervise research and development projects in aviation and related areas. Assist in the development of maintenance procedures for prototype aircraft and components. Supervise the development and instruction of training programs. Recommend and establish plans, policies, and procedures for aircraft maintenance operations. Maintains supply economy and discipline. Principal NCO in the operations (S3) section of an Aviation Battalion. Responsible for the synchronization of all staff functions for the commander. Knowledge of all ABCS systems and understands their deployment on the battlefield. Supervises and instructs subordinates in proper work techniques and procedures. Reviews, consolidates and prepares technical reports. Provides and oversight of a flight operations section that is responsible for the reporting of flight violations, preparing of situation maps, receiving and transferring classified information and participates in the crash rescue system."
+    ]
+  }
+}

@@ -52,6 +52,19 @@ export function levelViews(levels, k, viewportW, detailPct) {
   return views;
 }
 
+// Zoom is quantised before anything derived from it reaches the DOM. Box
+// borders, radii and header type all scale by 1/k, and at full precision every
+// one of them changes on every frame of a zoom -- which re-runs style for every
+// box and re-shapes every string of text. Rounding to 4% steps makes those
+// values change a couple of dozen times across the whole zoom range instead of
+// sixty times a second, and a 4% difference in a hairline border or a header
+// is not visible.
+const K_STEP = Math.log(1.04);
+
+export function quantizeK(k) {
+  return Math.exp(Math.round(Math.log(Math.max(k, 1e-6)) / K_STEP) * K_STEP);
+}
+
 /**
  * The zoom at which a given depth opens up. Clicking a unit is a request to see
  * inside it, so the camera has to land somewhere that actually opens its level.

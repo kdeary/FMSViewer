@@ -12,17 +12,26 @@ const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 /
 
 /**
  * Camera that fits `rect` inside `size` with a margin, centred.
- * `minK` forces a closer zoom than the fit when the caller needs one -- the
- * rect then overflows the viewport, still centred on the same point.
+ *
+ * `minK` forces a closer zoom than the fit when the caller needs one, and the
+ * rect then overflows the viewport. Centring it vertically at that point would
+ * push the box's header off the top of the screen and land the user in the
+ * middle of a unit with nothing naming it, so a rect taller than the viewport
+ * is anchored by its top edge instead. Horizontally it stays centred either
+ * way -- there is no equivalent landmark on that axis.
  */
 export function fitTo(rect, size, margin = 0.86, minK = 0) {
   if (!rect || !size.w || !size.h) return { x: 0, y: 0, k: 1 };
   const fit = Math.min((size.w / rect.w) * margin, (size.h / rect.h) * margin);
   const k = clamp(Math.max(fit, minK), MIN_K, MAX_K);
+  // The gap a plain fit would have left, so a top-anchored box sits at the same
+  // inset from the edge rather than flush against it.
+  const pad = (size.h * (1 - margin)) / 2;
+  const overflows = rect.h * k > size.h - pad;
   return {
     k,
     x: size.w / 2 - (rect.x + rect.w / 2) * k,
-    y: size.h / 2 - (rect.y + rect.h / 2) * k,
+    y: overflows ? pad - rect.y * k : size.h / 2 - (rect.y + rect.h / 2) * k,
   };
 }
 

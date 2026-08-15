@@ -1,0 +1,21 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "38B": [
+      "Civil Affairs Specialist (CA Specialist) (USAR Only)",
+      "Civil Affairs (CA) Specialists are trained and equipped to engage and influence unified action partners, indigenous populations, and institutions. Establishes and conducts military government operations, and provides civil considerations expertise through the planning and execution of Civil Affairs Operations (CAO) to enable Civil Military Operations (CMO)."
+    ],
+    "38R": [
+      "Civil Reconnaissance Sergeant (CR SGT)",
+      "The Civil Reconnaissance Sergeant serves as a member of a Civil Affairs unit that executes Civil Affairs missions in support of national security objectives. The Civil Reconnaissance Sergeant conducts civil network engagement, civil information evaluation, support to civil administration, and transitional military authority to enable situational understanding, targeting, information operations, freedom of maneuver, and stability in order to shape the operational environment, create effects in the civil component, consolidate gains, maintain operating tempo, and preserve combat power."
+    ],
+    "38W": [
+      "Civil Affairs Medical Sergeant (CA Medical SGT) (Active Component Only)",
+      "The Civil Affairs (CA) Medical Sergeant conducts medical mission planning and performs advanced emergency medical treatment and prolonged field care in austere environments on a four-person Civil Affairs Team (CAT). The Civil Affairs Medical Sergeant provides field sanitation assessments, evaluates medical systems and infrastructure, conducts civil network engagement, medical reconnaissance, and provides situational understanding to transitional governments. These functions provide situational understanding, targeting data, information operations, freedom of maneuver, and stability. They shape the operational environment, affect the civil component, preserve combat power, maintain operating tempo, and consolidate gains by supporting Transitional Governance. The Civil Affairs Medical Sergeant performs their principal duties in hostile, denied, or politically sensitive environments."
+    ],
+    "38Z": [
+      "Civil Affairs Senior Sergeant (Active Component Only)",
+      "The Civil Affairs (CA) Senior Sergeant supervises, leads, or serves as a member of a CA unit that executes CA missions in support of national security objectives or as a CA subject matter expert in an Army or Joint Service organization."
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "92A": [
+      "Automated Logistical Specialist (Auto Log Spec)",
+      "The Automated Logistical Specialist supervises and performs management or stock record/warehouse functions pertaining to receipt, storage, distribution and issue, and maintains equipment records and parts."
+    ],
+    "92F": [
+      "Petroleum Supply Specialist (Petro Sup SPC)",
+      "The petroleum supply specialist supervises, receives, stores, accounts for and cares for, dispenses, issues and ships bulk or packaged petroleum, oils and lubricants (POL) products."
+    ],
+    "92G": [
+      "Culinary Specialist",
+      "Supervise, prepare and serve food in a field or garrison operation."
+    ],
+    "92L": [
+      "Petroleum Laboratory Specialist (Petro Lab SPC)",
+      "The laboratory petroleum specialist supervises or conducts laboratory tests on petroleum, oils and lubricants (POL) products."
+    ],
+    "92M": [
+      "Fatality Management Specialist (Fatality Management SPC)",
+      "Performs or supervises recovery, collection, identification, escort, and temporary burial. Inventories, safeguards, and evacuates personal effects of deceased personnel."
+    ],
+    "92R": [
+      "Parachute Rigger",
+      "The parachute rigger supervises, packs and repairs cargo and personnel parachutes and rigs equipment and supply containers for airdrop."
+    ],
+    "92S": [
+      "Shower and Laundry Specialist (S&L SPC)",
+      "The Shower and Laundry specialist supervises or performs personnel laundry and shower operations."
+    ],
+    "92W": [
+      "Water Treatment Specialist (Water Trmt SPC)",
+      "The water treatment specialist supervises or performs installation, operation of water purification equipment, water storage and distribution operations and activities."
+    ],
+    "92Y": [
+      "Unit Supply Specialist (Unit Supply SPEC)",
+      ": The unit supply specialist supervises or performs duties involving request, receipt, storage, issue, accountability and the preservation of individual, organizational installation, facilities and expendable/durable property and equipment. Operating and maintaining the Global Combat Support System (GCSS-Army) an automated supply system for accounting of organizational and installation property and equipment."
+    ],
+    "92Z": [
+      "Senior Noncommissioned Logistician",
+      "The senior noncommissioned logistician supervises soldiers engaged in supply, services, materiel management and logistics operations. The critical duties for MOS 92Z are: Perform duties of MOS 92A, 92F, 92G, 92M, 92R, 92S, and 92Y at the \"6\" skill level. Serves as principal multifunctional NCO of supply and services operations. Supervises operation of organizations performing supply and related service operations such as transportation, property disposal, and commissary operations. Supervises management of materiel support functions in stock control and accounting, procurement, inventory control, and item financial management. Assists command and staff officers in appraisals of petroleum and water operations. Develop, coordinate, implement, advise and evaluate command food service programs. Monitor requests for food items and equipment. Develop and analyze menus and coordinates menu substitutions. Evaluate operation of garrison and field kitchens, food service training facilities and maintenance of equipment. Survey individual preferences, good preparation and food conservation. Prepare reports, studies and briefings on food service operations. Provide assistance to food service officers and NCOs. Surprises mortuary affairs activities, provides technical and administrative support on grave registration matters, acquisition of land for temporary cemeteries, equipment requirements for mortuaries, and recovery/evacuation procedures. Supervises airdrop operations of organizations performing airborne/resupply, advises airborne operational matters and performs liaison between staff and supported personnel. Supervises as a quality assurance representative for all shower/laundry and clothing repair functions. Supervises development and preparation of operations information, plans, maps sketches, overlays and related data to employ supply and service organizations. Contributes to staff development and operations of supply support data systems, equipment review, salvage and repair parts supply procedures, and maintenance support systems. Supervises preparation of orders, operating instructions, reports, and related technical materials. Performs liaison between staff and supported soldiers to improve effectiveness of support activities."
+    ]
+  }
+}

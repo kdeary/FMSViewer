@@ -1,6 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
 import { stepScene, levelViews } from './lod.js';
 
+// Rolling frame statistics, written in place so collecting them costs no
+// allocation and no extra render. `frame` is the wall-clock gap between frames,
+// which is the number that matters: it includes the browser's own style,
+// layout, paint and raster work, none of which is visible from JS.
+const WINDOW = 30;
+
+function newStats() {
+  return { frame: 0, scene: 0, boxes: 0, worst: 0, n: 0, last: 0 };
+}
+
+function sample(st, now, sceneMs, boxes) {
+  if (st.last) {
+    const dt = now - st.last;
+    // A gap of a quarter second is a tab switch or a stall outside our control.
+    if (dt < 250) {
+      const w = Math.min(st.n + 1, WINDOW);
+      st.frame += (dt - st.frame) / w;
+      st.scene += (sceneMs - st.scene) / w;
+      st.worst = st.n % (WINDOW * 4) === 0 ? dt : Math.max(st.worst, dt);
+      st.n++;
+    }
+  }
+  st.last = now;
+  st.boxes = boxes;
+}
+
 /**
  * Drives the scene from a frame loop rather than straight off the camera, so
  * view transitions keep playing after the camera has come to rest.
@@ -18,6 +44,7 @@ export function useScene(model, cam, size, detailPct) {
   const levelState = useRef([]);
   const raf = useRef(0);
   const last = useRef(0);
+  const stats = useRef(newStats());
 
   // Whatever the loop should be looking at, as of this render.
   const latest = useRef();
@@ -29,6 +56,7 @@ export function useScene(model, cam, size, detailPct) {
   useEffect(() => {
     if (!model || !size.w) {
       if (raf.current) { cancelAnimationFrame(raf.current); raf.current = 0; }
+      stats.current.last = 0;
       setScene({ list: [], views: [] });
       return;
     }
@@ -43,10 +71,12 @@ export function useScene(model, cam, size, detailPct) {
       const dt = last.current ? Math.min(now - last.current, 64) : 16;
       last.current = now;
 
+      const t0 = performance.now();
       views.current = levelViews(cur.model.levels, cur.cam.k, cur.size.w, cur.detailPct);
       const { list, animating } = stepScene(
         cur.model, cur.cam, cur.size, store.current, dt, views.current, levelState.current,
       );
+      sample(stats.current, now, performance.now() - t0, list.length);
       setScene({ list, views: views.current });
 
       // Keep going while something is still moving -- either a transition, or a
@@ -57,7 +87,7 @@ export function useScene(model, cam, size, detailPct) {
       const stale = now2.cam !== cur.cam || now2.size !== cur.size
         || now2.detailPct !== cur.detailPct || now2.model !== cur.model;
       raf.current = (animating || stale) ? requestAnimationFrame(step) : 0;
-      if (!raf.current) last.current = 0;
+      if (!raf.current) { last.current = 0; stats.current.last = 0; }
     };
 
     raf.current = requestAnimationFrame(step);
@@ -65,5 +95,5 @@ export function useScene(model, cam, size, detailPct) {
 
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
 
-  return scene;
+  return { ...scene, stats: stats.current };
 }

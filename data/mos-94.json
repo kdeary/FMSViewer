@@ -1,0 +1,57 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "94A": [
+      "Land Combat Electronic Missile System Repairer",
+      "The land combat electronic missile system repairer supervises or performs field level maintenance on the TOW and Dragon missile systems, the Bradley Fighting Vehicle System (BFVS) and Javelin system."
+    ],
+    "94D": [
+      "Air Traffic Control Equipment Repairer (ATC Equip Rep)",
+      "The ATC equipment repairer performs or supervises field level maintenance and installation of ATC communication systems, navigational aid systems (NAVAIDS), and landing systems."
+    ],
+    "94E": [
+      "Radio Equipment Repairer",
+      "The radio equipment repairer performs or supervises field level maintenance on radio receivers, transmitters, and associated equipment."
+    ],
+    "94F": [
+      "Computer/Detection Systems Repairer (Comp/Det Sys Rep)",
+      "The computer/detection systems repairer performs or supervises field level maintenance and repair on microcomputers and electromechanical telecommunications equipment, Field Artillery (FA) digital devices, Global Positioning System (GPS) receivers, switchboards, telephones, associated wire instruments/equipment, night vision devices/equipment, laser and fiber optic systems, mine detection and dispensing systems, battlefield illumination devices, electronic azimuth determining devices, and nuclear, biological, and chemical (NBC) warning and measuring devices."
+    ],
+    "94H": [
+      "Test, Measurement, and Diagnostic Equipment (TMDE) Maintenance Support Specialist (TMDE Maint Spt Sp)",
+      "The TMDE maintenance support specialist performs and supervises duties involving the calibration and repair of general purpose TMDE, selected special purpose TMDE, Radiation Detecting, Indicating, and Computing (RADIAC) equipment, calibration standards and accessories. Operate TMDE and calibration standards. Operates and performs preventive maintenance and checks and services (PMCS) on assigned vehicles and equipment. Installs, operates and performs PMCS on power generators."
+    ],
+    "94M": [
+      "Radar Repairer (Radar Rep)",
+      "The radar repairer performs or supervises field level maintenance on SENTINEL (Ground Based Sensor) and FIREFINDER radar electronic assemblies and associated equipment. Performs or supervises field level maintenance on ground surveillance radar, associated equipment and meteorological equipment."
+    ],
+    "94P": [
+      "Multiple Launch Rocket System (MLRS) Repairer (MLRS Rep)",
+      "The MLRS repairer supervises or performs field maintenance on multiple launch rocket system (MLRS) M270, M270A1, and High Mobility Artillery Rocket System (HIMARS), self-propelled launcher-loader (SPLL) (less carrier), launcher pod/container (LP/C) trainer, and test support group."
+    ],
+    "94R": [
+      "Avionics and Survivability Equipment Repairer (Avionics/Surv Eq Rep)",
+      "The avionics and survivability equipment repairer performs field level maintenance on avionic navigation flight control systems, stabilization systems, equipment which operates using radar principles, and aircraft survivability equipment."
+    ],
+    "94S": [
+      "Patriot System Repairer (Patriot Sys Rep)",
+      "The Patriot system repairer performs or supervises field maintenance on the Patriot missile system, associated equipment and trainers."
+    ],
+    "94T": [
+      "Short Range Air Defense System Repairer",
+      "The Short Range Air Defense System Repairer supervises, performs and inspects field maintenance on Avenger system and associated components (less carrier and communications)."
+    ],
+    "94W": [
+      "Electronic Maintenance Supervisor (Elect Maint Supv)",
+      "The electronic maintenance supervisor supervises, monitors, and directs the electronic maintenance mission of the US Army. The electronic maintenance supervisor performs and supervises field level maintenance on all Army standard electronic equipment, systems, and associated devices."
+    ],
+    "94Y": [
+      "Automatic Test Systems Operator/Maintainer",
+      "The Automatic Test Systems Operator/Maintainer operates, performs, and supervises field maintenance on the Next Generation Automatic Test System (NGATS), Direct Support Electrical Test System (DSETS), and Base Shop Test Facility (BSTF), AN/TSM-191. Performs field level electronic maintenance, adjustments, tests, fault isolation, and repairs of supported system line replaceable units (LRU), shop replaceable units (SRU), test program sets (TPS) and performs maintenance on combat vehicles, Infantry and Artillery fire control systems and equipment, and related test equipment. Operates and performs preventive maintenance checks and services (PMCS) on assigned vehicles and power generators."
+    ],
+    "94Z": [
+      "Senior Electronic Maintenance Supervisor (Sr Elect Maint Supv)",
+      "The senior electronic maintenance supervisor plans and directs electronic maintenance operations at all levels of command and echelons of the Army. Performs electronic maintenance staff functions. Provides technical advice to commanders and staff concerning Army electronic maintenance and electronic logistic support matters. Writes directives, policies and procedures which establishes Army electronic maintenance requirements."
+    ]
+  }
+}

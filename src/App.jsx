@@ -8,6 +8,7 @@ import MapCanvas from './view/MapCanvas.jsx';
 import SettingsModal from './ui/SettingsModal.jsx';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { useViewport } from './view/useViewport.js';
+import { useTooltips } from './view/useTooltips.js';
 import { zoomToOpen, DEFAULT_DETAIL_PCT, DETAIL_PCT_RANGE } from './view/lod.js';
 
 const SETTINGS_KEY = 'fmsviewer.settings';
@@ -16,9 +17,11 @@ function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
     const pct = Number(saved?.detailPct);
-    if (pct >= DETAIL_PCT_RANGE[0] && pct <= DETAIL_PCT_RANGE[1]) return { detailPct: pct };
+    const perf = !!saved?.perf;
+    if (pct >= DETAIL_PCT_RANGE[0] && pct <= DETAIL_PCT_RANGE[1]) return { detailPct: pct, perf };
+    return { detailPct: DEFAULT_DETAIL_PCT, perf };
   } catch { /* fall through to the default */ }
-  return { detailPct: DEFAULT_DETAIL_PCT };
+  return { detailPct: DEFAULT_DETAIL_PCT, perf: false };
 }
 import { hydrate, parseModelFile, toBlob, suggestedFileName } from './model/modelFile.js';
 
@@ -42,6 +45,7 @@ export default function App() {
   const workerRef = useRef(null);
   const pendingFit = useRef(false);
   const { surfaceRef, cam, size, flying, flyTo, zoomBy } = useViewport();
+  useTooltips();
 
   // --- loading -------------------------------------------------------------
 
@@ -233,6 +237,7 @@ export default function App() {
             flying={flying}
             onSelect={goTo}
             detailPct={settings.detailPct}
+            perf={settings.perf}
           />
           {legendOpen && <Legend model={model} onClose={() => setLegendOpen(false)} />}
           {selected && (

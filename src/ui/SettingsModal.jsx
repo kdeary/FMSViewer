@@ -60,6 +60,24 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
                 time, so every unit at the same depth always shows the same amount of
                 detail.
               </p>
+
+              <hr />
+
+              <div className="form-check">
+                <input
+                  id="perfHud"
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={!!settings.perf}
+                  onChange={(e) => onChange({ ...settings, perf: e.target.checked })}
+                />
+                <label htmlFor="perfHud" className="form-check-label">Show frame timings</label>
+              </div>
+              <p className="text-body-secondary small mt-1 mb-0">
+                Overlays a live breakdown of where each frame goes. Anything the browser
+                spends on style, paint and raster is the gap between the total and the two
+                JavaScript figures.
+              </p>
             </div>
 
             <div className="modal-footer">

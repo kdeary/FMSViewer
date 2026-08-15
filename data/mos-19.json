@@ -1,0 +1,21 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "19C": [
+      "Bradley Crewmember",
+      "Bradley Crewmembers combine the superior capabilities of their equipment with their ingenuity to find, fix, close with and destroy the enemies of this nation through combinations of mobility; precise, lethal, and overwhelming firepower and devastating shock effect. The Armor branch is a team of teams, ready to fight and win anytime, anywhere, and under any conditions of battle. Soldiers must possess the physical ability to function and adapt to austere environments and accomplish all missions."
+    ],
+    "19D": [
+      "Cavalry Scout",
+      "Cavalry Troopers combine the superior capabilities of their equipment with their ingenuity to find, fix, close with and destroy the enemies of this nation through combinations of mobility; precise, lethal, and overwhelming firepower and devastating shock effect. The Armor branch is a team of teams, ready to fight and win anytime, anywhere, and under any conditions of battle. Troopers must possess the physical ability to function and adapt to austere environments and accomplish all missions."
+    ],
+    "19K": [
+      "Armor Crewmember",
+      "Armor Soldiers combine the superior capabilities of our equipment with the ingenuity of our Soldiers to find, fix, close with and destroy the enemies of our nation through a combination of mobility, precise, lethal, and overwhelming firepower, and devastating shock effect. The Armor branch is a team of teams, ready to fight and win anytime, anywhere, and under any conditions of battle. Armor Crewmembers must possess the physical ability to function and adapt to austere environments and accomplish all missions. Armor Crewmembers may serve on either the Abrams Main Battle Tank or the Mobile Protected Firepower platforms. The terms “Tank” and “MPF” are interchangeable within the basic duty descriptions."
+    ],
+    "19Z": [
+      "Armor Senior Sergeant",
+      "The armor senior sergeant serves as principal NCO in an armor company, cavalry troop, or operations staff in combined arms battalion, cavalry squadron, or higher level organizations."
+    ]
+  }
+}

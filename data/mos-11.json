@@ -1,0 +1,17 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "11B": [
+      "Infantryman",
+      "The infantryman supervises, leads, or serves as a member of an infantry activity that employs individual small arms weapons or heavy anti-armor crew served weapons, either vehicle or dismounted in support of offensive and defensive combat operations."
+    ],
+    "11C": [
+      "Indirect Fire Infantryman (Indrct Fire Infmn)",
+      "The indirect fire infantryman serves as a supervisor or as a member of a mortar squad, section, or platoon. Employs crew and individual weapons in offensive, defensive and retrograde ground combat tactical operations."
+    ],
+    "11Z": [
+      "Infantry Senior Sergeant (Inf Sr SGT)",
+      "The Infantry Senior Sergeant supervises, leads, or serves as a member of an infantry activity that employs individual small arms weapons or heavy anti-armor crew served weapons, either vehicle or dismounted in support of offensive and defensive combat operations."
+    ]
+  }
+}

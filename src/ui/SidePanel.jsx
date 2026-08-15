@@ -3,10 +3,14 @@ import MosBar from '../view/MosBar.jsx';
 import ImagePlaceholder from '../view/ImagePlaceholder.jsx';
 import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
+import { useMosSpec } from '../view/useMosSpec.js';
 
 /** Everything about the selected node, at full fidelity, regardless of zoom. */
 export default function SidePanel({ node, model, onClose, onGo }) {
   const mosInfo = useMosInfo();
+  // A billet is one soldier, so its MOS specification is what the panel is
+  // really about. Hooks run before the early return.
+  const spec = useMosSpec(node && node.kind === 'BL' ? node.mos : null);
   if (!node) return null;
   const r = node.roll;
   const isBillet = node.kind === 'BL';
@@ -36,7 +40,10 @@ export default function SidePanel({ node, model, onClose, onGo }) {
             <>
               <dt className="col-5">MOS</dt>
               <dd className="col-7 mb-0" style={{ color: mosInfo(node.mos).color }}>
-                {node.mos || '—'} <span className="text-body-secondary">{mosInfo(node.mos).label}</span>
+                {node.mos || '—'}{' '}
+                <span className="text-body-secondary">
+                  {spec ? spec.title : mosInfo(node.mos).label}
+                </span>
               </dd>
               <dt className="col-5">Grade</dt><dd className="col-7 mb-0">{node.grade || '—'}</dd>
               <dt className="col-5">POSCO</dt><dd className="col-7 mb-0">{node.poscode || '—'}</dd>
@@ -59,6 +66,17 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           <dt className="col-5">Equipment</dt>
           <dd className="col-7 mb-0">{r.eqLines} lines · {r.eqQty} items</dd>
         </dl>
+
+        {isBillet && spec && (
+          <section className="mos-spec">
+            <h3 className="h6 mt-4 mb-2">
+              Major duties{' '}
+              <span className="text-body-secondary fw-normal font-monospace">{spec.mos}</span>
+            </h3>
+            <p className="small mb-1">{spec.duties}</p>
+            <p className="text-body-secondary mb-0 mos-spec-src">{spec.version}</p>
+          </section>
+        )}
 
         {!isBillet && node.topMos.length > 0 && (
           <>

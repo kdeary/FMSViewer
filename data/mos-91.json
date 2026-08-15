@@ -1,0 +1,61 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "91A": [
+      "M1 Abrams Tank System Maintainer (M1 Abrams Tank Sys Maint)",
+      "The M1 Abrams tank system maintainer supervises and performs field maintenance."
+    ],
+    "91B": [
+      "Wheeled Vehicle Mechanic",
+      "The wheeled vehicle mechanic supervises and performs field level maintenance and recovery operations on light and heavy wheeled vehicles, their associated trailers and material handling equipment (MHE)."
+    ],
+    "91C": [
+      "Utilities Equipment Repairer (Util Equip Rep)",
+      "The utilities equipment repairer supervises and performs field level maintenance on utilities equipment and special purpose support systems."
+    ],
+    "91D": [
+      "Tactical Power Generation Specialist (Tac Pwr Gen Spec)",
+      "The Tactical Power Generation Specialist supervises operation and performs field level maintenance functions, including overhaul, but not rebuild of power generation equipment, internal combustion engines and associated equipment from 0.5KW to 500KW (except for turbine engine driven generators)."
+    ],
+    "91E": [
+      "Allied Trades Specialist",
+      "The allied trades’ specialist supervises and performs the fabrication, repair and modifications of metallic and nonmetallic parts and supervises metalworking shop activities."
+    ],
+    "91F": [
+      "Small Arms/Towed Artillery Repairer (Small Arms/Towed Arty Rep)",
+      "The Small Arms/Towed Artillery Repairer performs field level maintenance and repairs on small arms and other infantry weapons and towed artillery."
+    ],
+    "91H": [
+      "Tracked Vehicle Repairer (Tracked Veh Rep)",
+      "The tracked vehicle repairer supervises and performs field level maintenance on tracked vehicles (other than the M1, M2, and M109 family of vehicles)."
+    ],
+    "91J": [
+      "Quartermaster and Chemical Equipment Repairer (QM & Chem Equip Rep)",
+      "The quartermaster and chemical equipment repairer supervises or performs field level maintenance on chemical equipment, quartermaster machinery, forced air-heaters, and special purpose equipment."
+    ],
+    "91L": [
+      "Construction Equipment Repairer (Const Equip Rep)",
+      "The construction equipment repairer supervises and performs field level maintenance on construction equipment which includes that used for earthmoving, grading, and compaction; lifting and loading; quarrying and rock crushing; asphalt and concrete mixing, and surfacing; water pumping; air compression and pneumatic tools; and powered bridging."
+    ],
+    "91M": [
+      "Bradley Fighting Vehicle System Maintainer (BFVS Maint)",
+      "The Bradley fighting vehicle system maintainer supervises and performs field level maintenance tasks i.e., major assembly and LRU replacement on the M2/M3 A1/A2 series Bradley fighting vehicle (BFV), and M7 Bradley Fighting Infantry Support Team (BFIST) (hull and turret)."
+    ],
+    "91P": [
+      "Self-Propelled Artillery Systems Mechanic (Self-Prop Arty Sys Mech)",
+      "The self-propelled artillery systems mechanic supervises and performs field level maintenance and recovery of all self-propelled field artillery cannon weapon systems, including automotive, turret, carriage-mounted armament, associated fire control systems, and chemical protection subsystems thereof."
+    ],
+    "91S": [
+      "Stryker Systems Maintainer, Stryker Sys Maint",
+      "The Stryker Systems Maintainer supervises and performs field level maintenance on the Stryker family of vehicles (M1126 Infantry Carrier Vehicle, M1127 Recon Vehicle, M1128 Mobile Gun System (MGS), M1129 Mortar Carrier, M1130 Commander’s Vehicle (CV), M1131 Fire Support Vehicle (FSV), M1132 Engineer Support Vehicle (ESV), M1133 Medical Evacuation Vehicle (MEV), M1134 Anti- Tank Guided Missile (ATGM), and M1135 NBC Recon Vehicle (NBCRV)."
+    ],
+    "91X": [
+      "Maintenance Supervisor (Maint Supv)",
+      "The maintenance supervisor supervises and performs field maintenance on tracked and wheeled vehicles, construction equipment (which includes that used for earthmoving, grading and compaction; lifting and loading; quarrying and rock crushing; asphalt and concrete mixing and surfacing; water pumping; air compression and pneumatic tools; powered bridging and their associated trailers and material handling equipment (MHE)); special purpose equipment maintenance activities to include: (1) Power Generation Equipment; (2) Air Conditioning/Refrigeration Systems; and (3) Quartermaster and Chemical Equipment; combat vehicles, infantry and artillery fire control systems and equipment, and related test equipment; small arms and other infantry weapons and towed artillery. Perform as support maintenance machine ship supervisor or metalworking supervisor. Supervise recovery operations on track vehicles, wheel vehicles and related activities including electrical wiring harness system repair/maintenance."
+    ],
+    "91Z": [
+      "Senior Maintenance Supervisor (SR Maint Supervisor)",
+      "The senior maintenance supervisor supervises, plans, coordinates, and directs the field maintenance of all wheeled, tracked, armament, power generation, and utility equipment."
+    ]
+  }
+}

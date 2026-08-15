@@ -121,19 +121,60 @@ export function truncate(title, max = 30) {
 }
 
 /**
+ * Drops every parenthetical and its contents.
+ *
+ * FMS titles carry their own abbreviation in brackets -- "Bradley Fighting
+ * Vehicle System (BFVS) Maintainer" -- which is dead weight anywhere the text
+ * is already short of room, and actively confusing inside an initialism.
+ */
+export function stripParentheticals(text) {
+  let out = String(text || '');
+  // Innermost first, repeatedly: these nest in the real data -- "BSB (Armored
+  // Brigade Combat Team (ABCT))" -- and one pass would strip the inner group
+  // and leave the outer brackets stranded around their contents.
+  for (let i = 0; i < 8; i++) {
+    const next = out.replace(/\s*\([^()]*\)/g, '');
+    if (next === out) break;
+    out = next;
+  }
+  return out.replace(/\s{2,}/g, ' ').trim();
+}
+
+// Words that have a settled short form. Anything not listed falls back to its
+// first letter, which is wrong for these: "Non-commissioned Officer" would come
+// out "NO" rather than the NCO everyone actually writes.
+const WORD_ABBR = [
+  [/^non-?commissioned$/i, 'NC'],
+  [/^officer$/i, 'O'],
+];
+
+/**
  * Initialism for boxes too small for words: "1st Armored Company/Distribution
  * Section" -> "1ACDS". Only worth it when nothing else fits -- use `truncate`
  * wherever a few words will do.
+ *
+ * A leading "#n" is a slot number, not part of the name, and putting it first
+ * makes every mechanic in a section sort and read as "#1…", "#2…" with the job
+ * itself pushed out of view. It moves to the end instead, so "#3 Wheeled
+ * Vehicle Mechanic" reads "WVM3".
  */
 export function abbreviate(title, max = 18) {
-  const t = String(title || '').trim();
+  const t = stripParentheticals(title);
   if (t.length <= max) return t;
-  const words = t.replace(/[()]/g, '').split(/[\s/]+/).filter(Boolean);
-  if (words.length > 2) {
-    const initials = words
-      .map((w) => (/^\d/.test(w) ? w.replace(/\D+$/, '') : w[0].toUpperCase()))
-      .join('');
-    if (initials.length <= max) return initials;
+
+  const numbered = /^#\s*(\d+)\s*(.*)$/.exec(t);
+  const tail = numbered ? numbered[1] : '';
+  const body = numbered ? numbered[2] : t;
+
+  const words = body.split(/[\s/]+/).filter(Boolean);
+  if (words.length > 1) {
+    const initials = words.map((w) => {
+      const known = WORD_ABBR.find(([re]) => re.test(w));
+      if (known) return known[1];
+      // "1st Platoon" keeps the digits and drops the ordinal suffix.
+      return /^\d/.test(w) ? w.replace(/\D+$/, '') : w[0].toUpperCase();
+    }).join('');
+    if (initials.length + tail.length <= max) return initials + tail;
   }
-  return `${t.slice(0, max - 1)}…`;
+  return `${body.slice(0, Math.max(1, max - 1 - tail.length))}…${tail}`;
 }

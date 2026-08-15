@@ -1,0 +1,53 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "00D": [
+      "Special Duty Assignment",
+      "This code (00D) will be used to identify approved special duty assignment positions in organizational requirements and authorization documents, and to report the duty MOS for Soldiers assigned to these positions. Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00F": [
+      "MOS Immaterial NGB",
+      "This code (00F) will be used to identify approved MOS immaterial positions in Army National Guard Table of Distribution and Allowance (TDA) organizational authorization documents, and to report the duty MOS for Soldiers assigned to theses positions. Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00G": [
+      "MOS Immaterial USAR",
+      "This code (00G) will be used to identify approved MOS immaterial positions in Army Reserve Table of Distribution and Allowance (TDA) organizational authorization documents and to report the duty MOS for Soldiers assigned to these positions. Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00J": [
+      "Command Sergeant Major (CSM) Engineer/Signal/Military Police/Military Intelligence Immaterial",
+      "This code (00J) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between career management fields (CMF) 12 (Engineer), 25 (Signal), 31 (Military Police) and CMF 35 (Military Intelligence) and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00J prior to approval by HQDA, ODCS G-1 (DAPE- PRP-CSB)(see table 14-2).. Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00K": [
+      "Command Sergeant Major (CSM) Maneuver Support (MS)/Logistics",
+      "This code (00K) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between maneuver support career management fields (CMF) 12 (Engineer), 31 (Military Police), 74 (Chemical, Biological, Radiological and Nuclear (CBRN)), and logistics CMF 88 (Transportation), 91 (Ordnance) and 92 (Quartermaster), 94 (Electronic Maintenance and Calibrations) and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00K prior to approval by HQDA, ODCS G-1 (DAPE-PRP-CSB) (see table 14- 2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00L": [
+      "Command Sergeant Major (CSM) Logistics",
+      "This code (00L) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between logistics career management fields (CMF) 36 (Financial Management), 42 (Adjutant General), 68 (Medical), 88 (Transportation), 89 (Ammunition), 91 (Ordnance) and 92 (Quartermaster), 94 (Electronic Maintenance and Calibrations) and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00L prior to approval by HQDA, ODCS G-1 (DAPE-PRP-CSB) (see table 14-2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00M": [
+      "MOS Grade Immaterial",
+      "This code (00M) will be used to identify approved MOS immaterial positions and grades in Army Future Command (AFC) Table of Distribution and Allowance (TDA) organizational authorization documents, Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00P": [
+      "Command Sergeant Major (CSM) Force Sustainment",
+      "This code (00P) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between force sustainment career management fields (CMF) 27 (Paralegal), 36 (Financial Management), 42 (Adjutant General), 56 (Religious Support), 68 (Medical), 79 (Recruitment and Reenlistment), 88 (Transportation), 89 (Ammunition), 91 (Ordnance), 92 (Quartermaster) and 94 (Electronic Maintenance and Calibrations) and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00P prior to approval by HQDA, ODCS G-1 (DAPE-PRP-CSB) (see table 14-2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00R": [
+      "Command Sergeant Major (CSM) Infantry/Armor Immaterial",
+      "This code (00R) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between Infantry and Armor skills of career management field (CMF) 11 (Infantry) and 19 (Armor), and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00R prior to approval by HQDA, ODCS G-1 (DAPE-PRP-CSB) (see table 14- 2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00T": [
+      "Command Sergeant Major (CSM) Infantry/Armor/Field Artillery/Combat Engineer Immaterial",
+      "This code (00T) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are interchangeable between Infantry, Armor, Field Artillery and Combat Engineer skills of career management field (CMF) 11 (Infantry), 12 (Engineer (Combat Engineer Senior Sergeant only), 13 (Field Artillery) and 19 (Armor), and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00T prior to approval by HQDA, ODCS G-1 (DAPE- PRP-CSB) (see table 14-2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00X": [
+      "Command Sergeant Major (CSM) MOS Immaterial",
+      "This code (00X) will be used to identify approved command sergeant major duty positions in organizational authorization documents that are not directly associated with the skills of a specific career management field (CMF) or MOS, and to report the duty MOS for Soldiers assigned to these positions. Authorization documents will not be identified with SRC 00X prior to approval by HQDA, ODCS G-1 (DAPE-PRP-CSB). (see table 14-2). Refer to chapter 14 for specifications, applications and restrictions."
+    ],
+    "00Z": [
+      "Nominative Command Sergeant Major/Sergeant Major (CSM/SGM)",
+      "Serves as the senior enlisted person for the command. Serves as the standard bearer in all things in the command including fitness and appearance. Provides guidance and expertise to the command on the Army’s Professional Ethic. Serves as the expert on Army and organizational history, traditions, customs and courtesies. Leads all enlisted talent management within the command. Serves as the principal enlisted advisor to the Commanding General. Provides advice and makes recommendations to senior leaders and staff on all matters pertaining to enlisted soldiers and their families. Manages enlisted professional development across the command.). Serves as the lead agent in the development of subordinate personnel. Disseminates information, command/organization policies, objectives and guidance to subordinate NCO Support Chain to ensure successful completion of missions. Develops and recommends courses of action for policy development and critical senior leader decisions. Provides guidance to create efficiencies and streamline processes. Develops methods to improve readiness. Performs other duties prescribed by their senior leader."
+    ]
+  }
+}

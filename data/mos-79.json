@@ -1,0 +1,21 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "79R": [
+      "Recruiter (Active Component and USAR)",
+      "Recruits qualified personnel for entry into the Army in accordance with applicable regulations, supervises recruiting and recruiting support activities."
+    ],
+    "79S": [
+      "Career Counselor (Active Component)",
+      "Assists commanders at all levels with sustaining the Army’s readiness posture and achieving their retention mission. Advises commanders on all matters relating to the Army Retention Program, ensures mission accomplishment and processes reclassification actions. Process Bars to Continued Service. Counsels, reenlists, extends, or transitions qualified Soldiers in the Active and Reserve Component to achieve the command’s retention mission. Conducts staff assistance visits. Manages a retention program budget."
+    ],
+    "79T": [
+      "Recruiting and Retention NCO (Army National Guard of the United States/ Recruiter and Retention NCO)",
+      "Recruits and retains qualified Soldiers for entry into the Army National Guard in accordance with applicable regulations. Supervise recruiting and retention activities."
+    ],
+    "79V": [
+      "Army Reserve Career Counselor (Army Reserve)",
+      "Transfers, counsels, informs, and retains qualified Soldiers in the Individual Ready Reserve (IRR), Troop Program Unit (TPU), Active Guard and Reserve (AGR), and Individual Mobilization Augmentee (IMA) programs to continue service and professional growth in the U.S. Army Reserve (USAR). Supports USAR end strength objectives by retaining qualified Soldiers and filling critical vacancies. Prospects units for qualified applicants for officer commissioning programs and AGR CMF 79 accessions. Supports USAR units in executing the U.S Army Reserve Retention Program and Chief, Army Reserve (CAR) policies."
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "31B": [
+      "Military Police",
+      "Military Police contribute to the combat power on the battlefield by conducting police operations, detention and security and mobility support across the full range of operations to enable protection and promote the rule of law. Military Police provide support to the peacetime Army community through professional policing, security of critical resources, crime prevention programs and preservation of law and order."
+    ],
+    "31D": [
+      "CID Special Agent",
+      "The CID Special Agent supervises or conducts investigations of incidents and offenses or allegations of criminality affecting DA or DoD personnel, property, facilities, or activities."
+    ],
+    "31E": [
+      "Corrections and Detention Specialist",
+      "The corrections and detention specialist controls, supervises, counsel internees, manages detention operations, confinement operations and corrections treatment programs. Provides professional detention/correctional support to US military prisoners, host nation corrections development and detainee operations."
+    ],
+    "31K": [
+      "Working Dog Handler",
+      "Military Working Dog (MWD) teams contribute to the combat power and installation security on the battlefield and at home station by providing target odor detection (explosive/narcotics) and a less than lethal course of action that serves as a psychological deterrent in supporting police operations; detention and security and mobility support to Installation and Maneuver Commanders. Patrol Drug Detector Dog (PDDD) and Patrol Explosive Detector Dog (PEDD) Teams provide Installation and Maneuver Commanders the ability to detect and locate hidden personnel, illicit narcotics and paraphernalia, weapons, ammunition, explosive ordnance, and Improvised Explosive Devices (IED)."
+    ],
+    "31Z": [
+      "Senior Military Police Sergeant",
+      ": Senior Military Police Sergeant is responsible for supervising the manning, training, equipping and combat readiness of a BN/BDE level of command; principle staff NCO in operations whom plans, coordinates and manages BN/BDE operations, training and tasking’s to provide Police Operations; Corrections and Detention, Security and Mobility support, Criminal Investigations and Military working Dog Operations. Provides for the health and welfare of Soldiers, DA Civilians and their families across the command. Serves as the senior enlisted Leader to the Commander and Provost Marshal on policing, security of critical installation resources, and all enlisted matters; develops and implements law enforcement policies and procedures."
+    ]
+  }
+}

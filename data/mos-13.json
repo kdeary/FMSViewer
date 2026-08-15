@@ -1,0 +1,29 @@
+{
+  "version": "DA PAM 611-21, ch. 10 sec. C (2023-11-08)",
+  "MOS": {
+    "13B": [
+      "Cannon Crewmember",
+      "The cannon crewmember supervises or serves as a member of field artillery cannon section or ammunition section."
+    ],
+    "13F": [
+      "Joint Fire Support Specialist",
+      "The Joint Fire Support Specialist (JFSS) is an integrator of joint fire support and executor of tactical indirect fires across all maneuver formations from Armor, Mechanized Infantry, Light Infantry, and Special Operations units in support of Unified Land Operations (ULO). The JFS is an integral part of the targeting process. The JFSS is the eyes and ears of the combined arms team and employs a suite of tactical vehicles, digital devices, precision targeting tools, precision munitions, employment tactics and procedures to provide surface to surface fires, close combat attack, and close air support, The JFSS reports battlefield intelligence, recommends targets for inclusion into the fire support plan, establishes and maintains digital and voice communication, provides target refinement data and advice to the combined arms team on the limitations and capabilities of all fire support assets. The JFS provides fire support planning, coordination, integration, and management of tactical battlefield information through a network of automated Mission Command systems. The JFS performs operator and unit level maintenance on all section equipment."
+    ],
+    "13J": [
+      "Fire Control Specialist",
+      ": The Fire Control Specialist employs automated computer based systems used in all U.S. Army echelons across multiple weapon systems and formations in order to facilitate the delivery and integration of joint fires in support of combat operations. The Fire Control Specialist integrates and processes tactical battlefield information from multiple users and sensors through a network of Army and JOINT automated battle command systems. The Fire Control Specialist employs automated systems in order to process technical firing solutions, apply gunnery fundamentals critical to the 5 Requirements for Accurate Fires, process precision tactical fire missions, control tactical fires, conduct Joint sensor management, integrate fire support coordination measures, integrate maneuver control measures, manage and process meteorological data and troubleshoot technical firing solutions. The Fire Control Specialist performs operator and unit level maintenance on all automated tools and section equipment."
+    ],
+    "13M": [
+      "Multiple Launch Rocket System (MLRS)/High Mobility Artillery Rocket System (HIMARS) Crewmember (MLRS/HIMARS)",
+      "The MLRS/HIMARS crewmember supervises or serves as a member of a launcher crew or section."
+    ],
+    "13R": [
+      "Field Artillery (FA) Weapons Locating Radar (WLR) Specialist (FA WLR Spc)",
+      "The WLR specialist supports unified land operations (offensive, defensive, stability, and defense support of civil authorities) thru the tactical employment of Field Artillery heavy and light WLR within the Target Acquisition Platoon (TAP) in support of Field Artillery Brigades, DIVARTY, and Brigade Combat Teams (BCT). The WLR specialist’s primary mission is to track surface to surface munitions, report the point of origin (POO), and determine a prediction of the point of impact (POI) in support of counterfire operations and the identification of land based hostile indirect fire weapons. The WLR specialist’s secondary mission is to provide calibration and registration support to friendly indirect fire systems. The WLR specialist is critical in protecting friendly forces from surface to surface indirect fire attacks by providing early warning and distributing timely and accurate target information thru intelligence operations as a member of the Counterfire Cell and Target Processing Sections."
+    ],
+    "13Z": [
+      "Field Artillery Senior Sergeant (FA Sr Sgt)",
+      "The Field Artillery Senior Sergeant duties include Command Sergeant Major (CSM), Operations Sergeant Major (SGM), First Sergeant (1SG), Detachment Sergeant and Operations Sergeant. The Field Artillery Senior Sergeant is assigned and performs duties in Theater, Corps, Divisions, Brigade Combat Teams, Fires Brigades, Battlefield Coordination Detachments, Batteries and Companies. They assist commanders and/or their staff officers in the coordination of advanced battle command systems that support the integration of Army indirect fires, fire support operations, joint operations and target acquisition. The specific duties of the Field Artillery Senior Sergeant at each echelon are outlined below"
+    ]
+  }
+}
