@@ -1,0 +1,258 @@
+/* App-specific styling only -- Bootstrap core + Bootswatch Slate are loaded from
+   the CDN in index.html, and everything here builds on their CSS variables. */
+
+:root {
+  --nb-fill: #3a4148;
+  --nb-fill-2: #434b53;
+  --nb-line: rgba(0, 0, 0, 0.55);
+  --panel-w: 22rem;
+}
+
+html, body, #root { height: 100%; }
+body { overflow: hidden; }
+
+.app-shell { display: flex; flex-direction: column; height: 100%; }
+.app-centered { align-items: center; justify-content: center; padding: 1.5rem; }
+.app-body { position: relative; flex: 1 1 auto; min-height: 0; }
+
+/* ---------------------------------------------------------------- top bar */
+
+.topbar { flex: 0 0 auto; z-index: 10; }
+.brand-mark { width: 1.2rem; height: 1.2rem; fill: none; stroke: var(--bs-info); stroke-width: 1.6; }
+.topbar-meta { max-width: 22rem; }
+.crumbs .breadcrumb { overflow-x: auto; scrollbar-width: none; font-size: 0.875rem; }
+.crumbs .breadcrumb::-webkit-scrollbar { display: none; }
+.crumbs .breadcrumb-item { white-space: nowrap; }
+
+.statusbar {
+  flex: 0 0 auto;
+  display: flex; gap: 1rem; align-items: center;
+  padding: 0.15rem 0.75rem;
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--bs-tertiary-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ landing page */
+
+.drop-wrap { width: min(38rem, 100%); }
+
+.drop-zone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.35rem; padding: 3.5rem 2rem; text-align: center; cursor: pointer;
+  border: 2px dashed var(--bs-border-color);
+  border-radius: 0.75rem;
+  background: var(--bs-tertiary-bg);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.drop-zone:hover, .drop-zone:focus-visible { border-color: var(--bs-info); background: var(--bs-secondary-bg); }
+.drop-zone.is-over { border-color: var(--bs-info); transform: scale(1.01); }
+.drop-icon { width: 2.75rem; height: 2.75rem; margin-bottom: 0.5rem; fill: none; stroke: var(--bs-info); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.drop-note { display: flex; align-items: center; margin-top: 1rem; }
+
+.progress-card { width: 100%; }
+.phase-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.phase-pill {
+  font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 1rem;
+  border: 1px solid var(--bs-border-color); color: var(--bs-secondary-color);
+}
+.phase-pill.is-done { border-color: var(--bs-success); color: var(--bs-success); }
+.phase-pill.is-active { border-color: var(--bs-info); color: var(--bs-body-color); background: var(--bs-secondary-bg); }
+
+/* ------------------------------------------------------------- map surface */
+
+.map-surface {
+  position: absolute; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+    var(--bs-body-bg);
+  cursor: grab; touch-action: none; user-select: none;
+}
+.map-surface.is-panning { cursor: grabbing; }
+.map-surface.is-flying { cursor: progress; }
+
+.world { position: absolute; top: 0; left: 0; width: 0; height: 0; transform-origin: 0 0; }
+
+.map-count {
+  position: absolute; right: 0.5rem; bottom: 0.4rem;
+  font-size: 0.7rem; color: var(--bs-secondary-color);
+  pointer-events: none; opacity: 0.6;
+}
+
+/* ------------------------------------------------------------------ a box */
+
+.nb {
+  position: absolute;
+  overflow: hidden;
+  contain: layout paint style;
+  border: calc(1px / var(--k)) solid var(--nb-line);
+  border-radius: calc(5px / var(--k));
+  background: linear-gradient(180deg, var(--nb-fill-2), var(--nb-fill));
+  box-shadow: 0 calc(1px / var(--k)) calc(3px / var(--k)) rgba(0, 0, 0, 0.35);
+  color: var(--bs-body-color);
+  line-height: 1.25;
+}
+.nb-UN { --nb-fill: #343b42; --nb-fill-2: #3e464e; }
+.nb-CR { --nb-fill: #413b30; --nb-fill-2: #4b4438; border-color: rgba(201, 162, 39, 0.35); }
+.nb-BL { --nb-fill: #333c33; --nb-fill-2: #3c463c; }
+
+.nb.is-selected { outline: calc(2px / var(--k)) solid var(--bs-info); outline-offset: calc(-1px / var(--k)); }
+.nb.is-focused { border-color: var(--bs-info); }
+.nb:hover { filter: brightness(1.12); }
+
+.nb.is-hq { border-color: rgba(126, 166, 196, 0.5); }
+.nb.is-hq .nb-head { background: rgba(126, 166, 196, 0.16); }
+.nb-hq-tag {
+  flex: none;
+  padding: 0 0.35em;
+  border-radius: 0.25em;
+  background: rgba(126, 166, 196, 0.3);
+  font-size: 0.72em;
+  letter-spacing: 0.04em;
+}
+
+/* Type sizes come from inline styles in world units, so everything inside a box
+   is expressed in em and scales with it. */
+
+/* Holds whichever single view is currently mounted; its opacity is the
+   transition between views. */
+.nb-content { position: absolute; inset: 0; }
+
+.nb-mini {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.15em; text-align: center; padding: 0.2em; overflow: hidden;
+}
+.nb-mini-title { font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+.nb-mini-n { font-size: 0.62em; opacity: 0.65; font-variant-numeric: tabular-nums; }
+
+.nb-head {
+  position: absolute; top: 0; left: 0; right: 0; height: var(--hh);
+  display: flex; align-items: center; gap: 0.5em;
+  padding: 0 0.6em;
+  border-bottom: calc(1px / var(--k)) solid rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.18);
+  font-weight: 600;
+}
+.nb-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nb-head-n {
+  margin-left: auto; flex: none;
+  font-variant-numeric: tabular-nums; font-weight: 500; opacity: 0.7; font-size: 0.85em;
+}
+.nb-BL .nb-head { background: rgba(0, 0, 0, 0.18); border-bottom-color: var(--accent, rgba(0, 0, 0, 0.4)); }
+
+.nb-face { position: absolute; top: var(--hh); left: 0; right: 0; bottom: 0; padding: 0.55em 0.7em 0.5em; overflow: hidden; }
+
+/* ------------------------------------------------------------- summary face */
+
+.nb-summary-inner { display: flex; flex-direction: column; height: 100%; gap: 0.45em; }
+.nb-sum-top { display: flex; align-items: center; gap: 0.6em; }
+.nb-sum-figures { min-width: 0; }
+.nb-big { font-size: 1.85em; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.nb-unit { font-size: 0.5em; opacity: 0.6; margin-left: 0.25em; font-weight: 400; }
+.nb-sub { font-size: 0.82em; opacity: 0.72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nb-sum-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 0.3em; font-size: 0.76em; }
+.nb-tag {
+  padding: 0.05em 0.45em; border-radius: 0.8em;
+  background: rgba(255, 255, 255, 0.07); opacity: 0.85; white-space: nowrap;
+}
+.nb-tag-eq { background: rgba(126, 166, 196, 0.16); }
+
+/* ---------------------------------------------------------------- MOS bar */
+
+/* Shrinkable so a long wrapped code list clips itself instead of pushing the
+   unit/crew/equipment tags out of the bottom of the box. */
+.mosbar { display: flex; flex-direction: column; gap: 0.3em; flex: 0 1 auto; min-height: 0; }
+.mosbar-track {
+  display: flex; height: 0.5em; border-radius: 1em; overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+}
+.mosbar-seg { display: block; height: 100%; }
+.mosbar-codes { display: flex; flex-wrap: wrap; gap: 0.15em 0.6em; font-size: 0.78em; overflow: hidden; }
+.mos-chip { display: inline-flex; align-items: center; gap: 0.25em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mos-chip b { font-weight: 600; opacity: 0.65; }
+.mos-dot { width: 0.55em; height: 0.55em; border-radius: 50%; flex: none; }
+
+/* -------------------------------------------------------------- detail face */
+
+.nb-det-head { display: flex; align-items: flex-start; gap: 0.6em; }
+.nb-attrs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.1em 0.7em; margin: 0; font-size: 0.85em; min-width: 0; }
+.nb-attrs div { display: flex; gap: 0.35em; min-width: 0; }
+.nb-attrs dt { font-weight: 400; opacity: 0.55; }
+.nb-attrs dd { margin: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nb-det-branch { margin-top: 0.35em; font-size: 0.8em; opacity: 0.6; }
+
+.eq-list { list-style: none; margin: 0.5em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.12em; font-size: 0.8em; }
+.eq-chip {
+  display: flex; align-items: baseline; gap: 0.4em;
+  padding: 0.08em 0.4em; border-radius: 0.25em;
+  background: rgba(255, 255, 255, 0.055);
+  white-space: nowrap; overflow: hidden;
+}
+.eq-lin { font-family: var(--bs-font-monospace); opacity: 0.65; flex: none; }
+.eq-name { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; }
+.eq-qty { font-weight: 600; flex: none; }
+.eq-erc { flex: none; opacity: 0.45; }
+.eq-more { background: none; opacity: 0.55; }
+
+/* ------------------------------------------------------- image placeholders */
+
+.img-ph {
+  flex: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.2em;
+  width: 3.1em; height: 3.1em;
+  border: 0.08em dashed rgba(255, 255, 255, 0.22);
+  border-radius: 0.3em;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+.img-ph svg { width: 55%; height: 55%; fill: rgba(255, 255, 255, 0.22); }
+.img-ph-label { display: none; }
+.img-ph-lg {
+  width: 100%; height: 8rem; font-size: 1rem;
+  border-width: 2px; border-radius: 0.5rem;
+}
+.img-ph-lg svg { width: 3rem; height: 3rem; }
+.img-ph-lg .img-ph-label { display: block; font-size: 0.75rem; color: var(--bs-secondary-color); }
+
+/* --------------------------------------------------------------- side panel */
+
+.side-panel {
+  position: absolute; top: 0; right: 0; bottom: 0; z-index: 6;
+  width: var(--panel-w); max-width: 100%;
+  display: flex; flex-direction: column;
+  background: var(--bs-body-bg);
+  border-left: 1px solid var(--bs-border-color) !important;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.35);
+  animation: panel-in 0.22s ease-out;
+}
+.side-panel .card-body { min-height: 0; }
+@keyframes panel-in { from { transform: translateX(1.5rem); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.legend {
+  position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 5;
+  width: 15rem; max-height: 60%;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: panel-in 0.18s ease-out;
+}
+.legend-swatch { width: 0.7rem; height: 0.7rem; border-radius: 0.2rem; flex: none; }
+
+/* ------------------------------------------------------------------ gear */
+
+.btn-gear { display: inline-flex; align-items: center; justify-content: center; padding: 0.2rem 0.4rem; }
+.btn-gear svg {
+  width: 1rem; height: 1rem;
+  fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round;
+}
+.modal { background: rgba(0, 0, 0, 0.15); }
+
+@media (max-width: 720px) {
+  :root { --panel-w: 100%; }
+  .topbar-meta { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel, .legend, .drop-zone { animation: none; transition: none; }
+}
