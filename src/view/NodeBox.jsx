@@ -4,47 +4,40 @@ import DetailFace from './DetailFace.jsx';
 import { useMosInfo } from './MosPalette.jsx';
 import { headerHeight } from '../layout/layoutTree.js';
 
-// Rough advance width of the header font, as a fraction of its size. Good
-// enough to fit a title without measuring text on every box, every frame.
+// Rough advance width of the header font, as a fraction of its size.
 const CHAR_EM = 0.52;
-// A header never shrinks below this on screen -- past here, truncating beats
-// unreadable text.
+// A header never shrinks below this on screen
 const MIN_HEADER_PX = 11;
 
 /**
- * Header type size, in world units.
- *
- * A size proportional to the box would keep a long title truncated at every
- * zoom, since text and box grow together -- zooming in would never reveal more
- * of it. So the title is allowed to shrink to whatever fits, bounded below by a
- * fixed *on-screen* size. Zoomed out, that floor dominates and the title stays
- * legible but clipped; zoom in and the floor shrinks in world terms, letting
- * the text step down until the whole name fits.
+ * Header type size in screen pixels.
  */
-function headerFontSize(node, hh, k) {
-  const cap = hh * 0.44;
-  const avail = node.rect.w * 0.76; // minus padding, the HQ tag and the count
+function headerFontSize(node, screenW, hh) {
+  const cap = hh * 0.46;
+  const avail = screenW * 0.76;
   const needed = avail / Math.max(1, (node.title || '').length * CHAR_EM);
-  return Math.min(cap, Math.max(needed, MIN_HEADER_PX / Math.max(k, 1e-6)));
+  return Math.min(cap, Math.max(needed, MIN_HEADER_PX));
 }
 
 /**
- * One box, positioned in world units. The camera transform lives on an ancestor,
- * so nothing here changes while panning, and `k` arrives quantised so nothing
- * here changes on most frames of a zoom either.
- *
- * Exactly one view is mounted at a time -- `view` says which, `face` is how far
- * through its fade it is. Two views are never on screen together.
+ * One box, positioned directly in screen pixels (Screen-Space Virtual DOM).
+ * Completely eliminates outer container scale distortion, thick border inflation,
+ * and floating-point sub-pixel layout rounding thrashing.
  */
-function NodeBox({ node, view, face = 1, appear = 1, k, selected, focused }) {
+function NodeBox({ node, view, face = 1, appear = 1, cam, selected, focused }) {
   const mosInfo = useMosInfo();
   const { rect: r, kind } = node;
   const isLeaf = node.childIds.length === 0;
-  const hh = headerHeight(r);
 
-  // Type sizes are world units too, so text scales with the box.
-  const headFs = headerFontSize(node, hh, k);
-  const bodyFs = Math.min(r.w * 0.048, r.h * 0.07);
+  // Screen-space coordinates
+  const screenX = r.x * cam.k + cam.x;
+  const screenY = r.y * cam.k + cam.y;
+  const screenW = r.w * cam.k;
+  const screenH = r.h * cam.k;
+
+  const hh = Math.max(14, headerHeight(r) * cam.k);
+  const headFs = headerFontSize(node, screenW, hh);
+  const bodyFs = Math.max(9, Math.min(screenW * 0.048, screenH * 0.07));
 
   const accent = kind === 'BL' && node.mos ? mosInfo(node.mos).color : undefined;
   const cls = [
@@ -60,11 +53,13 @@ function NodeBox({ node, view, face = 1, appear = 1, k, selected, focused }) {
       data-id={node.id}
       className={cls}
       style={{
-        left: r.x, top: r.y, width: r.w, height: r.h,
+        transform: `translate3d(${screenX.toFixed(2)}px, ${screenY.toFixed(2)}px, 0)`,
+        width: `${screenW.toFixed(2)}px`,
+        height: `${screenH.toFixed(2)}px`,
         opacity: appear,
         pointerEvents: appear < 0.3 ? 'none' : undefined,
         '--accent': accent,
-        '--hh': `${hh}px`,
+        '--hh': `${hh.toFixed(2)}px`,
       }}
     >
       <div
@@ -96,8 +91,6 @@ function NodeBox({ node, view, face = 1, appear = 1, k, selected, focused }) {
   );
 }
 
-// The scene is rebuilt every frame; memoising keeps re-renders to the boxes
-// whose view, face, or zoom actually moved.
 export default React.memo(NodeBox, (a, b) => (
   a.node === b.node
   && a.view === b.view
@@ -105,5 +98,7 @@ export default React.memo(NodeBox, (a, b) => (
   && a.focused === b.focused
   && Math.abs((a.face ?? 1) - (b.face ?? 1)) < 0.05
   && Math.abs((a.appear ?? 1) - (b.appear ?? 1)) < 0.05
-  && a.k === b.k
+  && Math.abs(a.cam.x - b.cam.x) < 0.5
+  && Math.abs(a.cam.y - b.cam.y) < 0.5
+  && Math.abs(a.cam.k - b.cam.k) < 0.001
 ));

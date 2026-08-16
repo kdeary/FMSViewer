@@ -4,7 +4,7 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 export default function TopBar({
   path, onGo, onExport, onLoadModel, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
-  searchOpen, onToggleSearch, onOpenStats,
+  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings,
 }) {
   const modelInput = useRef(null);
 
@@ -47,12 +47,11 @@ export default function TopBar({
         {warnings?.length > 0 && (
           <button
             type="button"
-            className="btn btn-sm btn-outline-warning"
-            data-bs-toggle="tooltip"
-            title={warnings.join('\n')}
-            onClick={() => window.alert(`Model warnings:\n\n${warnings.join('\n')}`)}
+            className="btn btn-sm btn-outline-warning d-flex align-items-center gap-1"
+            title="View model warnings"
+            onClick={onOpenWarnings}
           >
-            ⚠ {warnings.length}
+            <i className="bi bi-exclamation-triangle-fill" /> {warnings.length}
           </button>
         )}
 

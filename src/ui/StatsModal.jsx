@@ -10,7 +10,7 @@ import { titleCut } from '../model/taxonomy.js';
  *  - "Equipment": Scrollable table of all unit equipment grouped by Equipment Category (6-char clean code).
  *    Uses accordions for categories with multiple items, flat rows for single-item categories.
  *    Sorted with ERC "P" priority first, then category count ASCENDING.
- *  - Clicking any MOS or Equipment row closes the modal and opens the Search panel populated with that item.
+ *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
 export default function StatsModal({ open, model, onClose, onSearch }) {
   const [tab, setTab] = useState('general'); // 'general' | 'equipment'
@@ -148,7 +148,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                   {/* General Strength Text Summary */}
                   <div className="p-2 mb-3 border rounded bg-body-tertiary text-body-secondary small d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
-                      <strong className="text-body fs-6 me-1">{r.mil} Total Military</strong>
+                      <strong className="text-body fs-6 me-1">{r.mil} PAX</strong>
                       <span>({r.off} O / {r.wo} W / {r.enl} E / {r.civ} C)</span>
                     </div>
                     <div className="d-flex gap-3 text-nowrap">
@@ -160,7 +160,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
 
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <h3 className="h6 fw-semibold mb-0">MOS Breakdown ({root.topMos.length} Unique)</h3>
-                    <span className="small text-body-secondary">Click row to search</span>
+                    <span className="small text-body-secondary">Click row to search with MOS: tag</span>
                   </div>
 
                   <div className="table-responsive stats-table-container">
@@ -179,9 +179,9 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                           return (
                             <tr
                               key={mos}
-                              onClick={() => handleRowClick(mos)}
+                              onClick={() => handleRowClick(`MOS:${mos}`)}
                               style={{ cursor: 'pointer' }}
-                              title={`Click to search for ${mos}`}
+                              title={`Click to search for MOS:${mos}`}
                             >
                               <td>
                                 <span className="d-inline-flex align-items-center gap-1">
@@ -204,7 +204,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                 <div>
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <span className="small text-body-secondary">
-                      ERC P items at top · Sorted ascending by category count · Click item to search
+                      ERC P items at top · Sorted ascending by category count · Click item to search tag
                     </span>
                     <span className="badge bg-secondary-subtle text-secondary-emphasis">
                       Total: {r.eqQty} items ({r.eqLines} lines)
@@ -229,13 +229,14 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                           if (!isMulti) {
                             const singleItem = group.items[0];
                             const isP = String(singleItem.erc || '').trim().toUpperCase() === 'P';
+                            const targetQuery = singleItem.lin ? `LIN:${singleItem.lin}` : `EQUIP:${singleItem.name}`;
                             return (
                               <tr
                                 key={`single-${group.category}`}
                                 className="eq-single-row"
-                                onClick={() => handleRowClick(singleItem.name || singleItem.lin)}
+                                onClick={() => handleRowClick(targetQuery)}
                                 style={{ cursor: 'pointer' }}
-                                title={`Click to search for ${singleItem.name}`}
+                                title={`Click to search for ${targetQuery}`}
                               >
                                 <td className="fw-medium">{singleItem.name || '—'}</td>
                                 <td><code>{singleItem.lin || '—'}</code></td>
@@ -262,7 +263,14 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                                 <td colSpan={2} className="fw-bold">
                                   <span className="d-inline-flex align-items-center gap-1">
                                     <i className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'} text-body-secondary small me-1`} />
-                                    <span className="badge bg-primary-subtle text-primary-emphasis font-monospace me-1">
+                                    <span
+                                      className="badge bg-primary-subtle text-primary-emphasis font-monospace me-1"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRowClick(`CAT:${group.category}`);
+                                      }}
+                                      title={`Click to search category CAT:${group.category}`}
+                                    >
                                       {group.category}
                                     </span>
                                     <span className="small text-body-secondary fw-normal">
@@ -273,7 +281,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                                 <td>
                                   {group.hasP && (
                                     <span className="badge bg-warning-subtle text-warning-emphasis fw-bold">
-                                      ERC P
+                                      P
                                     </span>
                                   )}
                                 </td>
@@ -283,13 +291,14 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                               {isExpanded &&
                                 group.items.map((item, idx) => {
                                   const isP = String(item.erc || '').trim().toUpperCase() === 'P';
+                                  const subQuery = item.lin ? `LIN:${item.lin}` : `EQUIP:${item.name}`;
                                   return (
                                     <tr
                                       key={`sub-${group.category}-${idx}`}
                                       className="eq-sub-row"
-                                      onClick={() => handleRowClick(item.name || item.lin)}
+                                      onClick={() => handleRowClick(subQuery)}
                                       style={{ cursor: 'pointer' }}
-                                      title={`Click to search for ${item.name}`}
+                                      title={`Click to search for ${subQuery}`}
                                     >
                                       <td className="ps-4 fw-medium text-body-secondary">
                                         <i className="bi bi-arrow-return-right me-2 text-body-tertiary" />

@@ -8,6 +8,7 @@ import MapCanvas from './view/MapCanvas.jsx';
 import SettingsModal from './ui/SettingsModal.jsx';
 import StatsModal from './ui/StatsModal.jsx';
 import ExportModal from './ui/ExportModal.jsx';
+import WarningsModal from './ui/WarningsModal.jsx';
 import SearchPanel from './ui/SearchPanel.jsx';
 import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
@@ -40,6 +41,7 @@ export default function App() {
   const [focusId, setFocusId] = useState(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [warningsOpen, setWarningsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -294,6 +296,7 @@ export default function App() {
           searchOpen={searchOpen}
           onToggleSearch={() => { setSearchOpen((v) => !v); setSearchPicking(false); }}
           onOpenStats={() => setStatsOpen(true)}
+          onOpenWarnings={() => setWarningsOpen(true)}
         />
 
         <div className="app-body">
@@ -360,6 +363,12 @@ export default function App() {
             setSearchOpen(true);
             setSearchPicking(false);
           }}
+        />
+
+        <WarningsModal
+          open={warningsOpen}
+          warnings={model.meta.warnings}
+          onClose={() => setWarningsOpen(false)}
         />
 
         <ExportModal

@@ -154,25 +154,23 @@ body { overflow: hidden; }
 
 .nb {
   position: absolute;
+  top: 0;
+  left: 0;
   overflow: hidden;
   contain: layout paint style;
-  border: calc(1px / var(--k)) solid var(--nb-line);
-  border-radius: calc(5px / var(--k));
-  /* Flat fills, not gradients, and no drop shadow. Boxes tile the whole
-     viewport and overlap their parents, so every pixel is painted several times
-     over; a blurred shadow per box is the most expensive thing in that stack
-     and almost entirely hidden behind the children drawn on top of it. The
-     lighter top edge below gives the same relief for the cost of one line. */
+  border: 1px solid var(--nb-line);
+  border-radius: 5px;
   background: var(--nb-fill);
-  box-shadow: inset 0 calc(1px / var(--k)) 0 rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   color: var(--bs-body-color);
   line-height: 1.25;
+  will-change: transform;
 }
 .nb-UN { --nb-fill: #343b42; --nb-fill-2: #3e464e; }
-.nb-CR { --nb-fill: #413b30; --nb-fill-2: #4b4438; border-color: rgba(201, 162, 39, 0.35); }
+.nb-CR { --nb-fill: #413b30; --nb-fill-2: #4b4438; border-color: rgba(201, 162, 39, 0.45); }
 .nb-BL { --nb-fill: #333c33; --nb-fill-2: #3c463c; }
 
-.nb.is-selected { outline: calc(2px / var(--k)) solid var(--bs-info); outline-offset: calc(-1px / var(--k)); }
+.nb.is-selected { outline: 2px solid var(--bs-info); outline-offset: -1px; }
 .nb.is-focused { border-color: var(--bs-info); }
 /* Lightening the fill, not `filter: brightness()` -- a filter puts the box in
    its own paint pass, and under the cursor during a pan that is every box the
@@ -514,4 +512,32 @@ body { overflow: hidden; }
 }
 .eq-single-row {
   border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+/* ------------------------------------------------------------- search help */
+
+.search-info-btn {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 10;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  background: var(--bs-body-bg);
+}
+
+.search-help-popover {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 3.35rem;
+  z-index: 11;
+  width: 19.5rem;
+  max-width: calc(100% - 1.5rem);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg);
 }

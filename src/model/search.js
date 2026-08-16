@@ -1,14 +1,10 @@
-// Search within a subtree.
-//
-// Scoped to the focused unit rather than the whole structure: "91B" in a
-// battalion is hundreds of hits and no help, but "91B in this platoon" is a
-// question with a useful answer. The scope is the user's to widen -- clicking
-// up the breadcrumb trail and searching again searches more.
+// Search within a subtree with prefix query support (e.g. MOS:56M, LIN:T73827, TITLE:Infantry, etc.).
+
+import { getEquipmentCategory } from './rollups.js';
 
 const MAX_RESULTS = 300;
 
-// Lower sorts first. An exact code is what you typed if you typed a code, so it
-// outranks a title that merely happens to contain those letters.
+// Lower sorts first.
 const EXACT_CODE = 0;
 const TITLE_START = 1;
 const CODE_PREFIX = 2;
@@ -16,16 +12,48 @@ const TITLE_PART = 3;
 const EQUIP = 4;
 
 const FIELD_LABEL = {
-  mos: 'MOS', poscode: 'POSCO', grade: 'Grade', lin: 'LIN', title: null,
+  mos: 'MOS',
+  poscode: 'POSCO',
+  grade: 'Grade',
+  lin: 'LIN',
+  uic: 'UIC',
+  parno: 'Para',
+  erc: 'ERC',
+  cat: 'Category',
+  title: null,
 };
 
+export function parseSearchQuery(query) {
+  const raw = String(query || '').trim();
+  if (!raw) return { prefix: null, term: '' };
+
+  const colonIdx = raw.indexOf(':');
+  if (colonIdx > 0) {
+    const key = raw.substring(0, colonIdx).trim().toUpperCase();
+    const term = raw.substring(colonIdx + 1).trim();
+    if (term) {
+      if (['MOS', 'M'].includes(key)) return { prefix: 'MOS', term: term.toUpperCase() };
+      if (['LIN', 'L'].includes(key)) return { prefix: 'LIN', term: term.toUpperCase() };
+      if (['EQUIP', 'EQ', 'GEAR'].includes(key)) return { prefix: 'EQUIP', term: term.toUpperCase() };
+      if (['TITLE', 'T', 'NAME'].includes(key)) return { prefix: 'TITLE', term: term.toUpperCase() };
+      if (['GRADE', 'G', 'RANK'].includes(key)) return { prefix: 'GRADE', term: term.toUpperCase() };
+      if (['UIC', 'U'].includes(key)) return { prefix: 'UIC', term: term.toUpperCase() };
+      if (['POS', 'POSCODE'].includes(key)) return { prefix: 'POSCODE', term: term.toUpperCase() };
+      if (['PAR', 'PARNO'].includes(key)) return { prefix: 'PARNO', term: term.toUpperCase() };
+      if (['ERC'].includes(key)) return { prefix: 'ERC', term: term.toUpperCase() };
+      if (['CAT', 'CATEGORY'].includes(key)) return { prefix: 'CAT', term: term.toUpperCase() };
+    }
+  }
+
+  return { prefix: null, term: raw.toUpperCase() };
+}
+
 /**
- * @returns [{ node, score, field, hint }] -- `field` says why it matched and
- *   `hint` is the matching text, so a result can explain itself.
+ * @returns [{ node, score, field, hint }] -- `field` says why it matched and `hint` is the matching text.
  */
 export function searchSubtree(model, scopeId, query) {
-  const q = String(query || '').trim().toUpperCase();
-  if (q.length < 1 || !model) return [];
+  const parsed = parseSearchQuery(query);
+  if (!parsed.term || !model) return [];
   const scope = model.byId.get(scopeId) || model.byId.get(model.rootId);
   if (!scope) return [];
 
@@ -37,7 +65,7 @@ export function searchSubtree(model, scopeId, query) {
     if (!node) continue;
     for (const id of node.childIds) stack.push(id);
 
-    const hit = match(node, q);
+    const hit = match(node, parsed);
     if (hit) out.push({ node, ...hit });
   }
 
@@ -47,15 +75,97 @@ export function searchSubtree(model, scopeId, query) {
   return out.slice(0, MAX_RESULTS);
 }
 
-function match(node, q) {
+function match(node, parsed) {
+  const { prefix, term: q } = parsed;
+  if (!q) return null;
+
+  if (prefix) {
+    switch (prefix) {
+      case 'MOS': {
+        const mos = (node.mos || '').toUpperCase();
+        if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: node.mos };
+        if (mos.includes(q)) return { score: CODE_PREFIX, field: 'mos', hint: node.mos };
+        return null;
+      }
+      case 'LIN': {
+        for (const e of node.equipment) {
+          const lin = (e.lin || '').toUpperCase();
+          if (lin === q) return { score: EXACT_CODE, field: 'lin', hint: `${e.lin} ${e.name}` };
+          if (lin.includes(q)) return { score: CODE_PREFIX, field: 'lin', hint: `${e.lin} ${e.name}` };
+        }
+        return null;
+      }
+      case 'EQUIP': {
+        for (const e of node.equipment) {
+          const lin = (e.lin || '').toUpperCase();
+          const name = (e.name || '').toUpperCase();
+          if (lin === q || name === q) return { score: EXACT_CODE, field: 'lin', hint: `${e.lin} ${e.name}` };
+          if (lin.includes(q) || name.includes(q)) return { score: EQUIP, field: 'lin', hint: `${e.lin} ${e.name}` };
+        }
+        return null;
+      }
+      case 'TITLE': {
+        const title = (node.title || '').toUpperCase();
+        if (title === q) return { score: EXACT_CODE, field: 'title', hint: node.title };
+        if (title.startsWith(q)) return { score: TITLE_START, field: 'title', hint: node.title };
+        if (title.includes(q)) return { score: TITLE_PART, field: 'title', hint: node.title };
+        return null;
+      }
+      case 'GRADE': {
+        const grade = (node.grade || '').toUpperCase();
+        const normGrade = grade.replace('-', '');
+        const normQ = q.replace('-', '');
+        if (grade === q || normGrade === normQ) return { score: EXACT_CODE, field: 'grade', hint: node.grade };
+        if (grade.includes(q)) return { score: CODE_PREFIX, field: 'grade', hint: node.grade };
+        return null;
+      }
+      case 'UIC': {
+        const uic = (node.uic || '').toUpperCase();
+        if (uic === q) return { score: EXACT_CODE, field: 'uic', hint: node.uic };
+        if (uic.includes(q)) return { score: CODE_PREFIX, field: 'uic', hint: node.uic };
+        return null;
+      }
+      case 'POSCODE': {
+        const pos = (node.poscode || '').toUpperCase();
+        if (pos === q) return { score: EXACT_CODE, field: 'poscode', hint: node.poscode };
+        if (pos.includes(q)) return { score: CODE_PREFIX, field: 'poscode', hint: node.poscode };
+        return null;
+      }
+      case 'PARNO': {
+        const par = (node.parno || '').toUpperCase();
+        if (par === q) return { score: EXACT_CODE, field: 'parno', hint: `Para ${node.parno}` };
+        if (par.includes(q)) return { score: CODE_PREFIX, field: 'parno', hint: `Para ${node.parno}` };
+        return null;
+      }
+      case 'ERC': {
+        for (const e of node.equipment) {
+          const erc = (e.erc || '').toUpperCase();
+          if (erc === q) return { score: EXACT_CODE, field: 'erc', hint: `${e.name} (ERC ${e.erc})` };
+        }
+        return null;
+      }
+      case 'CAT': {
+        for (const e of node.equipment) {
+          const cat = getEquipmentCategory(e.name);
+          if (cat === q || cat.includes(q)) return { score: EXACT_CODE, field: 'cat', hint: `[${cat}] ${e.name}` };
+        }
+        return null;
+      }
+      default:
+        return null;
+    }
+  }
+
+  // Standard multi-field search (no prefix)
   const title = (node.title || '').toUpperCase();
   const mos = (node.mos || '').toUpperCase();
   const posco = (node.poscode || '').toUpperCase();
   const grade = (node.grade || '').toUpperCase();
+  const uic = (node.uic || '').toUpperCase();
 
   if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: node.mos };
   if (posco === q) return { score: EXACT_CODE, field: 'poscode', hint: node.poscode };
-  // Grades are written "E-4"; accepting "E4" saves the hyphen.
+  if (uic === q) return { score: EXACT_CODE, field: 'uic', hint: node.uic };
   if (grade === q || grade.replace('-', '') === q.replace('-', '')) {
     return { score: EXACT_CODE, field: 'grade', hint: node.grade };
   }
@@ -69,6 +179,7 @@ function match(node, q) {
   if (title.startsWith(q)) return { score: TITLE_START, field: 'title', hint: node.title };
   if (mos.startsWith(q)) return { score: CODE_PREFIX, field: 'mos', hint: node.mos };
   if (posco.startsWith(q)) return { score: CODE_PREFIX, field: 'poscode', hint: node.poscode };
+  if (uic.startsWith(q)) return { score: CODE_PREFIX, field: 'uic', hint: node.uic };
   if (title.includes(q)) return { score: TITLE_PART, field: 'title', hint: node.title };
 
   for (const e of node.equipment) {
@@ -84,13 +195,6 @@ export function fieldLabel(field) {
   return FIELD_LABEL[field] || null;
 }
 
-/**
- * The two units a result sits inside, outermost first.
- *
- * A result on its own is often ambiguous -- half a company answers to "#1
- * Wheeled Vehicle Mechanic" -- and two levels is enough to tell them apart
- * without turning every row into a full path from the root.
- */
 export function ancestorTrail(model, node, levels = 2) {
   const trail = [];
   let id = node && node.parentId;

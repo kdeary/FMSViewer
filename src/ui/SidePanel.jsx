@@ -85,24 +85,6 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           </>
         )}
 
-        {children.length > 0 && (
-          <>
-            <h3 className="h6 mt-4 mb-2">Contains</h3>
-            <ul className="list-group list-group-flush small">
-              {children.map((c) => (
-                <li key={c.id} className="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between align-items-center gap-2">
-                  <button type="button" className="btn btn-link btn-sm p-0 text-start flex-grow-1" onClick={() => onGo(c.id)}>
-                    {c.title}
-                  </button>
-                  <span className="text-body-secondary text-nowrap">
-                    {c.kind === 'BL' ? (c.mos || c.grade || 'BL') : `${c.roll.mil} PAX`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-
         {node.equipment.length > 0 && (
           <>
             <h3 className="h6 mt-4 mb-2">
@@ -129,6 +111,24 @@ export default function SidePanel({ node, model, onClose, onGo }) {
             <p className="text-body-secondary small mt-1 mb-0 fst-italic">
               Note: Displayed equipment is assigned directly to this unit element, not a rollup of sub-unit equipment.
             </p>
+          </>
+        )}
+
+        {children.length > 0 && (
+          <>
+            <h3 className="h6 mt-4 mb-2">Contains</h3>
+            <ul className="list-group list-group-flush small">
+              {children.map((c) => (
+                <li key={c.id} className="list-group-item bg-transparent px-0 py-1 d-flex justify-content-between align-items-center gap-2">
+                  <button type="button" className="btn btn-link btn-sm p-0 text-start flex-grow-1" onClick={() => onGo(c.id)}>
+                    {c.title}
+                  </button>
+                  <span className="text-body-secondary text-nowrap">
+                    {c.kind === 'BL' ? (c.mos || c.grade || 'BL') : `${c.roll.mil} PAX`}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </>
         )}
       </div>

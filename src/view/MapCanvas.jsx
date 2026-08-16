@@ -4,8 +4,9 @@ import { useScene } from './useScene.js';
 import { quantizeK } from './lod.js';
 
 /**
- * The map surface. Everything lives inside one transformed layer, so panning and
- * zooming is a single composited transform rather than a re-layout.
+ * The map surface using Screen-Space Virtual DOM.
+ * Outer container transform scaling is eliminated, so borders, outlines,
+ * and text rasterization remain crisp and 1:1 with screen resolution at any zoom depth.
  *
  * Clicks are handled once, here, via `data-id` -- no per-box listeners.
  */
@@ -14,17 +15,8 @@ export default function MapCanvas({
 }) {
   const { list, stats } = useScene(model, cam, size, minTextPx);
 
-  // Boxes see a quantised zoom, never the live one. Everything a box derives
-  // from k -- border widths, corner radii, header type size -- would otherwise
-  // change on every frame of a zoom, forcing a re-render and a text re-shape
-  // for every box on screen. Steps of 4% are invisible and turn that into a
-  // handful of updates across an entire zoom.
   const k = quantizeK(cam.k);
 
-  // Elements are cached per box and reused while nothing about that box has
-  // changed. Panning shifts one transform on the parent, so most boxes are
-  // untouched from frame to frame; handing React the identical element lets it
-  // skip them outright instead of rebuilding and diffing every box each frame.
   const cache = useRef(new Map());
   const nextCache = new Map();
 
@@ -34,7 +26,9 @@ export default function MapCanvas({
     const focused = id === focusId;
     const faceStep = Math.round((v.face ?? 1) * 8) / 8;
     const appearStep = Math.round((v.appear ?? 1) * 8) / 8;
-    const sig = `${v.view}|${faceStep}|${appearStep}|${k}|${selected ? 1 : 0}${focused ? 1 : 0}`;
+    const camXStep = Math.round(cam.x);
+    const camYStep = Math.round(cam.y);
+    const sig = `${v.view}|${faceStep}|${appearStep}|${k}|${camXStep}|${camYStep}|${selected ? 1 : 0}${focused ? 1 : 0}`;
 
     const hit = cache.current.get(id);
     if (hit && hit.sig === sig && hit.node === v.node) {
@@ -49,7 +43,7 @@ export default function MapCanvas({
         view={v.view}
         face={v.face}
         appear={v.appear}
-        k={k}
+        cam={cam}
         selected={selected}
         focused={focused}
       />
@@ -58,17 +52,12 @@ export default function MapCanvas({
     return el;
   });
 
-  // Boxes that left the viewport drop out of the cache with them.
   cache.current = nextCache;
 
   const onClick = (e) => {
-    // A drag that ended on a box shouldn't count as a selection.
     const surface = e.currentTarget;
     if (surface.dataset.dragged) { surface.dataset.dragged = ''; return; }
     let el = e.target.closest('[data-id]');
-    // If anything retargeted the event away from the box that was actually
-    // under the cursor (pointer capture does exactly this), fall back to a
-    // hit-test on the coordinates, which nothing can redirect.
     if (!el && document.elementFromPoint) {
       el = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-id]');
     }
@@ -85,17 +74,7 @@ export default function MapCanvas({
       role="application"
       aria-label="Force structure map"
     >
-      <div
-        className="world"
-        style={{
-          transform: `translate3d(${cam.x}px, ${cam.y}px, 0) scale(${cam.k})`,
-          // Borders and radii divide by this so they stay a constant width on
-          // screen instead of thickening as you zoom in. Quantised, because a
-          // custom property on this element is inherited by every box, and
-          // changing it restyles all of them.
-          '--k': k,
-        }}
-      >
+      <div className="world">
         <Profiler id="boxes" onRender={onCommit}>{children}</Profiler>
       </div>
       <div className="map-count">{list.length} boxes</div>
@@ -105,9 +84,7 @@ export default function MapCanvas({
 }
 
 /**
- * Frame timing, sampled in the scene loop. `frame` is the wall clock, so
- * everything the browser does after React hands off -- style, layout, paint,
- * raster -- shows up as the gap between it and the JS columns.
+ * Frame timing, sampled in the scene loop.
  */
 function PerfReadout({ stats }) {
   const [, redraw] = React.useReducer((n) => n + 1, 0);

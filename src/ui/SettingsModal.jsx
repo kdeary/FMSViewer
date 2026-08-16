@@ -30,14 +30,27 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h2 className="modal-title h5">Settings</h2>
+              <h2 className="modal-title h5 mb-0">Settings</h2>
               <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
             </div>
 
             <div className="modal-body">
-              <label htmlFor="minTextPx" className="form-label mb-1">
-                Minimum readable text size: <strong>{textPx}px</strong> on screen
-              </label>
+              <div className="d-flex align-items-center justify-content-between mb-1">
+                <label htmlFor="minTextPx" className="form-label mb-0">
+                  Minimum readable text size: <strong>{textPx}px</strong> on screen
+                </label>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm py-0 px-2"
+                  style={{ fontSize: '0.78rem' }}
+                  onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX })}
+                  disabled={textPx === DEFAULT_MIN_TEXT_PX}
+                  title={`Reset to default ${DEFAULT_MIN_TEXT_PX}px`}
+                >
+                  Reset ({DEFAULT_MIN_TEXT_PX}px)
+                </button>
+              </div>
+
               <input
                 id="minTextPx"
                 type="range"
@@ -78,14 +91,6 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
             </div>
 
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm"
-                onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX })}
-                disabled={textPx === DEFAULT_MIN_TEXT_PX}
-              >
-                Reset to {DEFAULT_MIN_TEXT_PX}px
-              </button>
               <button type="button" className="btn btn-primary btn-sm" onClick={onClose}>Done</button>
             </div>
           </div>
