@@ -2,11 +2,11 @@ import React, { useRef } from 'react';
 import Breadcrumbs from './Breadcrumbs.jsx';
 
 export default function TopBar({
-  model, path, onGo, onExport, onLoadModel, onReset,
+  path, onGo, onExport, onLoadModel, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
+  searchOpen, onToggleSearch,
 }) {
   const modelInput = useRef(null);
-  const { meta } = model;
 
   return (
     <nav className="navbar navbar-expand bg-body-tertiary border-bottom topbar py-1">
@@ -21,16 +21,28 @@ export default function TopBar({
           FMS Viewer
         </span>
 
-        <div className="topbar-meta text-body-secondary small text-truncate d-none d-lg-block">
-          <span className="fw-semibold text-body">{meta.uic || '—'}</span>
-          <span className="mx-2">·</span>
-          <span title={meta.sourceFile}>{meta.sourceFile}</span>
-          {meta.runDate && <><span className="mx-2">·</span><span>run {meta.runDate}</span></>}
-        </div>
-
+        {/* The file's identity lives in the status bar -- it is reference
+            information, not something you act on, and the space here is better
+            spent on the trail showing where you are. */}
         <div className="flex-grow-1 overflow-hidden">
           <Breadcrumbs path={path} onGo={onGo} />
         </div>
+
+        {/* Immediately after the trail, since the two answer the same question:
+            where you are, and what you want to look for inside it. */}
+        <button
+          type="button"
+          className={`btn btn-sm ${searchOpen ? 'btn-secondary' : 'btn-outline-secondary'} d-flex align-items-center gap-1`}
+          onClick={onToggleSearch}
+          title="Search within a unit"
+          aria-pressed={searchOpen}
+        >
+          <svg className="icon-search" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="M16 16l4.5 4.5" />
+          </svg>
+          Search
+        </button>
 
         {warnings?.length > 0 && (
           <button

@@ -1,7 +1,6 @@
 import React from 'react';
 import SummaryFace from './SummaryFace.jsx';
 import DetailFace from './DetailFace.jsx';
-import { abbreviate } from '../model/taxonomy.js';
 import { useMosInfo } from './MosPalette.jsx';
 import { headerHeight } from '../layout/layoutTree.js';
 
@@ -37,7 +36,7 @@ function headerFontSize(node, hh, k) {
  * Exactly one view is mounted at a time -- `view` says which, `face` is how far
  * through its fade it is. Two views are never on screen together.
  */
-function NodeBox({ node, s, view, face, appear, k, selected, focused }) {
+function NodeBox({ node, view, face, appear, k, selected, focused }) {
   const mosInfo = useMosInfo();
   const { rect: r, kind } = node;
   const isLeaf = node.childIds.length === 0;
@@ -46,7 +45,6 @@ function NodeBox({ node, s, view, face, appear, k, selected, focused }) {
   // Type sizes are world units too, so text scales with the box.
   const headFs = headerFontSize(node, hh, k);
   const bodyFs = Math.min(r.w * 0.048, r.h * 0.07);
-  const miniFs = Math.min(r.w * 0.17, r.h * 0.3);
 
   const accent = kind === 'BL' && node.mos ? mosInfo(node.mos).color : undefined;
   const cls = [
@@ -75,34 +73,25 @@ function NodeBox({ node, s, view, face, appear, k, selected, focused }) {
         className="nb-content"
         style={{ opacity: face, willChange: face > 0.015 && face < 0.985 ? 'opacity' : undefined }}
       >
-        {view === 'mini' ? (
-          <div className="nb-mini" style={{ fontSize: miniFs }}>
-            <span className="nb-mini-title">{abbreviate(node.title, s < 90 ? 6 : 12)}</span>
-            {node.roll.mil > 0 && <span className="nb-mini-n">{node.roll.mil}</span>}
+        <div className="nb-head" style={{ fontSize: headFs }}>
+          {node.isHq && <span className="nb-hq-tag">HQ</span>}
+          <span className="nb-title">{node.title}</span>
+          <span className="nb-head-n">
+            {node.roll.mil > 0 ? node.roll.mil : ''}
+            {kind === 'BL' && node.grade ? ` ${node.grade}` : ''}
+          </span>
+        </div>
+
+        {view === 'summary' && (
+          <div className="nb-face nb-summary" style={{ fontSize: bodyFs }}>
+            <SummaryFace node={node} />
           </div>
-        ) : (
-          <>
-            <div className="nb-head" style={{ fontSize: headFs }}>
-              {node.isHq && <span className="nb-hq-tag">HQ</span>}
-              <span className="nb-title">{node.title}</span>
-              <span className="nb-head-n">
-                {node.roll.mil > 0 ? node.roll.mil : ''}
-                {kind === 'BL' && node.grade ? ` ${node.grade}` : ''}
-              </span>
-            </div>
+        )}
 
-            {view === 'summary' && (
-              <div className="nb-face nb-summary" style={{ fontSize: bodyFs }}>
-                <SummaryFace node={node} />
-              </div>
-            )}
-
-            {view === 'detail' && isLeaf && (
-              <div className="nb-face nb-detail" style={{ fontSize: bodyFs }}>
-                <DetailFace node={node} />
-              </div>
-            )}
-          </>
+        {view === 'detail' && isLeaf && (
+          <div className="nb-face nb-detail" style={{ fontSize: bodyFs }}>
+            <DetailFace node={node} />
+          </div>
         )}
       </div>
     </div>
@@ -118,10 +107,6 @@ export default React.memo(NodeBox, (a, b) => (
   && a.focused === b.focused
   && Math.abs(a.face - b.face) < 0.004
   && Math.abs(a.appear - b.appear) < 0.004
-  // `s` is only ever compared against one threshold, in the mini label. Testing
-  // the threshold rather than the value keeps a box off the re-render list
-  // through a whole zoom instead of every few percent of it.
-  && (a.s < 90) === (b.s < 90)
   // Already quantised by the caller, so this is normally an exact match.
   && a.k === b.k
 ));

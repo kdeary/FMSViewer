@@ -6,10 +6,13 @@ import SidePanel from './ui/SidePanel.jsx';
 import Legend from './ui/Legend.jsx';
 import MapCanvas from './view/MapCanvas.jsx';
 import SettingsModal from './ui/SettingsModal.jsx';
+import ExportModal from './ui/ExportModal.jsx';
+import SearchPanel from './ui/SearchPanel.jsx';
+import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { useViewport } from './view/useViewport.js';
 import { useTooltips } from './view/useTooltips.js';
-import { zoomToOpen, DEFAULT_DETAIL_PCT, DETAIL_PCT_RANGE } from './view/lod.js';
+import { zoomToOpen, zoomToReveal, DEFAULT_DETAIL_PCT, DETAIL_PCT_RANGE } from './view/lod.js';
 
 const SETTINGS_KEY = 'fmsviewer.settings';
 
@@ -36,6 +39,13 @@ export default function App() {
   const [focusId, setFocusId] = useState(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  // The search scope is pinned rather than following the focus, so working
+  // through a list of results doesn't narrow the search out from under you.
+  // Null means the whole structure.
+  const [searchScopeId, setSearchScopeId] = useState(null);
+  const [searchPicking, setSearchPicking] = useState(false);
   const [settings, setSettings] = useState(loadSettings);
 
   useEffect(() => {
@@ -44,8 +54,12 @@ export default function App() {
 
   const workerRef = useRef(null);
   const pendingFit = useRef(false);
-  const { surfaceRef, cam, size, flying, flyTo, zoomBy } = useViewport();
+  const { surfaceRef, cam, size, flying, flyTo, zoomBy, setCam } = useViewport();
   useTooltips();
+  // Read through a ref, so `goTo` doesn't get a new identity on every frame of
+  // a flight and re-subscribe the key handler sixty times a second.
+  const camRef = useRef(cam);
+  camRef.current = cam;
 
   // --- loading -------------------------------------------------------------
 
@@ -68,6 +82,7 @@ export default function App() {
         setModel(m);
         setFocusId(m.rootId);
         setSelectedId(null);
+        setSearchScopeId(null);
         setStage('ready');
         worker.terminate();
         workerRef.current = null;
@@ -94,6 +109,7 @@ export default function App() {
       setFileName(file.name);
       setFocusId(m.rootId);
       setSelectedId(null);
+      setSearchScopeId(null);
       setStage('ready');
     } catch (err) {
       setError(err.message);
@@ -101,22 +117,41 @@ export default function App() {
     }
   }, []);
 
-  const exportModel = useCallback(() => {
-    if (!model) return;
-    const url = URL.createObjectURL(toBlob(model));
+  const download = useCallback((blob, name) => {
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = suggestedFileName(model);
+    a.download = name;
     a.click();
     URL.revokeObjectURL(url);
-  }, [model]);
+  }, []);
+
+  const exportModel = useCallback(() => {
+    if (!model) return;
+    download(toBlob(model), suggestedFileName(model));
+  }, [model, download]);
+
+  // `mosColor` comes from the modal, which sits inside the palette provider:
+  // an exported image and the screen it came from have to agree on colours.
+  const exportImage = useCallback(async (nodeId, detail, mosColor) => {
+    if (!model) return;
+    const node = model.byId.get(nodeId);
+    if (!node) throw new Error('That unit is no longer in the model.');
+    const { svg, width, height } = buildSvg(model, nodeId, detail, { mosColor });
+    download(await svgToPng(svg, width, height), imageFileName(model, node));
+  }, [model, download]);
 
   const reset = useCallback(() => {
     workerRef.current?.terminate();
     workerRef.current = null;
     setModel(null); setStage('idle'); setError(''); setProgress(null);
     setSelectedId(null); setFocusId(null);
-  }, []);
+    setSearchScopeId(null); setSearchPicking(false);
+    // Nothing about where the last structure was being viewed means anything
+    // for the next one, and a camera left deep inside the old world would show
+    // empty space until something re-framed it.
+    setCam({ x: 0, y: 0, k: 1 });
+  }, [setCam]);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
@@ -126,23 +161,53 @@ export default function App() {
     if (!model) return;
     const node = model.byId.get(id);
     if (!node) return;
+    const { levels } = model;
+    const pct = settings.detailPct;
+    const hasKids = node.childIds.length > 0;
+
+    // Fitting a box to the screen is not always a zoom *in*, and for a tall one
+    // the fit can land below the zoom its own level needs -- so the click ends
+    // on a view that no longer draws the thing that was clicked. Every move is
+    // floored at the zoom that keeps the target on screen.
+    let minK = zoomToReveal(levels, node.depth, size.w, pct);
+    if (hasKids) {
+      // A unit is a request to see inside it, so open its level as well.
+      minK = Math.max(minK, zoomToOpen(levels, node.depth, size.w, pct));
+    } else {
+      // A soldier has nothing to open, and is the smallest thing on the map:
+      // there is never a reason to pull back from one. Clicking at a closer
+      // zoom than the fit just centres it.
+      minK = Math.max(minK, camRef.current.k);
+    }
+
     setFocusId(id);
     setSelectedId(id);
-    flyTo(node.rect, {
-      margin: node.childIds.length ? 0.92 : 0.6,
-      // Clicking a unit anywhere is a request to see inside it, so never stop
-      // short of the zoom that opens its level -- fitting it to the screen
-      // isn't always enough, and the threshold is the user's to set.
-      minK: node.childIds.length ? zoomToOpen(model.levels, node.depth, size.w, settings.detailPct) : 0,
-      ...opts,
-    });
+    flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, ...opts });
   }, [model, flyTo, size.w, settings.detailPct]);
 
+  // Clicks on the map. Identical to `goTo` except while the search panel is
+  // waiting to be told what to search -- only a click out here sets that, never
+  // a click on a result.
+  const selectOnMap = useCallback((id) => {
+    if (searchPicking && model?.byId.has(id)) {
+      setSearchScopeId(id);
+      setSearchPicking(false);
+    }
+    goTo(id);
+  }, [goTo, model, searchPicking]);
+
   // Frame the whole structure as soon as the surface has a size.
+  //
+  // The flag is only cleared once the fit has actually happened. On a re-import
+  // the map remounts and this can run against a surface that has no layout yet;
+  // clearing up front left that attempt as the only one, and the camera stayed
+  // wherever the previous structure had left it -- pointing, in general, at
+  // nothing in the new one.
   useEffect(() => {
     if (!model || !pendingFit.current || !size.w) return;
-    pendingFit.current = false;
-    flyTo(model.byId.get(model.rootId).rect, { instant: true });
+    if (flyTo(model.byId.get(model.rootId).rect, { instant: true })) {
+      pendingFit.current = false;
+    }
   }, [model, size, flyTo]);
 
   const fitAll = useCallback(() => {
@@ -164,7 +229,7 @@ export default function App() {
       // The target is only an element when something is focused -- a bare
       // keypress on the document would otherwise blow up on .matches().
       if (e.target instanceof Element && e.target.matches('input, textarea, button')) return;
-      if (settingsOpen) return; // the modal owns the keyboard while it's up
+      if (settingsOpen || exportOpen) return; // a modal owns the keyboard while it's up
       if (e.key === 'Escape') goUp();
       else if (e.key === 'f' || e.key === 'F') fitAll();
       else if (e.key === '+' || e.key === '=') zoomBy(1.4, size.w / 2, size.h / 2);
@@ -172,7 +237,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [goUp, fitAll, zoomBy, size, settingsOpen]);
+  }, [goUp, fitAll, zoomBy, size, settingsOpen, exportOpen]);
 
   // Root -> focused node, for the breadcrumb trail.
   const path = useMemo(() => {
@@ -214,7 +279,7 @@ export default function App() {
           model={model}
           path={path}
           onGo={goTo}
-          onExport={exportModel}
+          onExport={() => setExportOpen(true)}
           onLoadModel={loadModelFile}
           onReset={reset}
           onZoomIn={() => zoomBy(1.4, size.w / 2, size.h / 2)}
@@ -224,6 +289,8 @@ export default function App() {
           onToggleLegend={() => setLegendOpen((v) => !v)}
           warnings={model.meta.warnings}
           onOpenSettings={() => setSettingsOpen(true)}
+          searchOpen={searchOpen}
+          onToggleSearch={() => { setSearchOpen((v) => !v); setSearchPicking(false); }}
         />
 
         <div className="app-body">
@@ -235,10 +302,20 @@ export default function App() {
             selectedId={selectedId}
             focusId={focusId}
             flying={flying}
-            onSelect={goTo}
+            onSelect={selectOnMap}
             detailPct={settings.detailPct}
             perf={settings.perf}
           />
+          {searchOpen && (
+            <SearchPanel
+              model={model}
+              scopeNode={model.byId.get(searchScopeId) || model.byId.get(model.rootId)}
+              picking={searchPicking}
+              onPick={() => setSearchPicking((v) => !v)}
+              onGo={goTo}
+              onClose={() => { setSearchOpen(false); setSearchPicking(false); }}
+            />
+          )}
           {legendOpen && <Legend model={model} onClose={() => setLegendOpen(false)} />}
           {selected && (
             <SidePanel node={selected} model={model} onGo={goTo} onClose={() => setSelectedId(null)} />
@@ -246,11 +323,18 @@ export default function App() {
         </div>
 
         <div className="statusbar text-body-secondary small">
+          <div className="status-file">
+            <span className="fw-semibold text-body">{model.meta.uic || '—'}</span>
+            <span title={model.meta.sourceFile}>{model.meta.sourceFile}</span>
+            {model.meta.runDate && <span>run {model.meta.runDate}</span>}
+          </div>
+          <div className="vr" />
           <span>{model.meta.nodeCount} nodes</span>
           <span>{model.meta.rowCount} rows</span>
           <span>parsed in {model.meta.parseMs ?? 0} ms</span>
-          <span className="ms-auto">zoom {cam.k.toFixed(2)}×</span>
-          <span>Esc = up · F = fit · scroll = zoom · drag = pan</span>
+          <div className="vr ms-auto" />
+          <span>zoom {cam.k.toFixed(2)}×</span>
+          <span className="d-none d-lg-inline">Esc = up · F = fit · scroll = zoom · drag = pan</span>
         </div>
 
         <SettingsModal
@@ -258,6 +342,15 @@ export default function App() {
           settings={settings}
           onChange={setSettings}
           onClose={() => setSettingsOpen(false)}
+        />
+
+        <ExportModal
+          open={exportOpen}
+          model={model}
+          focusNode={focusId ? model.byId.get(focusId) : null}
+          onExportModel={exportModel}
+          onExportImage={exportImage}
+          onClose={() => setExportOpen(false)}
         />
       </div>
     </MosPaletteProvider>

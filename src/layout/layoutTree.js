@@ -1,7 +1,7 @@
 // Assigns every node a rect in a canonical world space, once, in the worker.
 // Pan/zoom is then a single CSS transform -- layout never re-runs.
 
-import { squarify } from './squarify.js';
+import { squarify, limitAspect } from './squarify.js';
 import { isHeadquarters } from '../model/taxonomy.js';
 
 export const WORLD = { x: 0, y: 0, w: 4000, h: 2600 };
@@ -141,7 +141,9 @@ export function layoutTree(nodes, rootId, onProgress = () => {}) {
         queue.push(hqId);
 
         if (!items.length) {
-          place(hq, area);
+          // Sole child, so it never reaches squarify -- but it needs the same
+          // aspect bound, and this is the shape that most often violates it.
+          place(hq, limitAspect(area));
         } else {
           const total = node.childIds.reduce((s, id) => s + weightOf(nodes.get(id)), 0);
           const cut = sliceHeadquarters(area, weightOf(hq), total);

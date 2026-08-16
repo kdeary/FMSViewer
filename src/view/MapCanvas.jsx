@@ -34,8 +34,8 @@ export default function MapCanvas({
     const focused = id === focusId;
     // Deliberately coarse, and matched to NodeBox's own memo: anything finer
     // invalidates the cache on frames where nothing about the box would look
-    // different. `s` only decides how hard the mini label is abbreviated.
-    const sig = `${v.view}|${v.face.toFixed(2)}|${v.appear.toFixed(2)}|${v.s < 90 ? 1 : 0}`
+    // different.
+    const sig = `${v.view}|${v.face.toFixed(2)}|${v.appear.toFixed(2)}`
       + `|${k}|${selected ? 1 : 0}${focused ? 1 : 0}`;
 
     const hit = cache.current.get(id);
@@ -48,7 +48,6 @@ export default function MapCanvas({
       <NodeBox
         key={id}
         node={v.node}
-        s={v.s}
         view={v.view}
         face={v.face}
         appear={v.appear}

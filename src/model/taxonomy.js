@@ -140,41 +140,52 @@ export function stripParentheticals(text) {
   return out.replace(/\s{2,}/g, ' ').trim();
 }
 
-// Words that have a settled short form. Anything not listed falls back to its
-// first letter, which is wrong for these: "Non-commissioned Officer" would come
-// out "NO" rather than the NCO everyone actually writes.
-const WORD_ABBR = [
-  [/^non-?commissioned$/i, 'NC'],
-  [/^officer$/i, 'O'],
+/**
+ * Phrase -> abbreviation, applied in order, all of them, case-insensitively.
+ *
+ * Order is the priority: a longer phrase must come before any phrase contained
+ * in it, or the shorter rule fires first and the longer one no longer matches.
+ * "Forward Support Company" ahead of "Company" is that case -- swap them and an
+ * FSC becomes "Forward Support CO".
+ */
+export const TITLE_ABBR = [
+  ['Forward Support Company', 'FSC'],
+  ['Company', 'CO'],
+  ['Platoon', 'PLT'],
+  ['Headquarters', 'HQ'],
 ];
 
-/**
- * Initialism for boxes too small for words: "1st Armored Company/Distribution
- * Section" -> "1ACDS". Only worth it when nothing else fits -- use `truncate`
- * wherever a few words will do.
- *
- * A leading "#n" is a slot number, not part of the name, and putting it first
- * makes every mechanic in a section sort and read as "#1…", "#2…" with the job
- * itself pushed out of view. It moves to the end instead, so "#3 Wheeled
- * Vehicle Mechanic" reads "WVM3".
- */
-export function abbreviate(title, max = 18) {
-  const t = stripParentheticals(title);
-  if (t.length <= max) return t;
+// Compiling a rule table is not free and abbreviateTitle is called per result
+// row per keystroke, so each table is compiled once and kept against the array
+// it came from.
+const ABBR_CACHE = new WeakMap();
 
-  const numbered = /^#\s*(\d+)\s*(.*)$/.exec(t);
-  const tail = numbered ? numbered[1] : '';
-  const body = numbered ? numbered[2] : t;
-
-  const words = body.split(/[\s/]+/).filter(Boolean);
-  if (words.length > 1) {
-    const initials = words.map((w) => {
-      const known = WORD_ABBR.find(([re]) => re.test(w));
-      if (known) return known[1];
-      // "1st Platoon" keeps the digits and drops the ordinal suffix.
-      return /^\d/.test(w) ? w.replace(/\D+$/, '') : w[0].toUpperCase();
-    }).join('');
-    if (initials.length + tail.length <= max) return initials + tail;
+function compileAbbr(rules) {
+  let compiled = ABBR_CACHE.get(rules);
+  if (!compiled) {
+    compiled = rules.map(([from, to]) => {
+      const body = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Word boundaries only where the phrase itself ends in a word character,
+      // so a rule may still target punctuation or a fragment if it wants to.
+      const open = /^\w/.test(from) ? '\\b' : '';
+      const close = /\w$/.test(from) ? '\\b' : '';
+      return [new RegExp(`${open}${body}${close}`, 'gi'), to];
+    });
+    ABBR_CACHE.set(rules, compiled);
   }
-  return `${body.slice(0, Math.max(1, max - 1 - tail.length))}…${tail}`;
+  return compiled;
 }
+
+/**
+ * Shortens a title for somewhere there isn't room to read it in full.
+ *
+ * Parentheticals go first and unconditionally -- an FMS title carries its own
+ * initialism in brackets, which is the least useful text in it once space is
+ * short. Then every rule in the table is applied.
+ */
+export function abbreviateTitle(title, rules = TITLE_ABBR) {
+  let out = stripParentheticals(title);
+  for (const [re, to] of compileAbbr(rules)) out = out.replace(re, to);
+  return out.replace(/\s{2,}/g, ' ').trim();
+}
+

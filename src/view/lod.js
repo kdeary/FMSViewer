@@ -2,7 +2,7 @@
 //
 // Two rules govern what a box shows:
 //
-//  1. A box is in exactly one of three views -- never two at once, because a
+//  1. A box is in exactly one of two views -- never both at once, because a
 //     half-faded summary on top of half-faded detail is unreadable. Crossing a
 //     threshold plays a transition: the current view fades out, then the new
 //     one fades in.
@@ -11,6 +11,12 @@
 //     box width for that level (see model/levels.js). Every box at the same
 //     depth therefore shows the same amount of information at a given zoom --
 //     you never see one soldier's equipment next to another's bare summary.
+//
+// There used to be a third, "mini" view below summary -- just an abbreviated
+// title and a headcount, no header, no MOS mix, nothing you could act on. It's
+// gone: a box that's too small to summarise now simply isn't drawn (MIN_S
+// already existed for that), so the ladder is either summary or detail, never
+// a placeholder in between.
 
 export const MIN_S = 44;          // below this a box isn't drawn at all
 export const CULL_MARGIN = 80;    // px of slack around the viewport, so boxes
@@ -20,9 +26,6 @@ export const CULL_MARGIN = 80;    // px of slack around the viewport, so boxes
 export const DEFAULT_DETAIL_PCT = 22;
 export const DETAIL_PCT_RANGE = [6, 60];
 
-// The mini -> summary step sits at a fixed fraction of the detail threshold, so
-// the single setting moves the whole ladder coherently.
-const SUMMARY_RATIO = 0.34;
 // No hysteresis: a level's view is a pure function of the zoom, so the same
 // zoom always shows the same thing. An earlier version made opening sticky,
 // which meant zooming into a unit and then hitting Fit left the overview opened
@@ -42,12 +45,11 @@ const APPEAR_MS = 220;
  */
 export function levelViews(levels, k, viewportW, detailPct) {
   const detail = Math.max(detailPct, 1) / 100;
-  const summary = detail * SUMMARY_RATIO;
   const views = [];
 
   for (let d = 0; d < levels.length; d++) {
     const frac = viewportW > 0 ? (levels[d] * k) / viewportW : 0;
-    views[d] = frac >= detail ? 'detail' : frac >= summary ? 'summary' : 'mini';
+    views[d] = frac >= detail ? 'detail' : 'summary';
   }
   return views;
 }
@@ -73,6 +75,25 @@ export function zoomToOpen(levels, depth, viewportW, detailPct) {
   const w = levels && levels[depth];
   if (!w || !viewportW) return 0;
   return ((detailPct / 100) * viewportW * 1.04) / w;
+}
+
+/**
+ * The zoom below which a node at `depth` is not drawn at all.
+ *
+ * A box only reaches the screen if every level above it is open -- the walk
+ * stops descending at the first that isn't. So this is the widest of the
+ * ancestor thresholds, not just the parent's: the levels are not strictly
+ * ordered by width, and a shallower one can be the binding constraint.
+ *
+ * Anything that moves the camera to a node has to respect this floor, or it
+ * lands on a view that no longer contains what it was aiming at.
+ */
+export function zoomToReveal(levels, depth, viewportW, detailPct) {
+  let k = 0;
+  for (let d = 0; d < depth; d++) {
+    k = Math.max(k, zoomToOpen(levels, d, viewportW, detailPct));
+  }
+  return k;
 }
 
 /**
@@ -130,7 +151,7 @@ export function stepScene(model, cam, size, store, dt, views, levelState) {
     if (s < MIN_S && id !== rootId) continue;
 
     const isLeaf = node.childIds.length === 0;
-    const level = levelState[node.depth] || { view: 'mini', face: 1 };
+    const level = levelState[node.depth] || { view: 'summary', face: 1 };
 
     // The only per-box animation left: fading in as it enters the viewport.
     let e = store.get(id);

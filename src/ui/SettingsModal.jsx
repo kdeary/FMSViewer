@@ -50,8 +50,8 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
                 onChange={(e) => onChange({ ...settings, detailPct: Number(e.target.value) })}
               />
               <div className="d-flex justify-content-between text-body-secondary small">
-                <span>{MIN_PCT}% — opens sooner, more on screen</span>
-                <span>{MAX_PCT}% — opens later, less clutter</span>
+                <span>{MIN_PCT}%: opens sooner, more on screen</span>
+                <span>{MAX_PCT}%: opens later, less clutter</span>
               </div>
 
               <p className="text-body-secondary small mt-3 mb-0">

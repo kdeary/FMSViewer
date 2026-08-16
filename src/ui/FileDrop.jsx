@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import HowToModal from './HowToModal.jsx';
 
 const SHEET_RE = /\.(xlsx|xlsm|xlsb|xls|csv)$/i;
 const MODEL_RE = /\.json$/i;
@@ -7,6 +8,7 @@ const MODEL_RE = /\.json$/i;
 export default function FileDrop({ onSheet, onModel, error }) {
   const inputRef = useRef(null);
   const [over, setOver] = useState(false);
+  const [howTo, setHowTo] = useState(false);
 
   const handle = (file) => {
     if (!file) return;
@@ -16,6 +18,33 @@ export default function FileDrop({ onSheet, onModel, error }) {
 
   return (
     <div className="drop-wrap">
+      <section className="intro-card">
+        <h1 className="h4 mb-1">FMS Viewer</h1>
+        <p className="text-body-secondary mb-3">
+          Turns an FMS Web structure export into a map you can move around in —
+          units nested inside units, down to individual soldiers and their equipment.
+        </p>
+
+        <ul className="intro-points">
+          <li>
+            <strong>Zoom is the level of detail.</strong> The more you zoom in, the more
+            details you can see within units.
+          </li>
+          <li>
+            <strong>Click anything to go into it.</strong> The panel on the right side shows
+            all information from the MTOE / TDA spreadsheet.
+          </li>
+          <li>
+            <strong>Nothing leaves your machine.</strong> The spreadsheet is parsed in the
+            browser. There is no server and nothing is uploaded anywhere.
+          </li>
+        </ul>
+
+        <button type="button" className="btn btn-outline-info btn-sm" onClick={() => setHowTo(true)}>
+          How do I get the spreadsheet?
+        </button>
+      </section>
+
       <div
         className={`drop-zone${over ? ' is-over' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setOver(true); }}
@@ -52,6 +81,8 @@ export default function FileDrop({ onSheet, onModel, error }) {
           <div className="small mt-1">{error}</div>
         </div>
       )}
+
+      <HowToModal open={howTo} onClose={() => setHowTo(false)} />
     </div>
   );
 }

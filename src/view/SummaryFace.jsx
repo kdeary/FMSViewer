@@ -1,5 +1,6 @@
 import React from 'react';
 import MosBar from './MosBar.jsx';
+import EquipmentChips from './EquipmentChips.jsx';
 import ImagePlaceholder from './ImagePlaceholder.jsx';
 import { useMosInfo } from './MosPalette.jsx';
 
@@ -41,6 +42,15 @@ export default function SummaryFace({ node }) {
       </div>
 
       {!isBillet && <MosBar topMos={node.topMos} total={r.billets} />}
+
+      {/* Equipment authorised directly to this unit -- not the sub-tree total
+          in the footer tag below, which would double-count a sub-unit's own
+          gear here. A company HQ holding NBC and optics gear is the common
+          case this is for; most units carry nothing at this level and the
+          block simply doesn't render. */}
+      {!isBillet && node.equipment.length > 0 && (
+        <EquipmentChips equipment={node.equipment} limit={6} />
+      )}
 
       <div className="nb-sum-foot">
         {r.units > 0 && <span className="nb-tag">{r.units} units</span>}

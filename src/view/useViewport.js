@@ -64,14 +64,21 @@ export function useViewport() {
    * Animate the camera to frame `rect`. Interpolating k in log space keeps the
    * apparent speed even across large zoom changes.
    */
+  /**
+   * @returns true if the camera actually moved. A surface that is mounted but
+   * not yet laid out measures 0x0, and fitting to that produces a camera
+   * pointing at nothing -- so the move is refused and the caller can try again
+   * once there is something to fit to.
+   */
   const flyTo = useCallback((rect, opts = {}) => {
     const node = elRef.current;
-    if (!node || !rect) return;
+    if (!node || !rect) return false;
     const box = { w: node.clientWidth, h: node.clientHeight };
+    if (!box.w || !box.h) return false;
     const target = fitTo(rect, box, opts.margin ?? 0.86, opts.minK ?? 0);
     const from = camRef.current;
 
-    if (opts.instant) { cancelFlight(); setCam(target); return; }
+    if (opts.instant) { cancelFlight(); setCam(target); return true; }
 
     cancelFlight();
     // Taken from the first frame rather than performance.now(): the timestamp
@@ -96,6 +103,7 @@ export function useViewport() {
       else { flightRef.current = null; setFlying(false); }
     };
     flightRef.current = { raf: requestAnimationFrame(tick) };
+    return true;
   }, [cancelFlight]);
 
   const zoomBy = useCallback((factor, originX, originY) => {
@@ -110,7 +118,10 @@ export function useViewport() {
 
   // Track container size.
   useEffect(() => {
-    if (!el) return undefined;
+    // No surface means no viewport. Holding the last session's dimensions here
+    // would let the next one make decisions -- what fits, what is culled --
+    // against a surface that isn't on screen yet.
+    if (!el) { setSize({ w: 0, h: 0 }); return undefined; }
     const measure = () => setSize({ w: el.clientWidth, h: el.clientHeight });
     const ro = new ResizeObserver(measure);
     ro.observe(el);
