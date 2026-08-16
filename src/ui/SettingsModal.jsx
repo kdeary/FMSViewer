@@ -4,8 +4,7 @@ import { DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from '../view/lod.js';
 const [MIN_PX, MAX_PX] = MIN_TEXT_PX_RANGE;
 
 /**
- * Controlled Bootstrap modal. Rendered by hand rather than through the
- * Bootstrap JS bundle so its open state stays owned by React.
+ * Controlled Bootstrap modal for app settings.
  */
 export default function SettingsModal({ open, settings, onChange, onClose }) {
   useEffect(() => {
@@ -16,7 +15,7 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
   }, [open, onClose]);
 
   if (!open) return null;
-  const textPx = settings.minTextPx ?? settings.detailPct ?? DEFAULT_MIN_TEXT_PX;
+  const textPx = settings.minTextPx ?? DEFAULT_MIN_TEXT_PX;
 
   return (
     <>
@@ -47,7 +46,7 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
                 max={MAX_PX}
                 step={1}
                 value={textPx}
-                onChange={(e) => onChange({ ...settings, minTextPx: Number(e.target.value), detailPct: Number(e.target.value) })}
+                onChange={(e) => onChange({ ...settings, minTextPx: Number(e.target.value) })}
               />
               <div className="d-flex justify-content-between text-body-secondary small">
                 <span>{MIN_PX}px: opens sooner, smaller text</span>
@@ -82,7 +81,7 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
               <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm"
-                onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX })}
+                onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX })}
                 disabled={textPx === DEFAULT_MIN_TEXT_PX}
               >
                 Reset to {DEFAULT_MIN_TEXT_PX}px

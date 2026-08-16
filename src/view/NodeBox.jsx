@@ -36,7 +36,7 @@ function headerFontSize(node, hh, k) {
  * Exactly one view is mounted at a time -- `view` says which, `face` is how far
  * through its fade it is. Two views are never on screen together.
  */
-function NodeBox({ node, view, face, appear, k, selected, focused }) {
+function NodeBox({ node, view, face = 1, appear = 1, k, selected, focused }) {
   const mosInfo = useMosInfo();
   const { rect: r, kind } = node;
   const isLeaf = node.childIds.length === 0;
@@ -62,8 +62,6 @@ function NodeBox({ node, view, face, appear, k, selected, focused }) {
       style={{
         left: r.x, top: r.y, width: r.w, height: r.h,
         opacity: appear,
-        // A box that has barely begun fading in shouldn't intercept clicks
-        // meant for the parent underneath it.
         pointerEvents: appear < 0.3 ? 'none' : undefined,
         '--accent': accent,
         '--hh': `${hh}px`,
@@ -99,14 +97,13 @@ function NodeBox({ node, view, face, appear, k, selected, focused }) {
 }
 
 // The scene is rebuilt every frame; memoising keeps re-renders to the boxes
-// whose view or fade actually moved.
+// whose view, face, or zoom actually moved.
 export default React.memo(NodeBox, (a, b) => (
   a.node === b.node
   && a.view === b.view
   && a.selected === b.selected
   && a.focused === b.focused
-  && Math.abs(a.face - b.face) < 0.004
-  && Math.abs(a.appear - b.appear) < 0.004
-  // Already quantised by the caller, so this is normally an exact match.
+  && Math.abs((a.face ?? 1) - (b.face ?? 1)) < 0.05
+  && Math.abs((a.appear ?? 1) - (b.appear ?? 1)) < 0.05
   && a.k === b.k
 ));

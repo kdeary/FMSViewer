@@ -76,14 +76,7 @@ export function useViewport() {
   }, []);
 
   /**
-   * Animate the camera to frame `rect`. Interpolating k in log space keeps the
-   * apparent speed even across large zoom changes.
-   */
-  /**
-   * @returns true if the camera actually moved. A surface that is mounted but
-   * not yet laid out measures 0x0, and fitting to that produces a camera
-   * pointing at nothing -- so the move is refused and the caller can try again
-   * once there is something to fit to.
+   * Animate the camera to frame `rect` using direct linear interpolation with an ease-in-out timing curve.
    */
   const flyTo = useCallback((rect, opts = {}) => {
     const node = elRef.current;
@@ -109,13 +102,8 @@ export function useViewport() {
     if (opts.instant) { cancelFlight(); setCam(target); return true; }
 
     cancelFlight();
-    // Taken from the first frame rather than performance.now(): the timestamp
-    // passed to a rAF callback need not share an origin with performance.now(),
-    // and a negative delta would stall the flight at t=0 forever.
     let t0 = null;
     const dur = opts.duration ?? FLY_MS;
-    const logFrom = Math.log(from.k);
-    const logTo = Math.log(target.k);
     setFlying(true);
 
     const tick = (now) => {
@@ -125,7 +113,7 @@ export function useViewport() {
       setCam({
         x: from.x + (target.x - from.x) * e,
         y: from.y + (target.y - from.y) * e,
-        k: Math.exp(logFrom + (logTo - logFrom) * e),
+        k: from.k + (target.k - from.k) * e,
       });
       if (t < 1) flightRef.current.raf = requestAnimationFrame(tick);
       else { flightRef.current = null; setFlying(false); }

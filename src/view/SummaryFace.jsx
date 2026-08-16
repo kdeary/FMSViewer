@@ -49,7 +49,7 @@ export default function SummaryFace({ node }) {
           case this is for; most units carry nothing at this level and the
           block simply doesn't render. */}
       {!isBillet && node.equipment.length > 0 && (
-        <EquipmentChips equipment={node.equipment} limit={6} />
+        <EquipmentChips equipment={node.equipment} limit={6} node={node} />
       )}
 
       <div className="nb-sum-foot">

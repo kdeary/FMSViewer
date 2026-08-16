@@ -138,7 +138,7 @@ body { overflow: hidden; }
 }
 
 .perf-hud {
-  position: absolute; right: 0.5rem; top: 0.5rem; z-index: 4;
+  position: absolute; left: 50%; bottom: 0.5rem; transform: translateX(-50%); z-index: 4;
   min-width: 15rem; padding: 0.4rem 0.55rem;
   border: 1px solid var(--bs-border-color); border-radius: 0.35rem;
   background: rgba(0, 0, 0, 0.62);
@@ -195,7 +195,7 @@ body { overflow: hidden; }
 
 /* Holds whichever single view is currently mounted; its opacity is the
    transition between views. */
-.nb-content { position: absolute; inset: 0; }
+.nb-content { position: absolute; inset: 0; transition: opacity 180ms ease-out; }
 
 .nb-head {
   position: absolute; top: 0; left: 0; right: 0; height: var(--hh);

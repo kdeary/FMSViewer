@@ -1,63 +1,52 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
+import { headerHeight } from '../layout/layoutTree.js';
+
+/**
+ * Calculates max chips that fit inside the box container in world space.
+ * Because all elements scale proportionally with bodyFs, maxFit is constant for a
+ * given box rectangle, avoiding DOM layout thrashing during zoom/pan.
+ */
+function calculateMaxFit(node, limit) {
+  const total = node?.equipment?.length || 0;
+  if (!total) return 0;
+
+  const maxAllowed = limit ? Math.min(limit, total) : total;
+  if (!node?.rect) return maxAllowed;
+
+  const r = node.rect;
+  const hh = headerHeight(r);
+  const bodyFs = Math.min(r.w * 0.048, r.h * 0.07);
+
+  // Available height inside container box minus header and top/bottom padding
+  const padY = Math.max(14, r.h * 0.18);
+  const availH = r.h - hh - padY;
+  const step = bodyFs * 1.45; // chip height + gap in world units
+
+  if (availH <= 0 || step <= 0) return 1;
+
+  let fit = Math.floor(availH / step);
+  if (fit < total && fit < maxAllowed) {
+    // Reserve space for the '+N more' chip
+    fit = Math.max(1, fit - 1);
+  }
+
+  return Math.min(fit, maxAllowed);
+}
 
 /**
  * Equipment authorised directly to this node (LIN, nomenclature, quantity, ERC).
- * Only mounted at the deepest zoom band -- there are >1,100 lines in a company.
- * Dynamically limits shown chips so they never squish vertically or overflow.
+ * Dynamically limits shown chips to fit container bounds with '+N more' summary tag.
  */
-export default function EquipmentChips({ equipment, limit = 0 }) {
-  const listRef = useRef(null);
-  const total = equipment?.length || 0;
-  const initialMax = limit ? Math.min(limit, total) : total;
-  const [maxFit, setMaxFit] = useState(initialMax);
-
-  useLayoutEffect(() => {
-    const el = listRef.current;
-    if (!el || !total) return;
-
-    const measure = () => {
-      const availH = el.clientHeight;
-      if (availH <= 0) return;
-
-      const chipEl = el.querySelector('.eq-chip');
-      if (!chipEl) return;
-
-      const chipH = chipEl.offsetHeight;
-      if (chipH <= 0) return;
-
-      // Small gap between vertical chips (matches 0.12em gap in CSS)
-      const gap = 2;
-      const step = chipH + gap;
-      const maxAllowed = limit ? Math.min(limit, total) : total;
-
-      let fit = 0;
-      for (let k = maxAllowed; k >= 0; k--) {
-        const isFull = (k === total);
-        const totalNeeded = isFull ? (k * step - gap) : ((k + 1) * step - gap);
-        if (totalNeeded <= availH) {
-          fit = k;
-          break;
-        }
-      }
-
-      setMaxFit((prev) => (prev !== fit ? fit : prev));
-    };
-
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    measure();
-
-    return () => ro.disconnect();
-  }, [equipment, limit, total]);
-
+export default function EquipmentChips({ equipment, limit = 0, node }) {
   if (!equipment || !equipment.length) return null;
 
+  const maxFit = node ? calculateMaxFit(node, limit) : (limit ? Math.min(limit, equipment.length) : equipment.length);
   const shownCount = Math.min(maxFit, equipment.length);
   const shown = equipment.slice(0, shownCount);
   const hidden = equipment.length - shownCount;
 
   return (
-    <ul className="eq-list" ref={listRef}>
+    <ul className="eq-list">
       {shown.map((e, i) => (
         <li className="eq-chip" key={`${e.lin}-${i}`} title={`${e.lin} — ${e.name} (ERC ${e.erc || '—'})`}>
           <span className="eq-lin">{e.lin}</span>

@@ -36,7 +36,7 @@ export default function DetailFace({ node }) {
         </dl>
       </div>
       {isBillet && <div className="nb-det-branch">{info.label}</div>}
-      <EquipmentChips equipment={node.equipment} />
+      <EquipmentChips equipment={node.equipment} node={node} />
     </div>
   );
 }

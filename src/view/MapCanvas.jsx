@@ -10,9 +10,9 @@ import { quantizeK } from './lod.js';
  * Clicks are handled once, here, via `data-id` -- no per-box listeners.
  */
 export default function MapCanvas({
-  containerRef, model, cam, size, selectedId, focusId, onSelect, flying, detailPct, perf,
+  containerRef, model, cam, size, selectedId, focusId, onSelect, flying, minTextPx, perf,
 }) {
-  const { list, views, stats } = useScene(model, cam, size, detailPct);
+  const { list, stats } = useScene(model, cam, size, minTextPx);
 
   // Boxes see a quantised zoom, never the live one. Everything a box derives
   // from k -- border widths, corner radii, header type size -- would otherwise
@@ -32,11 +32,9 @@ export default function MapCanvas({
     const id = v.node.id;
     const selected = id === selectedId;
     const focused = id === focusId;
-    // Deliberately coarse, and matched to NodeBox's own memo: anything finer
-    // invalidates the cache on frames where nothing about the box would look
-    // different.
-    const sig = `${v.view}|${v.face.toFixed(2)}|${v.appear.toFixed(2)}`
-      + `|${k}|${selected ? 1 : 0}${focused ? 1 : 0}`;
+    const faceStep = Math.round((v.face ?? 1) * 8) / 8;
+    const appearStep = Math.round((v.appear ?? 1) * 8) / 8;
+    const sig = `${v.view}|${faceStep}|${appearStep}|${k}|${selected ? 1 : 0}${focused ? 1 : 0}`;
 
     const hit = cache.current.get(id);
     if (hit && hit.sig === sig && hit.node === v.node) {
@@ -100,9 +98,7 @@ export default function MapCanvas({
       >
         <Profiler id="boxes" onRender={onCommit}>{children}</Profiler>
       </div>
-      <div className="map-count">
-        {list.length} boxes · {views.filter((v) => v === 'detail').length} levels open
-      </div>
+      <div className="map-count">{list.length} boxes</div>
       {perf && <PerfReadout stats={stats} />}
     </div>
   );

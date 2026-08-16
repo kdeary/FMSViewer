@@ -21,10 +21,10 @@ function loadSettings() {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
     const px = Number(saved?.minTextPx ?? saved?.detailPct);
     const perf = !!saved?.perf;
-    if (px >= MIN_TEXT_PX_RANGE[0] && px <= MIN_TEXT_PX_RANGE[1]) return { minTextPx: px, detailPct: px, perf };
-    return { minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX, perf };
+    if (px >= MIN_TEXT_PX_RANGE[0] && px <= MIN_TEXT_PX_RANGE[1]) return { minTextPx: px, perf };
+    return { minTextPx: DEFAULT_MIN_TEXT_PX, perf };
   } catch { /* fall through to the default */ }
-  return { minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX, perf: false };
+  return { minTextPx: DEFAULT_MIN_TEXT_PX, perf: false };
 }
 import { hydrate, parseModelFile, toBlob, suggestedFileName } from './model/modelFile.js';
 
@@ -161,7 +161,6 @@ export default function App() {
     if (!model) return;
     const node = model.byId.get(id);
     if (!node) return;
-    const minTextPx = settings.minTextPx ?? settings.detailPct;
     const hasKids = node.childIds.length > 0;
 
     const leftPanel = document.querySelector('.search-panel');
@@ -173,21 +172,17 @@ export default function App() {
 
     const availW = Math.max(1, size.w - offsetLeft - offsetRight);
 
-    let minK = zoomToReveal(node, model.byId, availW, minTextPx);
+    let minK = zoomToReveal(node, model.byId, availW, settings.minTextPx);
     if (hasKids) {
-      // A unit is a request to see inside it, so open its level as well.
-      minK = Math.max(minK, zoomToOpen(node, availW, minTextPx, model.byId));
+      minK = Math.max(minK, zoomToOpen(node, availW, settings.minTextPx, model.byId));
     } else {
-      // A soldier has nothing to open, and is the smallest thing on the map:
-      // there is never a reason to pull back from one. Clicking at a closer
-      // zoom than the fit just centres it.
       minK = Math.max(minK, camRef.current.k);
     }
 
     setFocusId(id);
     setSelectedId(id);
     flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, offsetLeft, offsetRight, ...opts });
-  }, [model, flyTo, size.w, settings.minTextPx, settings.detailPct]);
+  }, [model, flyTo, size.w, settings.minTextPx]);
 
   // Clicks on the map. Identical to `goTo` except while the search panel is
   // waiting to be told what to search -- only a click out here sets that, never
@@ -307,7 +302,7 @@ export default function App() {
             focusId={focusId}
             flying={flying}
             onSelect={selectOnMap}
-            detailPct={settings.detailPct}
+            minTextPx={settings.minTextPx}
             perf={settings.perf}
           />
           {searchOpen && (
