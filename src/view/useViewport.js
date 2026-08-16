@@ -20,19 +20,34 @@ const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 /
  * is anchored by its top edge instead. Horizontally it stays centred either
  * way -- there is no equivalent landmark on that axis.
  */
-export function fitTo(rect, size, margin = 0.86, minK = 0) {
+export function fitTo(rect, size, margin = 0.86, minK = 0, opts = {}) {
   if (!rect || !size.w || !size.h) return { x: 0, y: 0, k: 1 };
-  const fit = Math.min((size.w / rect.w) * margin, (size.h / rect.h) * margin);
+  const offsetLeft = opts.offsetLeft || 0;
+  const offsetRight = opts.offsetRight || 0;
+  const availW = Math.max(1, size.w - offsetLeft - offsetRight);
+
+  const fit = Math.min((availW / rect.w) * margin, (size.h / rect.h) * margin);
   const k = clamp(Math.max(fit, minK), MIN_K, MAX_K);
   // The gap a plain fit would have left, so a top-anchored box sits at the same
   // inset from the edge rather than flush against it.
-  const pad = (size.h * (1 - margin)) / 2;
-  const overflows = rect.h * k > size.h - pad;
-  return {
-    k,
-    x: size.w / 2 - (rect.x + rect.w / 2) * k,
-    y: overflows ? pad - rect.y * k : size.h / 2 - (rect.y + rect.h / 2) * k,
-  };
+  const padX = (availW * (1 - margin)) / 2;
+  const padY = (size.h * (1 - margin)) / 2;
+
+  const overflowsY = rect.h * k > size.h - padY;
+  const overflowsX = rect.w * k > availW - padX;
+
+  const centerX = offsetLeft + availW / 2;
+  // If frame overflows available width, prioritize keeping the left edge of the frame
+  // visible anchored at offsetLeft + padX rather than centering.
+  const targetX = overflowsX
+    ? offsetLeft + padX - rect.x * k
+    : centerX - (rect.x + rect.w / 2) * k;
+
+  const targetY = overflowsY
+    ? padY - rect.y * k
+    : size.h / 2 - (rect.y + rect.h / 2) * k;
+
+  return { k, x: targetX, y: targetY };
 }
 
 export function useViewport() {
@@ -75,7 +90,20 @@ export function useViewport() {
     if (!node || !rect) return false;
     const box = { w: node.clientWidth, h: node.clientHeight };
     if (!box.w || !box.h) return false;
-    const target = fitTo(rect, box, opts.margin ?? 0.86, opts.minK ?? 0);
+
+    let offsetLeft = opts.offsetLeft;
+    if (offsetLeft === undefined) {
+      const leftPanel = node.parentElement?.querySelector('.search-panel') || document.querySelector('.search-panel');
+      offsetLeft = leftPanel ? leftPanel.offsetWidth : 0;
+    }
+
+    let offsetRight = opts.offsetRight;
+    if (offsetRight === undefined) {
+      const rightPanel = node.parentElement?.querySelector('.side-panel') || document.querySelector('.side-panel');
+      offsetRight = rightPanel ? rightPanel.offsetWidth : 0;
+    }
+
+    const target = fitTo(rect, box, opts.margin ?? 0.86, opts.minK ?? 0, { offsetLeft, offsetRight });
     const from = camRef.current;
 
     if (opts.instant) { cancelFlight(); setCam(target); return true; }

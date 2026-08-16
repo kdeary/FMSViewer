@@ -74,7 +74,7 @@ export function useScene(model, cam, size, detailPct) {
       const t0 = performance.now();
       views.current = levelViews(cur.model.levels, cur.cam.k, cur.size.w, cur.detailPct);
       const { list, animating } = stepScene(
-        cur.model, cur.cam, cur.size, store.current, dt, views.current, levelState.current,
+        cur.model, cur.cam, cur.size, store.current, dt, cur.detailPct,
       );
       sample(stats.current, now, performance.now() - t0, list.length);
       setScene({ list, views: views.current });

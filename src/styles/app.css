@@ -259,12 +259,13 @@ body { overflow: hidden; }
 
 /* -------------------------------------------------------------- detail face */
 
-.nb-det-head { display: flex; align-items: flex-start; gap: 0.6em; }
+.nb-detail-inner { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.nb-det-head { display: flex; align-items: flex-start; gap: 0.6em; flex: none; }
 .nb-attrs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.1em 0.7em; margin: 0; font-size: 0.85em; min-width: 0; }
 .nb-attrs div { display: flex; gap: 0.35em; min-width: 0; }
 .nb-attrs dt { font-weight: 400; opacity: 0.55; }
 .nb-attrs dd { margin: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nb-det-branch { margin-top: 0.35em; font-size: 0.8em; opacity: 0.6; }
+.nb-det-branch { margin-top: 0.35em; font-size: 0.8em; opacity: 0.6; flex: none; }
 
 .eq-list { list-style: none; margin: 0.5em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.12em; font-size: 0.8em; }
 .eq-chip {
@@ -272,29 +273,24 @@ body { overflow: hidden; }
   padding: 0.08em 0.4em; border-radius: 0.25em;
   background: rgba(255, 255, 255, 0.055);
   white-space: nowrap; overflow: hidden;
+  flex-shrink: 0;
 }
 .eq-lin { font-family: var(--bs-font-monospace); opacity: 0.65; flex: none; }
 .eq-name { overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; }
 .eq-qty { font-weight: 600; flex: none; }
 .eq-erc { flex: none; opacity: 0.45; }
 
-/* On the summary face this is the block that gives way when a box is short: six
-   lines sampled from a possible hundred is an illustration, not a figure, so
-   losing a row of it costs less than losing a MOS code. Clipped rather than
-   overflowing, so it cannot paint past the bottom of the box. */
-.nb-summary-inner .eq-list { flex: 0 1 auto; min-height: 0; overflow: hidden; }
+/* On summary and detail faces, eq-list fills available space so it can measure room and display fitting chips. */
+.nb-summary-inner .eq-list,
+.nb-detail-inner .eq-list { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 
-/* Pinned to the bottom of whatever room the list ended up with. This chip's
-   entire job is to say the list is incomplete, so it is the one row that must
-   never be the row that gets clipped -- which is exactly what happened while it
-   sat in normal flow at the end of a list taller than its container. Sticky
-   needs an opaque backdrop of its own, since chips now pass underneath it;
-   --nb-fill is the box's own fill and tracks its hover state. */
 .eq-more {
-  position: sticky; bottom: 0;
+  position: relative;
   background: var(--nb-fill);
   color: var(--bs-secondary-color);
+  flex-shrink: 0;
 }
+
 
 /* ------------------------------------------------------- image placeholders */
 

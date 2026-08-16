@@ -12,19 +12,19 @@ import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { useViewport } from './view/useViewport.js';
 import { useTooltips } from './view/useTooltips.js';
-import { zoomToOpen, zoomToReveal, DEFAULT_DETAIL_PCT, DETAIL_PCT_RANGE } from './view/lod.js';
+import { zoomToOpen, zoomToReveal, DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from './view/lod.js';
 
 const SETTINGS_KEY = 'fmsviewer.settings';
 
 function loadSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-    const pct = Number(saved?.detailPct);
+    const px = Number(saved?.minTextPx ?? saved?.detailPct);
     const perf = !!saved?.perf;
-    if (pct >= DETAIL_PCT_RANGE[0] && pct <= DETAIL_PCT_RANGE[1]) return { detailPct: pct, perf };
-    return { detailPct: DEFAULT_DETAIL_PCT, perf };
+    if (px >= MIN_TEXT_PX_RANGE[0] && px <= MIN_TEXT_PX_RANGE[1]) return { minTextPx: px, detailPct: px, perf };
+    return { minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX, perf };
   } catch { /* fall through to the default */ }
-  return { detailPct: DEFAULT_DETAIL_PCT, perf: false };
+  return { minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX, perf: false };
 }
 import { hydrate, parseModelFile, toBlob, suggestedFileName } from './model/modelFile.js';
 
@@ -161,18 +161,22 @@ export default function App() {
     if (!model) return;
     const node = model.byId.get(id);
     if (!node) return;
-    const { levels } = model;
-    const pct = settings.detailPct;
+    const minTextPx = settings.minTextPx ?? settings.detailPct;
     const hasKids = node.childIds.length > 0;
 
-    // Fitting a box to the screen is not always a zoom *in*, and for a tall one
-    // the fit can land below the zoom its own level needs -- so the click ends
-    // on a view that no longer draws the thing that was clicked. Every move is
-    // floored at the zoom that keeps the target on screen.
-    let minK = zoomToReveal(levels, node.depth, size.w, pct);
+    const leftPanel = document.querySelector('.search-panel');
+    const offsetLeft = leftPanel ? leftPanel.offsetWidth : 0;
+
+    const rightPanel = document.querySelector('.side-panel');
+    const defaultPanelW = size.w <= 720 ? size.w : Math.min(352, size.w * 0.4);
+    const offsetRight = rightPanel ? rightPanel.offsetWidth : defaultPanelW;
+
+    const availW = Math.max(1, size.w - offsetLeft - offsetRight);
+
+    let minK = zoomToReveal(node, model.byId, availW, minTextPx);
     if (hasKids) {
       // A unit is a request to see inside it, so open its level as well.
-      minK = Math.max(minK, zoomToOpen(levels, node.depth, size.w, pct));
+      minK = Math.max(minK, zoomToOpen(node, availW, minTextPx, model.byId));
     } else {
       // A soldier has nothing to open, and is the smallest thing on the map:
       // there is never a reason to pull back from one. Clicking at a closer
@@ -182,8 +186,8 @@ export default function App() {
 
     setFocusId(id);
     setSelectedId(id);
-    flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, ...opts });
-  }, [model, flyTo, size.w, settings.detailPct]);
+    flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, offsetLeft, offsetRight, ...opts });
+  }, [model, flyTo, size.w, settings.minTextPx, settings.detailPct]);
 
   // Clicks on the map. Identical to `goTo` except while the search panel is
   // waiting to be told what to search -- only a click out here sets that, never
@@ -334,7 +338,10 @@ export default function App() {
           <span>parsed in {model.meta.parseMs ?? 0} ms</span>
           <div className="vr ms-auto" />
           <span>zoom {cam.k.toFixed(2)}×</span>
-          <span className="d-none d-lg-inline">Esc = up · F = fit · scroll = zoom · drag = pan</span>
+          <div className="vr" />
+          <span className="d-none d-lg-inline">Esc = up | F = fit | scroll = zoom | drag = pan</span>
+          <div className="vr" />
+          <span className="d-none d-lg-inline">Developed by 2LT Korbin Deary</span>
         </div>
 
         <SettingsModal

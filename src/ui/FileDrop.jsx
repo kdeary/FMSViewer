@@ -35,7 +35,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
             all information from the MTOE / TDA spreadsheet.
           </li>
           <li>
-            <strong>Nothing leaves your machine.</strong> The spreadsheet is parsed in the
+            <strong>Nothing leaves the browser.</strong> The spreadsheet is parsed in the
             browser. There is no server and nothing is uploaded anywhere.
           </li>
         </ul>

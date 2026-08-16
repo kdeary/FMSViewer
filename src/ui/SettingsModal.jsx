@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { DEFAULT_DETAIL_PCT, DETAIL_PCT_RANGE } from '../view/lod.js';
+import { DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from '../view/lod.js';
 
-const [MIN_PCT, MAX_PCT] = DETAIL_PCT_RANGE;
+const [MIN_PX, MAX_PX] = MIN_TEXT_PX_RANGE;
 
 /**
  * Controlled Bootstrap modal. Rendered by hand rather than through the
@@ -16,7 +16,7 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
   }, [open, onClose]);
 
   if (!open) return null;
-  const pct = settings.detailPct;
+  const textPx = settings.minTextPx ?? settings.detailPct ?? DEFAULT_MIN_TEXT_PX;
 
   return (
     <>
@@ -36,29 +36,27 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
             </div>
 
             <div className="modal-body">
-              <label htmlFor="detailPct" className="form-label mb-1">
-                Open a unit at <strong>{pct}%</strong> of viewport width
+              <label htmlFor="minTextPx" className="form-label mb-1">
+                Minimum readable text size: <strong>{textPx}px</strong> on screen
               </label>
               <input
-                id="detailPct"
+                id="minTextPx"
                 type="range"
                 className="form-range"
-                min={MIN_PCT}
-                max={MAX_PCT}
+                min={MIN_PX}
+                max={MAX_PX}
                 step={1}
-                value={pct}
-                onChange={(e) => onChange({ ...settings, detailPct: Number(e.target.value) })}
+                value={textPx}
+                onChange={(e) => onChange({ ...settings, minTextPx: Number(e.target.value), detailPct: Number(e.target.value) })}
               />
               <div className="d-flex justify-content-between text-body-secondary small">
-                <span>{MIN_PCT}%: opens sooner, more on screen</span>
-                <span>{MAX_PCT}%: opens later, less clutter</span>
+                <span>{MIN_PX}px: opens sooner, smaller text</span>
+                <span>{MAX_PX}px: opens later, larger readable text</span>
               </div>
 
               <p className="text-body-secondary small mt-3 mb-0">
-                A unit shows what's inside it once a typical box at its level covers this
-                much of the viewport width. The threshold applies to a whole level at a
-                time, so every unit at the same depth always shows the same amount of
-                detail.
+                A unit shows what's inside it once the smallest text inside its sub-units reaches this size on screen.
+                All sub-units within the same unit transition together so sibling layout stays perfectly synchronized.
               </p>
 
               <hr />
@@ -84,10 +82,10 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
               <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm"
-                onClick={() => onChange({ ...settings, detailPct: DEFAULT_DETAIL_PCT })}
-                disabled={pct === DEFAULT_DETAIL_PCT}
+                onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX, detailPct: DEFAULT_MIN_TEXT_PX })}
+                disabled={textPx === DEFAULT_MIN_TEXT_PX}
               >
-                Reset to {DEFAULT_DETAIL_PCT}%
+                Reset to {DEFAULT_MIN_TEXT_PX}px
               </button>
               <button type="button" className="btn btn-primary btn-sm" onClick={onClose}>Done</button>
             </div>
