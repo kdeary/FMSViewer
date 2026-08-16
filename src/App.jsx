@@ -6,6 +6,7 @@ import SidePanel from './ui/SidePanel.jsx';
 import Legend from './ui/Legend.jsx';
 import MapCanvas from './view/MapCanvas.jsx';
 import SettingsModal from './ui/SettingsModal.jsx';
+import StatsModal from './ui/StatsModal.jsx';
 import ExportModal from './ui/ExportModal.jsx';
 import SearchPanel from './ui/SearchPanel.jsx';
 import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
@@ -38,6 +39,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [focusId, setFocusId] = useState(null);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -290,6 +292,7 @@ export default function App() {
           onOpenSettings={() => setSettingsOpen(true)}
           searchOpen={searchOpen}
           onToggleSearch={() => { setSearchOpen((v) => !v); setSearchPicking(false); }}
+          onOpenStats={() => setStatsOpen(true)}
         />
 
         <div className="app-body">
@@ -344,6 +347,12 @@ export default function App() {
           settings={settings}
           onChange={setSettings}
           onClose={() => setSettingsOpen(false)}
+        />
+
+        <StatsModal
+          open={statsOpen}
+          model={model}
+          onClose={() => setStatsOpen(false)}
         />
 
         <ExportModal

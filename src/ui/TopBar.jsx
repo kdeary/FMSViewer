@@ -4,7 +4,7 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 export default function TopBar({
   path, onGo, onExport, onLoadModel, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
-  searchOpen, onToggleSearch,
+  searchOpen, onToggleSearch, onOpenStats,
 }) {
   const modelInput = useRef(null);
 
@@ -61,6 +61,15 @@ export default function TopBar({
           <button type="button" className="btn btn-outline-secondary" onClick={onFit} title="Fit whole structure (F)">Fit</button>
           <button type="button" className="btn btn-outline-secondary" onClick={onZoomIn} title="Zoom in">+</button>
         </div>
+
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={onOpenStats}
+          title="Unit statistics"
+        >
+          Stats
+        </button>
 
         <button
           type="button"

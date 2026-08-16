@@ -1,5 +1,6 @@
 import React from 'react';
 import { headerHeight } from '../layout/layoutTree.js';
+import { sortEquipmentList } from '../model/rollups.js';
 
 /**
  * Calculates max chips that fit inside the box container in world space.
@@ -40,10 +41,13 @@ function calculateMaxFit(node, limit) {
 export default function EquipmentChips({ equipment, limit = 0, node }) {
   if (!equipment || !equipment.length) return null;
 
-  const maxFit = node ? calculateMaxFit(node, limit) : (limit ? Math.min(limit, equipment.length) : equipment.length);
-  const shownCount = Math.min(maxFit, equipment.length);
-  const shown = equipment.slice(0, shownCount);
-  const hidden = equipment.length - shownCount;
+  // Sorted by ERC "P" priority, then equipment category count ASCENDING
+  const sortedEq = sortEquipmentList(equipment, node?.catCounts);
+
+  const maxFit = node ? calculateMaxFit(node, limit) : (limit ? Math.min(limit, sortedEq.length) : sortedEq.length);
+  const shownCount = Math.min(maxFit, sortedEq.length);
+  const shown = sortedEq.slice(0, shownCount);
+  const hidden = sortedEq.length - shownCount;
 
   return (
     <ul className="eq-list">

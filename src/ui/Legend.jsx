@@ -30,15 +30,14 @@ export default function Legend({ model, onClose }) {
         <ul className="list-unstyled mb-0">
           {root.topMos.map(({ mos, n }) => {
             const info = mosInfo(mos);
-            const full = info.title || info.label;
+            const rawTitle = info.title || info.label || '';
+            const cleanTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim();
             return (
               <li key={mos} className="legend-mos d-flex gap-2 mb-1">
                 <i className="legend-swatch" style={{ background: info.color }} />
                 <span className="font-monospace">{mos}</span>
-                {/* The full title, parentheticals and all -- rows wrap, so
-                    there is room here that a tooltip doesn't have. */}
-                <span className="text-body-secondary flex-grow-1" title={full}>
-                  {full}
+                <span className="text-body-secondary flex-grow-1" title={cleanTitle}>
+                  {cleanTitle}
                 </span>
                 <span className="fw-semibold">{n}</span>
               </li>

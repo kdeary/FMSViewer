@@ -4,6 +4,7 @@ import ImagePlaceholder from '../view/ImagePlaceholder.jsx';
 import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
 import { useMosSpec } from '../view/useMosSpec.js';
+import { sortEquipmentList } from '../model/rollups.js';
 
 /** Everything about the selected node, at full fidelity, regardless of zoom. */
 export default function SidePanel({ node, model, onClose, onGo }) {
@@ -116,7 +117,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
                 </tr>
               </thead>
               <tbody>
-                {node.equipment.map((e, i) => (
+                {sortEquipmentList(node.equipment, node.catCounts).map((e, i) => (
                   <tr key={`${e.lin}-${i}`}>
                     <td className="font-monospace">{e.lin}</td>
                     <td>{e.name}</td>

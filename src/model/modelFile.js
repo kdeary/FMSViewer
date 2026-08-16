@@ -29,6 +29,7 @@ export function serializeNodes(nodes, order) {
       sheet: n.sheet,
       roll: n.roll,
       topMos: n.topMos,
+      allEq: n.allEq,
       rect: n.rect,
       isHq: n.isHq || undefined,
       synthetic: n.synthetic || undefined,
