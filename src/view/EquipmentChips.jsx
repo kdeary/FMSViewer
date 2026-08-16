@@ -41,8 +41,8 @@ function calculateMaxFit(node, limit) {
 export default function EquipmentChips({ equipment, limit = 0, node }) {
   if (!equipment || !equipment.length) return null;
 
-  // Sorted by ERC "P" priority, then equipment category count ASCENDING
-  const sortedEq = sortEquipmentList(equipment, node?.catCounts);
+  // Sorted by ERC "P" priority, then GLOBAL equipment category count ASCENDING
+  const sortedEq = sortEquipmentList(equipment, node?.globalCatCounts || node?.catCounts);
 
   const maxFit = node ? calculateMaxFit(node, limit) : (limit ? Math.min(limit, sortedEq.length) : sortedEq.length);
   const shownCount = Math.min(maxFit, sortedEq.length);

@@ -2,7 +2,8 @@
 // including precomputed layout rects. Re-importing one skips parsing entirely.
 
 // v2: per-depth `levels` replaced the old per-node `revealW`, so level of
-// detail is decided per tree level instead of per box.
+import { getEquipmentCategory } from './rollups.js';
+
 export const MODEL_VERSION = 2;
 export const MODEL_EXT = '.fmsmodel.json';
 
@@ -41,7 +42,21 @@ export function serializeNodes(nodes, order) {
 export function hydrate(model) {
   const byId = new Map();
   for (const n of model.nodes) byId.set(n.id, n);
-  return { ...model, byId };
+
+  const rootNode = model.rootId ? byId.get(model.rootId) : null;
+  let globalCatCounts = new Map();
+  if (rootNode && rootNode.allEq) {
+    for (const item of rootNode.allEq) {
+      const cat = getEquipmentCategory(item.name);
+      globalCatCounts.set(cat, (globalCatCounts.get(cat) || 0) + item.qty);
+    }
+  }
+
+  for (const n of model.nodes) {
+    n.globalCatCounts = globalCatCounts;
+  }
+
+  return { ...model, byId, globalCatCounts };
 }
 
 export function toBlob(model) {

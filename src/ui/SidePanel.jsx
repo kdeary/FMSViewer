@@ -5,12 +5,11 @@ import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
 import { useMosSpec } from '../view/useMosSpec.js';
 import { sortEquipmentList } from '../model/rollups.js';
+import { titleCut } from '../model/taxonomy.js';
 
 /** Everything about the selected node, at full fidelity, regardless of zoom. */
 export default function SidePanel({ node, model, onClose, onGo }) {
   const mosInfo = useMosInfo();
-  // A billet is one soldier, so its MOS specification is what the panel is
-  // really about. Hooks run before the early return.
   const spec = useMosSpec(node && node.kind === 'BL' ? node.mos : null);
   if (!node) return null;
   const r = node.roll;
@@ -26,7 +25,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           <h2 className="h6 mb-0">{node.title}</h2>
           {parent && (
             <button type="button" className="btn btn-link btn-sm p-0 small" onClick={() => onGo(parent.id)}>
-              ↑ {parent.title}
+              <i className="bi bi-arrow-up me-1" /> {titleCut(parent.title)}
             </button>
           )}
         </div>
@@ -96,7 +95,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
                     {c.title}
                   </button>
                   <span className="text-body-secondary text-nowrap">
-                    {c.kind === 'BL' ? (c.mos || c.grade || 'BL') : `${c.roll.mil} pax`}
+                    {c.kind === 'BL' ? (c.mos || c.grade || 'BL') : `${c.roll.mil} PAX`}
                   </span>
                 </li>
               ))}
@@ -109,7 +108,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
             <h3 className="h6 mt-4 mb-2">
               Assigned equipment <span className="text-body-secondary fw-normal">({node.equipment.length})</span>
             </h3>
-            <table className="table table-sm table-borderless small mb-0">
+            <table className="table table-sm table-dark table-borderless small mb-0">
               <thead>
                 <tr className="text-body-secondary">
                   <th scope="col">LIN</th><th scope="col">Nomenclature</th>
@@ -117,7 +116,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
                 </tr>
               </thead>
               <tbody>
-                {sortEquipmentList(node.equipment, node.catCounts).map((e, i) => (
+                {sortEquipmentList(node.equipment, node.globalCatCounts || node.catCounts).map((e, i) => (
                   <tr key={`${e.lin}-${i}`}>
                     <td className="font-monospace">{e.lin}</td>
                     <td>{e.name}</td>
@@ -127,6 +126,9 @@ export default function SidePanel({ node, model, onClose, onGo }) {
                 ))}
               </tbody>
             </table>
+            <p className="text-body-secondary small mt-1 mb-0 fst-italic">
+              Note: Displayed equipment is assigned directly to this unit element, not a rollup of sub-unit equipment.
+            </p>
           </>
         )}
       </div>

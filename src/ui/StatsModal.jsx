@@ -1,16 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useMosInfo } from '../view/MosPalette.jsx';
 import { getEquipmentCategory } from '../model/rollups.js';
+import { titleCut } from '../model/taxonomy.js';
 
 /**
  * Unit Statistics Modal.
  * Has multiple tabs:
- *  - "General": Unit strength breakdown & full MOS breakdown table (Code, Title [no parentheticals], Count).
+ *  - "General": Text strength summary & full MOS breakdown table (Code, Title [no parentheticals], Count).
  *  - "Equipment": Scrollable table of all unit equipment grouped by Equipment Category (6-char clean code).
  *    Uses accordions for categories with multiple items, flat rows for single-item categories.
- *    Sorted with ERC "P" priority first, then category count ASCENDING (least authorized category first).
+ *    Sorted with ERC "P" priority first, then category count ASCENDING.
+ *  - Clicking any MOS or Equipment row closes the modal and opens the Search panel populated with that item.
  */
-export default function StatsModal({ open, model, onClose }) {
+export default function StatsModal({ open, model, onClose, onSearch }) {
   const [tab, setTab] = useState('general'); // 'general' | 'equipment'
   const [expandedCats, setExpandedCats] = useState(new Set());
   const mosInfo = useMosInfo();
@@ -30,7 +32,7 @@ export default function StatsModal({ open, model, onClose }) {
   // Clean unit title without parentheticals
   const cleanUnitTitle = useMemo(() => {
     if (!root) return '';
-    return (root.title || '').replace(/\s*\([^)]*\)/g, '').trim();
+    return titleCut(root.title);
   }, [root]);
 
   // Group and sort equipment categories
@@ -80,6 +82,13 @@ export default function StatsModal({ open, model, onClose }) {
       else next.add(catCode);
       return next;
     });
+  };
+
+  const handleRowClick = (query) => {
+    if (onSearch && query) {
+      onSearch(query);
+      onClose();
+    }
   };
 
   if (!open || !root) return null;
@@ -136,40 +145,29 @@ export default function StatsModal({ open, model, onClose }) {
             <div className="modal-body p-3">
               {tab === 'general' && (
                 <div>
-                  {/* General Strength Overview Cards */}
-                  <div className="row g-2 mb-3 text-center">
-                    <div className="col-6 col-md-3">
-                      <div className="p-2 border rounded bg-body-tertiary">
-                        <div className="text-body-secondary small">Total Military</div>
-                        <div className="fs-4 fw-bold">{r.mil}</div>
-                      </div>
+                  {/* General Strength Text Summary */}
+                  <div className="p-2 mb-3 border rounded bg-body-tertiary text-body-secondary small d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                      <strong className="text-body fs-6 me-1">{r.mil} Total Military</strong>
+                      <span>({r.off} O / {r.wo} W / {r.enl} E / {r.civ} C)</span>
                     </div>
-                    <div className="col-6 col-md-3">
-                      <div className="p-2 border rounded bg-body-tertiary">
-                        <div className="text-body-secondary small">Officers / WOs</div>
-                        <div className="fs-5 fw-semibold">{r.off} OFF · {r.wo} WO</div>
-                      </div>
-                    </div>
-                    <div className="col-6 col-md-3">
-                      <div className="p-2 border rounded bg-body-tertiary">
-                        <div className="text-body-secondary small">Enlisted / Civ</div>
-                        <div className="fs-5 fw-semibold">{r.enl} ENL · {r.civ} CIV</div>
-                      </div>
-                    </div>
-                    <div className="col-6 col-md-3">
-                      <div className="p-2 border rounded bg-body-tertiary">
-                        <div className="text-body-secondary small">Structure / Gear</div>
-                        <div className="fs-6 fw-semibold">{r.units} U · {r.billets} B · {r.eqQty} Eq</div>
-                      </div>
+                    <div className="d-flex gap-3 text-nowrap">
+                      <span><strong>{r.units}</strong> Units</span>
+                      <span><strong>{r.billets}</strong> Billets</span>
+                      <span><strong>{r.eqQty}</strong> Equipment</span>
                     </div>
                   </div>
 
-                  <h3 className="h6 fw-semibold mb-2">MOS Breakdown ({root.topMos.length} Specialties)</h3>
+                  <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h3 className="h6 fw-semibold mb-0">MOS Breakdown ({root.topMos.length} Unique)</h3>
+                    <span className="small text-body-secondary">Click row to search</span>
+                  </div>
+
                   <div className="table-responsive stats-table-container">
-                    <table className="table table-sm table-borderless table-hover align-middle mb-0">
-                      <thead className="table-light sticky-top border-bottom">
+                    <table className="table table-sm table-dark table-borderless table-hover align-middle mb-0">
+                      <thead className="sticky-top border-bottom">
                         <tr>
-                          <th scope="col" style={{ width: '80px' }}>Code</th>
+                          <th scope="col" style={{ width: '85px' }}>Code</th>
                           <th scope="col">Specialty / Title</th>
                           <th scope="col" className="text-end" style={{ width: '90px' }}>Count</th>
                         </tr>
@@ -177,14 +175,18 @@ export default function StatsModal({ open, model, onClose }) {
                       <tbody>
                         {root.topMos.map(({ mos, n }) => {
                           const info = mosInfo(mos);
-                          const rawTitle = info.title || info.label || '';
-                          const cleanTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim();
+                          const cleanTitle = titleCut(info.title || info.label || '');
                           return (
-                            <tr key={mos}>
+                            <tr
+                              key={mos}
+                              onClick={() => handleRowClick(mos)}
+                              style={{ cursor: 'pointer' }}
+                              title={`Click to search for ${mos}`}
+                            >
                               <td>
                                 <span className="d-inline-flex align-items-center gap-1">
                                   <i className="legend-swatch" style={{ background: info.color }} />
-                                  <code className="fw-bold">{mos}</code>
+                                  <code className="fw-bold text-body">{mos}</code>
                                 </span>
                               </td>
                               <td>{cleanTitle}</td>
@@ -202,7 +204,7 @@ export default function StatsModal({ open, model, onClose }) {
                 <div>
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <span className="small text-body-secondary">
-                      ERC P priority at top, then sorted ascending by category count
+                      ERC P items at top · Sorted ascending by category count · Click item to search
                     </span>
                     <span className="badge bg-secondary-subtle text-secondary-emphasis">
                       Total: {r.eqQty} items ({r.eqLines} lines)
@@ -210,10 +212,10 @@ export default function StatsModal({ open, model, onClose }) {
                   </div>
 
                   <div className="table-responsive stats-table-container" style={{ maxHeight: '420px' }}>
-                    <table className="table table-sm table-borderless align-middle mb-0">
-                      <thead className="table-light sticky-top border-bottom">
+                    <table className="table table-sm table-dark table-borderless table-hover align-middle mb-0">
+                      <thead className="sticky-top border-bottom">
                         <tr>
-                          <th scope="col">Category / Nomenclature</th>
+                          <th scope="col">Nomenclature / Title</th>
                           <th scope="col" style={{ width: '110px' }}>LIN</th>
                           <th scope="col" style={{ width: '80px' }}>ERC</th>
                           <th scope="col" className="text-end" style={{ width: '90px' }}>Count</th>
@@ -228,13 +230,14 @@ export default function StatsModal({ open, model, onClose }) {
                             const singleItem = group.items[0];
                             const isP = String(singleItem.erc || '').trim().toUpperCase() === 'P';
                             return (
-                              <tr key={`single-${group.category}`} className="eq-single-row">
-                                <td className="fw-medium">
-                                  <span className="badge bg-body-secondary text-body-tertiary me-2 font-monospace">
-                                    {group.category}
-                                  </span>
-                                  {singleItem.name || '—'}
-                                </td>
+                              <tr
+                                key={`single-${group.category}`}
+                                className="eq-single-row"
+                                onClick={() => handleRowClick(singleItem.name || singleItem.lin)}
+                                style={{ cursor: 'pointer' }}
+                                title={`Click to search for ${singleItem.name}`}
+                              >
+                                <td className="fw-medium">{singleItem.name || '—'}</td>
                                 <td><code>{singleItem.lin || '—'}</code></td>
                                 <td>
                                   {singleItem.erc && (
@@ -257,11 +260,9 @@ export default function StatsModal({ open, model, onClose }) {
                                 style={{ cursor: 'pointer' }}
                               >
                                 <td colSpan={2} className="fw-bold">
-                                  <span className="d-inline-flex align-items-center gap-2">
-                                    <span className="eq-cat-toggle text-body-secondary small">
-                                      {isExpanded ? '▼' : '▶'}
-                                    </span>
-                                    <span className="badge bg-primary-subtle text-primary-emphasis font-monospace">
+                                  <span className="d-inline-flex align-items-center gap-1">
+                                    <i className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'} text-body-secondary small me-1`} />
+                                    <span className="badge bg-primary-subtle text-primary-emphasis font-monospace me-1">
                                       {group.category}
                                     </span>
                                     <span className="small text-body-secondary fw-normal">
@@ -283,9 +284,16 @@ export default function StatsModal({ open, model, onClose }) {
                                 group.items.map((item, idx) => {
                                   const isP = String(item.erc || '').trim().toUpperCase() === 'P';
                                   return (
-                                    <tr key={`sub-${group.category}-${idx}`} className="eq-sub-row bg-body-tertiary">
+                                    <tr
+                                      key={`sub-${group.category}-${idx}`}
+                                      className="eq-sub-row"
+                                      onClick={() => handleRowClick(item.name || item.lin)}
+                                      style={{ cursor: 'pointer' }}
+                                      title={`Click to search for ${item.name}`}
+                                    >
                                       <td className="ps-4 fw-medium text-body-secondary">
-                                        ↳ {item.name || '—'}
+                                        <i className="bi bi-arrow-return-right me-2 text-body-tertiary" />
+                                        {item.name || '—'}
                                       </td>
                                       <td><code>{item.lin || '—'}</code></td>
                                       <td>

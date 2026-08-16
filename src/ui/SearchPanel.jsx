@@ -12,13 +12,16 @@ import { useMosInfo } from '../view/MosPalette.jsx';
  * working through. It changes only when you ask it to, via the header.
  */
 export default function SearchPanel({
-  model, scopeNode, picking, onPick, onGo, onClose,
+  model, scopeNode, picking, onPick, onGo, onClose, initialQuery = '',
 }) {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState(initialQuery);
   const input = useRef(null);
   const mosInfo = useMosInfo();
 
-  useEffect(() => { input.current?.focus(); }, []);
+  useEffect(() => {
+    if (initialQuery) setQ(initialQuery);
+    input.current?.focus();
+  }, [initialQuery]);
 
   const results = useMemo(
     () => searchSubtree(model, scopeNode?.id, q),
@@ -121,7 +124,7 @@ export default function SearchPanel({
                     )}
                   </span>
                   <span className="search-hit-tail">
-                    {node.kind === 'BL' ? (node.grade || 'BL') : `${node.roll.mil} pax`}
+                    {node.kind === 'BL' ? (node.grade || 'BL') : `${node.roll.mil} PAX`}
                   </span>
                 </button>
               </li>

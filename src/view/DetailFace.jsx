@@ -27,7 +27,7 @@ export default function DetailFace({ node }) {
             </>
           ) : (
             <>
-              <div><dt>Strength</dt><dd>{node.roll.mil} pax</dd></div>
+              <div><dt>Strength</dt><dd>{node.roll.mil} PAX</dd></div>
               <div><dt>Billets</dt><dd>{node.roll.billets}</dd></div>
               <div><dt>Para</dt><dd>{node.parno || '—'}</dd></div>
               <div><dt>Equip</dt><dd>{node.roll.eqQty}</dd></div>

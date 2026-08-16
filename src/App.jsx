@@ -43,6 +43,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   // The search scope is pinned rather than following the focus, so working
   // through a list of results doesn't narrow the search out from under you.
   // Null means the whole structure.
@@ -315,7 +316,8 @@ export default function App() {
               picking={searchPicking}
               onPick={() => setSearchPicking((v) => !v)}
               onGo={goTo}
-              onClose={() => { setSearchOpen(false); setSearchPicking(false); }}
+              onClose={() => { setSearchOpen(false); setSearchPicking(false); setSearchQuery(''); }}
+              initialQuery={searchQuery}
             />
           )}
           {legendOpen && <Legend model={model} onClose={() => setLegendOpen(false)} />}
@@ -353,6 +355,11 @@ export default function App() {
           open={statsOpen}
           model={model}
           onClose={() => setStatsOpen(false)}
+          onSearch={(query) => {
+            setSearchQuery(query);
+            setSearchOpen(true);
+            setSearchPicking(false);
+          }}
         />
 
         <ExportModal

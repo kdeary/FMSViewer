@@ -28,7 +28,7 @@ export default function SummaryFace({ node }) {
           ) : (
             <>
               <div className="nb-big">
-                {r.mil}<span className="nb-unit">pax</span>
+                {r.mil}<span className="nb-unit">PAX</span>
               </div>
               <div className="nb-sub">
                 {r.off > 0 && <span title="Officers">{r.off} OFF</span>}

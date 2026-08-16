@@ -45,13 +45,19 @@ export function getEquipmentCategory(name) {
 export function sortEquipmentList(equipmentList, categoryCountsMap = null) {
   if (!equipmentList || !equipmentList.length) return [];
 
-  let catCounts = categoryCountsMap;
-  if (!catCounts) {
-    catCounts = new Map();
+  let catCounts = null;
+  if (categoryCountsMap && typeof categoryCountsMap.get === 'function') {
+    catCounts = categoryCountsMap;
+  } else if (categoryCountsMap && typeof categoryCountsMap === 'object') {
+    catCounts = { get: (k) => categoryCountsMap[k] || 0 };
+  } else {
+    // Always compute category counts from the equipmentList if no map provided
+    const map = new Map();
     for (const item of equipmentList) {
       const cat = getEquipmentCategory(item.name);
-      catCounts.set(cat, (catCounts.get(cat) || 0) + (item.qty || 1));
+      map.set(cat, (map.get(cat) || 0) + (item.qty || 1));
     }
+    catCounts = map;
   }
 
   return [...equipmentList].sort((a, b) => {
@@ -65,7 +71,7 @@ export function sortEquipmentList(equipmentList, categoryCountsMap = null) {
     const countB = catCounts.get(catB) || 0;
 
     if (countA !== countB) return countA - countB; // Least authorized category count first
-    return (a.qty || 1) - (b.qty || 1) || (a.name || '').localeCompare(b.name || '');
+    return (a.name || '').localeCompare(b.name || '');
   });
 }
 
@@ -141,7 +147,7 @@ export function computeRollups(nodes, rootId, onProgress = () => {}) {
     const allEq = sortEquipmentList(rawAllEq, catCounts);
     roll.eqLines = allEq.length;
     roll.eqQty = allEq.reduce((sum, item) => sum + item.qty, 0);
-
+    roll.mil = roll.off + roll.wo + roll.enl;
     node.roll = roll;
     node.mosCounts = mosCounts;
     node.allEq = allEq;
@@ -159,6 +165,13 @@ export function computeRollups(nodes, rootId, onProgress = () => {}) {
     }
 
     if (i % step === 0) onProgress(i / order.length);
+  }
+
+  // Attach global category counts (from root unit) to every node for global sorting
+  const rootNode = nodes.get(rootId);
+  const globalCatCounts = rootNode ? rootNode.catCounts : new Map();
+  for (const n of nodes.values()) {
+    n.globalCatCounts = globalCatCounts;
   }
 
   onProgress(1);

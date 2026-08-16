@@ -121,23 +121,34 @@ export function truncate(title, max = 30) {
 }
 
 /**
- * Drops every parenthetical and its contents.
- *
- * FMS titles carry their own abbreviation in brackets -- "Bradley Fighting
- * Vehicle System (BFVS) Maintainer" -- which is dead weight anywhere the text
- * is already short of room, and actively confusing inside an initialism.
+ * Global Title Shortening Methods:
+ * 1) Full: no change
+ * 2) Cut: Remove all parentheticals (recursively handling nested parentheticals)
+ * 3) Abbreviated: Take "Cut" and only use the first letter of every word.
+ *    If there is any of /, ., or , in the string, remove it and anything after it.
  */
-export function stripParentheticals(text) {
-  let out = String(text || '');
-  // Innermost first, repeatedly: these nest in the real data -- "BSB (Armored
-  // Brigade Combat Team (ABCT))" -- and one pass would strip the inner group
-  // and leave the outer brackets stranded around their contents.
-  for (let i = 0; i < 8; i++) {
+export function titleFull(title) {
+  return String(title || '').trim();
+}
+
+export function titleCut(title) {
+  let out = String(title || '');
+  for (let i = 0; i < 10; i++) {
     const next = out.replace(/\s*\([^()]*\)/g, '');
     if (next === out) break;
     out = next;
   }
   return out.replace(/\s{2,}/g, ' ').trim();
+}
+
+export function titleAbbrev(title) {
+  let str = titleCut(title);
+  // Remove /, ., or , and anything after it
+  str = str.split(/[/.,]/)[0].trim();
+  if (!str) return '';
+
+  const words = str.split(/[\s-]+/).filter(Boolean);
+  return words.map((w) => w[0].toUpperCase()).join('');
 }
 
 /**
@@ -160,7 +171,7 @@ export const TITLE_ABBR = [
 // it came from.
 const ABBR_CACHE = new WeakMap();
 
-function compileAbbr(rules) {
+export function compileAbbr(rules) {
   let compiled = ABBR_CACHE.get(rules);
   if (!compiled) {
     compiled = rules.map(([from, to]) => {
@@ -184,7 +195,7 @@ function compileAbbr(rules) {
  * short. Then every rule in the table is applied.
  */
 export function abbreviateTitle(title, rules = TITLE_ABBR) {
-  let out = stripParentheticals(title);
+  let out = titleCut(title);
   for (const [re, to] of compileAbbr(rules)) out = out.replace(re, to);
   return out.replace(/\s{2,}/g, ' ').trim();
 }

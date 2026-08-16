@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMosInfo } from './MosPalette.jsx';
-import { stripParentheticals } from '../model/taxonomy.js';
+import { titleCut } from '../model/taxonomy.js';
 
 /**
  * The MOS breakdown -- the headline number for a unit summary, ahead of any
@@ -21,7 +21,7 @@ export default function MosBar({ topMos, total, showCodes = true }) {
     // Parentheticals go: a tooltip has no room for "(Util Equip Rep)" spelled
     // out next to the words it abbreviates. The branch fallback keeps its own,
     // since "(Officer)" there is the distinction, not a restatement.
-    const name = info.title ? stripParentheticals(info.title) : info.label;
+    const name = info.title ? titleCut(info.title) : info.label;
     return `${mos} · ${name} · ${n} ${n === 1 ? 'soldier' : 'soldiers'}`;
   };
 
