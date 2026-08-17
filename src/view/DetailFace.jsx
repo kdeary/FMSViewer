@@ -16,7 +16,7 @@ export default function DetailFace({ node }) {
   return (
     <div className="nb-detail-inner">
       <div className="nb-det-head">
-        <ImagePlaceholder kind={node.kind} label={isBillet ? 'No photo' : 'No image'} />
+        <ImagePlaceholder node={node} kind={node.kind} label={isBillet ? 'No photo' : 'No image'} />
         <dl className="nb-attrs">
           {isBillet ? (
             <>

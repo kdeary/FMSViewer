@@ -33,7 +33,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
       </div>
 
       <div className="card-body overflow-auto">
-        <ImagePlaceholder kind={node.kind} className="img-ph-lg" label={isBillet ? 'No photo' : 'No crest'} />
+        <ImagePlaceholder node={node} kind={node.kind} className="img-ph-lg" label={isBillet ? 'No photo' : 'No crest'} />
 
         <dl className="row small mt-3 mb-2 gy-1">
           {isBillet ? (

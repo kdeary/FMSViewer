@@ -16,7 +16,7 @@ export default function SummaryFace({ node }) {
   return (
     <div className="nb-summary-inner">
       <div className="nb-sum-top">
-        <ImagePlaceholder kind={node.kind} label={isBillet ? 'No photo' : 'No crest'} />
+        <ImagePlaceholder node={node} kind={node.kind} label={isBillet ? 'No photo' : 'No crest'} />
         <div className="nb-sum-figures">
           {isBillet ? (
             <>
