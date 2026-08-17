@@ -1,15 +1,20 @@
 import React, { useMemo } from 'react';
 import USG, { describeToSvg } from '../vendor/usg.min.js';
+import { useSettings } from './SettingsContext.jsx';
 
 // Reserved space for unit crests / vehicle photos / USG unit symbols.
 export default function ImagePlaceholder({ node, kind = 'UN', className = '', label = 'No image', title = '' }) {
+  const { unitSymbols: symbolsEnabled } = useSettings();
   const isUnit = node ? node.kind === 'UN' : kind === 'UN';
   const rawTitle = node?.title || title || (typeof label === 'string' && !['No crest', 'No image', 'No photo'].includes(label) ? label : '');
   const unitTitle = rawTitle.replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
   const instanceId = useMemo(() => `usg-clip-${Math.random().toString(36).slice(2, 9)}`, []);
 
   const symbolSvg = useMemo(() => {
-    if (!isUnit || !unitTitle) return null;
+    // Off by default: the symbol is guessed from the title text alone and can
+    // be wrong, so it only renders once the setting has been explicitly opted
+    // into. Off (or unset) always falls through to the placeholder icon below.
+    if (!symbolsEnabled || !isUnit || !unitTitle) return null;
     try {
       const renderFn = describeToSvg || (USG && USG.describeToSvg);
       if (typeof renderFn === 'function') {
@@ -27,7 +32,7 @@ export default function ImagePlaceholder({ node, kind = 'UN', className = '', la
       console.warn('Failed to generate unit symbol for title:', unitTitle, e);
     }
     return null;
-  }, [unitTitle, isUnit, instanceId]);
+  }, [unitTitle, isUnit, instanceId, symbolsEnabled]);
 
   if (symbolSvg) {
     return (

@@ -88,6 +88,42 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
                 spends on style, paint and raster is the gap between the total and the two
                 JavaScript figures.
               </p>
+
+              <hr />
+
+              <div className="form-check">
+                <input
+                  id="censorInfo"
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={!!settings.censor}
+                  onChange={(e) => onChange({ ...settings, censor: e.target.checked })}
+                />
+                <label htmlFor="censorInfo" className="form-check-label">Censor information</label>
+              </div>
+              <p className="text-body-secondary small mt-1 mb-0">
+                Renames units, crew, billets, equipment names, LINs, and MOSs with generic identifiers.
+              </p>
+
+              <hr />
+
+              <div className="form-check">
+                <input
+                  id="unitSymbols"
+                  type="checkbox"
+                  className="form-check-input"
+                  checked={!!settings.unitSymbols}
+                  onChange={(e) => onChange({ ...settings, unitSymbols: e.target.checked })}
+                />
+                <label htmlFor="unitSymbols" className="form-check-label">Generate unit symbols</label>
+              </div>
+              <p className="text-body-secondary small mt-1 mb-0">
+                On: Draws a unit symbol for each unit in place of the placeholder icon.
+                Off: Shows the placeholder icon everywhere.
+              </p>
+              <p className="text-warning small mt-1 mb-0">
+                ⚠ The symbol is guessed from the unit&rsquo;s title text alone and may not be correct.
+              </p>
             </div>
 
             <div className="modal-footer">

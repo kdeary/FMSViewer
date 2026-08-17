@@ -12,6 +12,7 @@ import WarningsModal from './ui/WarningsModal.jsx';
 import SearchPanel from './ui/SearchPanel.jsx';
 import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
+import { SettingsProvider } from './view/SettingsContext.jsx';
 import { useViewport } from './view/useViewport.js';
 import { useTooltips } from './view/useTooltips.js';
 import { zoomToOpen, zoomToReveal, DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from './view/lod.js';
@@ -23,12 +24,18 @@ function loadSettings() {
     const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
     const px = Number(saved?.minTextPx ?? saved?.detailPct);
     const perf = !!saved?.perf;
-    if (px >= MIN_TEXT_PX_RANGE[0] && px <= MIN_TEXT_PX_RANGE[1]) return { minTextPx: px, perf };
-    return { minTextPx: DEFAULT_MIN_TEXT_PX, perf };
+    // Off unless a prior session turned it on: the symbol is a guess from the
+    // title text alone, so a reader who never opted in should never see one
+    // silently appear in place of the placeholder icon.
+    const unitSymbols = !!saved?.unitSymbols;
+    const censor = !!saved?.censor;
+    if (px >= MIN_TEXT_PX_RANGE[0] && px <= MIN_TEXT_PX_RANGE[1]) return { minTextPx: px, perf, unitSymbols, censor };
+    return { minTextPx: DEFAULT_MIN_TEXT_PX, perf, unitSymbols, censor };
   } catch { /* fall through to the default */ }
-  return { minTextPx: DEFAULT_MIN_TEXT_PX, perf: false };
+  return { minTextPx: DEFAULT_MIN_TEXT_PX, perf: false, unitSymbols: false, censor: false };
 }
 import { hydrate, parseModelFile, toBlob, suggestedFileName } from './model/modelFile.js';
+import { censorModel } from './model/censor.js';
 
 export default function App() {
   const [stage, setStage] = useState('idle'); // idle | parsing | ready
@@ -52,6 +59,11 @@ export default function App() {
   const [searchScopeId, setSearchScopeId] = useState(null);
   const [searchPicking, setSearchPicking] = useState(false);
   const [settings, setSettings] = useState(loadSettings);
+
+  const displayModel = useMemo(() => {
+    if (!model) return null;
+    return settings.censor ? censorModel(model) : model;
+  }, [model, settings.censor]);
 
   useEffect(() => {
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* storage disabled */ }
@@ -132,19 +144,19 @@ export default function App() {
   }, []);
 
   const exportModel = useCallback(() => {
-    if (!model) return;
-    download(toBlob(model), suggestedFileName(model));
-  }, [model, download]);
+    if (!displayModel) return;
+    download(toBlob(displayModel), suggestedFileName(displayModel));
+  }, [displayModel, download]);
 
   // `mosColor` comes from the modal, which sits inside the palette provider:
   // an exported image and the screen it came from have to agree on colours.
   const exportImage = useCallback(async (nodeId, detail, mosColor) => {
-    if (!model) return;
-    const node = model.byId.get(nodeId);
+    if (!displayModel) return;
+    const node = displayModel.byId.get(nodeId);
     if (!node) throw new Error('That unit is no longer in the model.');
-    const { svg, width, height } = buildSvg(model, nodeId, detail, { mosColor });
-    download(await svgToPng(svg, width, height), imageFileName(model, node));
-  }, [model, download]);
+    const { svg, width, height } = buildSvg(displayModel, nodeId, detail, { mosColor });
+    download(await svgToPng(svg, width, height), imageFileName(displayModel, node));
+  }, [displayModel, download]);
 
   const reset = useCallback(() => {
     workerRef.current?.terminate();
@@ -163,8 +175,8 @@ export default function App() {
   // --- camera --------------------------------------------------------------
 
   const goTo = useCallback((id, opts = {}) => {
-    if (!model) return;
-    const node = model.byId.get(id);
+    if (!displayModel) return;
+    const node = displayModel.byId.get(id);
     if (!node) return;
     const hasKids = node.childIds.length > 0;
 
@@ -177,9 +189,9 @@ export default function App() {
 
     const availW = Math.max(1, size.w - offsetLeft - offsetRight);
 
-    let minK = zoomToReveal(node, model.byId, availW, settings.minTextPx);
+    let minK = zoomToReveal(node, displayModel.byId, availW, settings.minTextPx);
     if (hasKids) {
-      minK = Math.max(minK, zoomToOpen(node, availW, settings.minTextPx, model.byId));
+      minK = Math.max(minK, zoomToOpen(node, availW, settings.minTextPx, displayModel.byId));
     } else {
       minK = Math.max(minK, camRef.current.k);
     }
@@ -187,18 +199,18 @@ export default function App() {
     setFocusId(id);
     setSelectedId(id);
     flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, offsetLeft, offsetRight, ...opts });
-  }, [model, flyTo, size.w, settings.minTextPx]);
+  }, [displayModel, flyTo, size.w, settings.minTextPx]);
 
   // Clicks on the map. Identical to `goTo` except while the search panel is
   // waiting to be told what to search -- only a click out here sets that, never
   // a click on a result.
   const selectOnMap = useCallback((id) => {
-    if (searchPicking && model?.byId.has(id)) {
+    if (searchPicking && displayModel?.byId.has(id)) {
       setSearchScopeId(id);
       setSearchPicking(false);
     }
     goTo(id);
-  }, [goTo, model, searchPicking]);
+  }, [goTo, displayModel, searchPicking]);
 
   // Frame the whole structure as soon as the surface has a size.
   //
@@ -208,25 +220,25 @@ export default function App() {
   // wherever the previous structure had left it -- pointing, in general, at
   // nothing in the new one.
   useEffect(() => {
-    if (!model || !pendingFit.current || !size.w) return;
-    if (flyTo(model.byId.get(model.rootId).rect, { instant: true })) {
+    if (!displayModel || !pendingFit.current || !size.w) return;
+    if (flyTo(displayModel.byId.get(displayModel.rootId).rect, { instant: true })) {
       pendingFit.current = false;
     }
-  }, [model, size, flyTo]);
+  }, [displayModel, size, flyTo]);
 
   const fitAll = useCallback(() => {
-    if (!model) return;
-    setFocusId(model.rootId);
+    if (!displayModel) return;
+    setFocusId(displayModel.rootId);
     setSelectedId(null);
-    flyTo(model.byId.get(model.rootId).rect);
-  }, [model, flyTo]);
+    flyTo(displayModel.byId.get(displayModel.rootId).rect);
+  }, [displayModel, flyTo]);
 
   const goUp = useCallback(() => {
-    if (!model || !focusId) return;
-    const node = model.byId.get(focusId);
-    if (node?.parentId && model.byId.has(node.parentId)) goTo(node.parentId);
+    if (!displayModel || !focusId) return;
+    const node = displayModel.byId.get(focusId);
+    if (node?.parentId && displayModel.byId.has(node.parentId)) goTo(node.parentId);
     else fitAll();
-  }, [model, focusId, goTo, fitAll]);
+  }, [displayModel, focusId, goTo, fitAll]);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -245,18 +257,18 @@ export default function App() {
 
   // Root -> focused node, for the breadcrumb trail.
   const path = useMemo(() => {
-    if (!model || !focusId) return [];
+    if (!displayModel || !focusId) return [];
     const chain = [];
     let id = focusId;
-    while (id && model.byId.has(id)) {
-      const n = model.byId.get(id);
+    while (id && displayModel.byId.has(id)) {
+      const n = displayModel.byId.get(id);
       chain.unshift(n);
       id = n.parentId;
     }
     return chain;
-  }, [model, focusId]);
+  }, [displayModel, focusId]);
 
-  const selected = selectedId ? model?.byId.get(selectedId) : null;
+  const selected = selectedId ? displayModel?.byId.get(selectedId) : null;
 
   // --- render --------------------------------------------------------------
 
@@ -277,10 +289,11 @@ export default function App() {
   }
 
   return (
-    <MosPaletteProvider model={model}>
+    <SettingsProvider settings={settings}>
+    <MosPaletteProvider model={displayModel}>
       <div className="app-shell">
         <TopBar
-          model={model}
+          model={displayModel}
           path={path}
           onGo={goTo}
           onExport={() => setExportOpen(true)}
@@ -291,7 +304,7 @@ export default function App() {
           onFit={fitAll}
           legendOpen={legendOpen}
           onToggleLegend={() => setLegendOpen((v) => !v)}
-          warnings={model.meta.warnings}
+          warnings={displayModel.meta.warnings}
           onOpenSettings={() => setSettingsOpen(true)}
           searchOpen={searchOpen}
           onToggleSearch={() => { setSearchOpen((v) => !v); setSearchPicking(false); }}
@@ -302,7 +315,7 @@ export default function App() {
         <div className="app-body">
           <MapCanvas
             containerRef={surfaceRef}
-            model={model}
+            model={displayModel}
             cam={cam}
             size={size}
             selectedId={selectedId}
@@ -314,8 +327,8 @@ export default function App() {
           />
           {searchOpen && (
             <SearchPanel
-              model={model}
-              scopeNode={model.byId.get(searchScopeId) || model.byId.get(model.rootId)}
+              model={displayModel}
+              scopeNode={displayModel.byId.get(searchScopeId) || displayModel.byId.get(displayModel.rootId)}
               picking={searchPicking}
               onPick={() => setSearchPicking((v) => !v)}
               onGo={goTo}
@@ -323,22 +336,22 @@ export default function App() {
               initialQuery={searchQuery}
             />
           )}
-          {legendOpen && <Legend model={model} onClose={() => setLegendOpen(false)} />}
+          {legendOpen && <Legend model={displayModel} onClose={() => setLegendOpen(false)} />}
           {selected && (
-            <SidePanel node={selected} model={model} onGo={goTo} onClose={() => setSelectedId(null)} />
+            <SidePanel node={selected} model={displayModel} onGo={goTo} onClose={() => setSelectedId(null)} />
           )}
         </div>
 
         <div className="statusbar text-body-secondary small">
           <div className="status-file">
-            <span className="fw-semibold text-body">{model.meta.uic || '—'}</span>
-            <span title={model.meta.sourceFile}>{model.meta.sourceFile}</span>
-            {model.meta.runDate && <span>run {model.meta.runDate}</span>}
+            <span className="fw-semibold text-body">{displayModel.meta.uic || '—'}</span>
+            <span title={displayModel.meta.sourceFile}>{displayModel.meta.sourceFile}</span>
+            {displayModel.meta.runDate && <span>run {displayModel.meta.runDate}</span>}
           </div>
           <div className="vr" />
-          <span>{model.meta.nodeCount} nodes</span>
-          <span>{model.meta.rowCount} rows</span>
-          <span>parsed in {model.meta.parseMs ?? 0} ms</span>
+          <span>{displayModel.meta.nodeCount} nodes</span>
+          <span>{displayModel.meta.rowCount} rows</span>
+          <span>parsed in {displayModel.meta.parseMs ?? 0} ms</span>
           <div className="vr ms-auto" />
           <span>zoom {cam.k.toFixed(2)}×</span>
           <div className="vr" />
@@ -356,7 +369,7 @@ export default function App() {
 
         <StatsModal
           open={statsOpen}
-          model={model}
+          model={displayModel}
           onClose={() => setStatsOpen(false)}
           onSearch={(query) => {
             setSearchQuery(query);
@@ -367,19 +380,20 @@ export default function App() {
 
         <WarningsModal
           open={warningsOpen}
-          warnings={model.meta.warnings}
+          warnings={displayModel.meta.warnings}
           onClose={() => setWarningsOpen(false)}
         />
 
         <ExportModal
           open={exportOpen}
-          model={model}
-          focusNode={focusId ? model.byId.get(focusId) : null}
+          model={displayModel}
+          focusNode={focusId ? displayModel.byId.get(focusId) : null}
           onExportModel={exportModel}
           onExportImage={exportImage}
           onClose={() => setExportOpen(false)}
         />
       </div>
     </MosPaletteProvider>
+    </SettingsProvider>
   );
 }
