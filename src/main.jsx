@@ -1,5 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import './vendor/bootstrap.bundle.min.js';
 import App from './App.jsx';
 import './styles/app.css';
 import USG, { describeToSvg, parse, renderSymbol } from './vendor/usg.min.js';

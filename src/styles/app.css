@@ -12,7 +12,7 @@ html, body, #root { height: 100%; }
 body { overflow: hidden; }
 
 .app-shell { display: flex; flex-direction: column; height: 100%; }
-.app-centered { align-items: center; justify-content: center; padding: 1.5rem; }
+.app-centered { align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
 .app-body { position: relative; flex: 1 1 auto; min-height: 0; }
 
 /* ---------------------------------------------------------------- top bar */
@@ -39,11 +39,27 @@ body { overflow: hidden; }
 
 /* ------------------------------------------------------------ landing page */
 
-.drop-wrap { width: min(42rem, 100%); }
+.drop-wrap { width: min(72rem, 100%); margin: 0 auto; }
+.landing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+.landing-right {
+  display: flex;
+  flex-direction: column;
+}
+.landing-right .drop-zone {
+  flex: 1;
+  min-height: 20rem;
+}
 
 .intro-card {
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--bs-border-color);
   border-radius: 0.75rem;
   background: var(--bs-tertiary-bg);
@@ -58,6 +74,60 @@ body { overflow: hidden; }
   width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--bs-info);
 }
 .intro-points strong { color: var(--bs-body-color); font-weight: 600; }
+
+.example-preview {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bs-border-color);
+}
+.example-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1172 / 768;
+  object-fit: cover;
+  background: var(--bs-secondary-bg);
+  border-radius: 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.example-img-clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.example-img-clickable:hover {
+  filter: brightness(1.08);
+}
+.example-img-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.position-relative:hover .example-img-overlay {
+  opacity: 1;
+}
+.example-note {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+  margin-top: 0.5rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 840px) {
+  .landing-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ---------------------------------------------------------------- how-to */
 

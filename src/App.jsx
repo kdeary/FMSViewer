@@ -10,7 +10,6 @@ import StatsModal from './ui/StatsModal.jsx';
 import ExportModal from './ui/ExportModal.jsx';
 import WarningsModal from './ui/WarningsModal.jsx';
 import SearchPanel from './ui/SearchPanel.jsx';
-import { buildSvg, svgToPng, imageFileName } from './model/exportImage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { SettingsProvider } from './view/SettingsContext.jsx';
 import { useViewport } from './view/useViewport.js';
@@ -146,16 +145,6 @@ export default function App() {
   const exportModel = useCallback(() => {
     if (!displayModel) return;
     download(toBlob(displayModel), suggestedFileName(displayModel));
-  }, [displayModel, download]);
-
-  // `mosColor` comes from the modal, which sits inside the palette provider:
-  // an exported image and the screen it came from have to agree on colours.
-  const exportImage = useCallback(async (nodeId, detail, mosColor) => {
-    if (!displayModel) return;
-    const node = displayModel.byId.get(nodeId);
-    if (!node) throw new Error('That unit is no longer in the model.');
-    const { svg, width, height } = buildSvg(displayModel, nodeId, detail, { mosColor });
-    download(await svgToPng(svg, width, height), imageFileName(displayModel, node));
   }, [displayModel, download]);
 
   const reset = useCallback(() => {
@@ -387,9 +376,7 @@ export default function App() {
         <ExportModal
           open={exportOpen}
           model={displayModel}
-          focusNode={focusId ? displayModel.byId.get(focusId) : null}
           onExportModel={exportModel}
-          onExportImage={exportImage}
           onClose={() => setExportOpen(false)}
         />
       </div>
