@@ -50,7 +50,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
         {/* Left Column: Explanation panel & example image */}
         <div className="landing-left">
           <section className="intro-card">
-            <h1 className="h4 mb-2">FMS Viewer</h1>
+            <h1 className="h4 mb-2">FMSViewer</h1>
             <p className="text-body-secondary mb-3">
               Turns an FMS Web structure export into a map you can move around in.
               Units are nested inside units, down to individual soldiers and their equipment.

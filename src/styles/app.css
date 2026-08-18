@@ -18,7 +18,30 @@ body { overflow: hidden; }
 /* ---------------------------------------------------------------- top bar */
 
 .topbar { flex: 0 0 auto; z-index: 10; }
-.brand-mark { width: 1.2rem; height: 1.2rem; fill: none; stroke: var(--bs-info); stroke-width: 1.6; }
+.topbar .navbar-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: inherit;
+  color: var(--bs-emphasis-color, var(--bs-body-color));
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--bs-border-color);
+  padding: 0 0 0 1rem;
+  margin-right: 0;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.topbar .navbar-brand:hover,
+.topbar .navbar-brand:focus {
+  color: var(--bs-info);
+  opacity: 0.9;
+  outline: none;
+  box-shadow: none;
+}
+.brand-mark { width: 1.25rem; height: 1.25rem; fill: none; stroke: var(--bs-info); stroke-width: 2; }
 .topbar-meta { max-width: 22rem; }
 .crumbs .breadcrumb { overflow-x: auto; scrollbar-width: none; font-size: 0.875rem; }
 .crumbs .breadcrumb::-webkit-scrollbar { display: none; }

@@ -95,16 +95,21 @@ export default function TopBar({
           <Breadcrumbs path={path} onGo={onGo} />
         </div>
 
-        {/* RIGHT SIDE: FMS Viewer Brand */}
-        <span className="navbar-brand mb-0 h1 d-flex align-items-center gap-2 ms-auto">
+        {/* RIGHT SIDE: FMS Viewer Brand (Clicking returns to home screen) */}
+        <button
+          type="button"
+          className="navbar-brand d-flex align-items-center gap-2 ms-auto"
+          onClick={onReset}
+          title="Return to home screen"
+        >
           <svg className="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="2" y="2" width="20" height="20" rx="3" />
             <rect x="5.5" y="5.5" width="8" height="7" rx="1" />
             <rect x="15" y="5.5" width="3.5" height="7" rx="1" />
             <rect x="5.5" y="14.5" width="13" height="4" rx="1" />
           </svg>
-          FMS Viewer
-        </span>
+          FMSViewer
+        </button>
 
         <input
           ref={modelInput}
