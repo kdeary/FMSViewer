@@ -68,16 +68,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
               </li>
             </ul>
 
-            <div className="d-grid gap-2 mb-3">
-              <button
-                type="button"
-                className="btn btn-info btn-sm w-100"
-                onClick={loadExampleUnit}
-                disabled={loadingExample}
-              >
-                <i className="bi bi-play-fill me-1" />
-                {loadingExample ? 'Loading example…' : 'Use Fake Example Unit'}
-              </button>
+            <div className="mb-3">
               <button
                 type="button"
                 className="btn btn-outline-info btn-sm w-100"
@@ -109,7 +100,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
           </section>
         </div>
 
-        {/* Right Column: Dropzone ONLY */}
+        {/* Right Column: Dropzone & Fake Example Unit Button */}
         <div className="landing-right">
           <div
             className={`drop-zone${over ? ' is-over' : ''}`}
@@ -125,11 +116,11 @@ export default function FileDrop({ onSheet, onModel, error }) {
               <path d="M12 16V4m0 0L7 9m5-5l5 5" />
               <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
             </svg>
-            <h2 className="h4 mb-2">Drop an FMS Web spreadsheet</h2>
-            <p className="text-body-secondary mb-2">
-              or click to browse — <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
+            <h2 className="fs-3 fw-bold mb-2">Drop an FMS Web spreadsheet</h2>
+            <p className="fs-5 text-body-secondary mb-2">
+              or click to browse &mdash; <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
             </p>
-            <p className="text-body-secondary small mb-0">
+            <p className="fs-6 text-body-secondary mb-0">
               A previously exported <code>.fmsmodel.json</code> works too, and loads instantly.
             </p>
             <input
@@ -139,6 +130,18 @@ export default function FileDrop({ onSheet, onModel, error }) {
               accept=".xlsx,.xlsm,.xlsb,.xls,.csv,.json"
               onChange={(e) => { handle(e.target.files[0]); e.target.value = ''; }}
             />
+          </div>
+
+          <div className="mt-3">
+            <button
+              type="button"
+              className="btn btn-info btn-lg w-100 py-2.5 shadow-sm fw-semibold d-flex align-items-center justify-content-center gap-2"
+              onClick={loadExampleUnit}
+              disabled={loadingExample}
+            >
+              <i className="bi bi-play-fill fs-5" />
+              {loadingExample ? 'Loading example…' : 'Use Fake Example Unit'}
+            </button>
           </div>
 
           {error && (
