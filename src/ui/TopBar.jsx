@@ -4,7 +4,7 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 export default function TopBar({
   path, onGo, onExport, onLoadModel, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
-  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings,
+  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree,
 }) {
   const modelInput = useRef(null);
 
@@ -41,7 +41,16 @@ export default function TopBar({
             Search
           </button>
 
-          {/* Stats & Legend */}
+          {/* Tree & Stats & Legend */}
+          <button
+            type="button"
+            className={`btn btn-sm ${treeOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
+            onClick={onOpenTree}
+            title="Unit breakdown tree"
+          >
+            Tree
+          </button>
+
           <button
             type="button"
             className="btn btn-sm btn-outline-secondary"
