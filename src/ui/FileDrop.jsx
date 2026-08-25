@@ -6,7 +6,7 @@ import exampleUnitUrl from '../../data/EXAMPLE_UNIT.xlsx?url';
 const SHEET_RE = /\.(xlsx|xlsm|xlsb|xls|csv)$/i;
 const MODEL_RE = /\.json$/i;
 
-/** Landing screen: take an FMS Web export, or a model file saved earlier. */
+/** Landing screen: take an FMSWeb export, or a model file saved earlier. */
 export default function FileDrop({ onSheet, onModel, error }) {
   const inputRef = useRef(null);
   const [over, setOver] = useState(false);
@@ -52,7 +52,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
           <section className="intro-card">
             <h1 className="h4 mb-2">FMSViewer</h1>
             <p className="text-body-secondary mb-3">
-              Turns an FMS Web structure export into a map you can move around in.
+              Turns an FMSWeb structure export into a map you can move around in.
               Units are nested inside units, down to individual soldiers and their equipment.
             </p>
 
@@ -116,7 +116,7 @@ export default function FileDrop({ onSheet, onModel, error }) {
               <path d="M12 16V4m0 0L7 9m5-5l5 5" />
               <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
             </svg>
-            <h2 className="fs-3 fw-bold mb-2">Drop an FMS Web spreadsheet</h2>
+            <h2 className="fs-3 fw-bold mb-2">Drop an FMSWeb spreadsheet</h2>
             <p className="fs-5 text-body-secondary mb-2">
               or click to browse &mdash; <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
             </p>

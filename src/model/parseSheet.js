@@ -1,4 +1,4 @@
-// Turns raw FMS Web sheet rows into node records + an equipment index.
+// Turns raw FMSWeb sheet rows into node records + an equipment index.
 //
 // Two rules of the FMS export that drive everything here:
 //   1. EQ rows are self-parented (ID === PARENTID) and that value is the *owning*
@@ -14,7 +14,7 @@ const COLUMNS = [
   'GRADE', 'POSCO', 'ERC', 'OFF', 'WO', 'ENL', 'MIL', 'CIV', 'AUTHEQP', 'RUNDATE',
 ];
 
-export class ParseError extends Error {}
+export class ParseError extends Error { }
 
 const str = (v) => (v == null ? '' : String(v).trim());
 
@@ -69,7 +69,7 @@ export function mosOf(poscode) {
  * @param onProgress (fractionComplete) => void, called periodically
  * @returns { nodes: Map<id, node>, equipment: Map<ownerId, line[]>, meta }
  */
-export function parseRows(rows, onProgress = () => {}) {
+export function parseRows(rows, onProgress = () => { }) {
   if (!rows || rows.length < 2) throw new ParseError('Spreadsheet has no data rows.');
 
   const col = mapHeaders(rows[0]);

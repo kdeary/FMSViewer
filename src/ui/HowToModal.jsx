@@ -47,13 +47,13 @@ export default function HowToModal({ open, onClose }) {
         tabIndex="-1"
         role="dialog"
         aria-modal="true"
-        aria-label="Getting a spreadsheet out of FMS Web"
+        aria-label="Getting a spreadsheet out of FMSWeb"
         onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
         <div className="modal-dialog modal-xl modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h2 className="modal-title h5">Getting the spreadsheet from FMS Web</h2>
+              <h2 className="modal-title h5">Getting the spreadsheet from FMSWeb</h2>
               <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
             </div>
 
