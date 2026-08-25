@@ -1,6 +1,6 @@
 # FMSViewer
 
-FMSViewer is an interactive web-based force structure visualization tool designed for reading, parsing, and exploring military Force Management System (FMS) Web exports and structure models.
+FMSViewer is an interactive web-based force structure visualization tool designed for reading, parsing, and exploring FMSWeb exports and structure models.
 
 ![FMS Viewer Preview](images/example.png)
 
