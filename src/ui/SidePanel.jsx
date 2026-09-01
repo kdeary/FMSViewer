@@ -6,6 +6,7 @@ import { useMosInfo } from '../view/MosPalette.jsx';
 import { useMosSpec } from '../view/useMosSpec.js';
 import { sortEquipmentList } from '../model/rollups.js';
 import { titleCut } from '../model/taxonomy.js';
+import { exportNodeToExcel } from '../model/exportExcel.js';
 
 /** Everything about the selected node, at full fidelity, regardless of zoom. */
 export default function SidePanel({ node, model, onClose, onGo }) {
@@ -29,7 +30,15 @@ export default function SidePanel({ node, model, onClose, onGo }) {
             </button>
           )}
         </div>
-        <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+        <button
+          type="button"
+          className="btn btn-outline-info btn-sm px-2"
+          title="Export to Excel"
+          onClick={() => exportNodeToExcel(node, model)}
+        >
+          <i className="bi bi-download" />
+        </button>
+        <button type="button" className="btn-close mt-1" aria-label="Close" onClick={onClose} />
       </div>
 
       <div className="card-body overflow-auto">
