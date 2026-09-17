@@ -48,7 +48,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           {isBillet ? (
             <>
               <dt className="col-5">MOS</dt>
-              <dd className="col-7 mb-0" style={{ color: mosInfo(node.mos).color }}>
+              <dd className="col-7 mb-0" style={{ color: mosInfo(node.mos).text }}>
                 {node.mos || '—'}{' '}
                 <span className="text-body-secondary">
                   {spec ? spec.title : mosInfo(node.mos).label}

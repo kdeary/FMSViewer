@@ -363,7 +363,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                                       title={`Click to search for ${subQuery}`}
                                     >
                                       <td className="ps-4 fw-medium text-body-secondary">
-                                        <i className="bi bi-arrow-return-right me-2 text-body-tertiary" />
+                                        <i className="bi bi-arrow-return-right me-2 text-body-secondary" />
                                         {item.name || '—'}
                                       </td>
                                       <td><code>{item.lin || '—'}</code></td>

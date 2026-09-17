@@ -20,7 +20,7 @@ export default function DetailFace({ node }) {
         <dl className="nb-attrs">
           {isBillet ? (
             <>
-              <div><dt>MOS</dt><dd style={{ color: info.color }}>{node.mos || '—'}</dd></div>
+              <div><dt>MOS</dt><dd style={{ color: info.text }}>{node.mos || '—'}</dd></div>
               <div><dt>Grade</dt><dd>{node.grade || '—'}</dd></div>
               <div><dt>POSCO</dt><dd>{node.poscode || '—'}</dd></div>
               <div><dt>Para</dt><dd>{node.parno || '—'}</dd></div>

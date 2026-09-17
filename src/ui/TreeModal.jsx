@@ -211,13 +211,8 @@ function TreeItem({
 
         {/* Kind badge */}
         <span
-          className="badge px-1 py-0 font-monospace tree-kind-badge"
-          style={{
-            backgroundColor: `${kindInfo.accent}25`,
-            color: kindInfo.accent,
-            border: `1px solid ${kindInfo.accent}60`,
-            fontSize: '0.72rem',
-          }}
+          className="badge px-1 py-0 font-monospace tree-kind-badge tint-badge"
+          style={{ '--accent': kindInfo.accent, fontSize: '0.72rem' }}
         >
           {node.kind}
         </span>

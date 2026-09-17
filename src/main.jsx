@@ -28,6 +28,12 @@ if (typeof window !== 'undefined') {
   };
 }
 
+// Dev-only: flags any text that has drifted out of contrast with whatever it
+// is painted on. Tree-shaken out of production by the import.meta.env guard.
+if (import.meta.env.DEV) {
+  import('./dev/contrastAudit.js').then((m) => m.installContrastAudit());
+}
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />

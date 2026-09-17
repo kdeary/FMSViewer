@@ -79,6 +79,11 @@ export function paletteEntry(mos, index) {
     hue,
     color: `hsl(${hue} ${tier.s}% ${tier.l}%)`,
     dim: `hsl(${hue} ${Math.round(tier.s * 0.7)}% ${tier.dim}%)`,
+    // `color` is a fill: it sits behind a swatch or a bar segment, so the
+    // third tier is deliberately dark. Used as *text* on a dark panel that
+    // same tier disappears, so anything typographic takes `text` instead --
+    // same hue, floored at a lightness that stays readable on the panels.
+    text: `hsl(${hue} ${Math.min(tier.s, 70)}% ${Math.max(tier.l, 72)}%)`,
   };
 }
 
