@@ -10,11 +10,14 @@ import { titleCut } from '../model/taxonomy.js';
  *  - "Equipment": Scrollable table of all unit equipment grouped by Equipment Category (6-char clean code).
  *    Uses accordions for categories with multiple items, flat rows for single-item categories.
  *    Sorted with ERC "P" priority first, then category count ASCENDING.
+ *    A search bar filters items by nomenclature, LIN, ERC or category code; while
+ *    filtering, matching categories auto-expand so hits are visible without clicking.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
 export default function StatsModal({ open, model, onClose, onSearch }) {
   const [tab, setTab] = useState('general'); // 'general' | 'equipment'
   const [expandedCats, setExpandedCats] = useState(new Set());
+  const [eqQuery, setEqQuery] = useState('');
   const mosInfo = useMosInfo();
 
   useEffect(() => {
@@ -23,6 +26,8 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
   }, [open, onClose]);
+
+  useEffect(() => { if (!open) setEqQuery(''); }, [open]);
 
   const root = useMemo(() => {
     if (!model || !model.rootId) return null;
@@ -74,6 +79,39 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
 
     return groups;
   }, [root]);
+
+  // Free-text filter over nomenclature, LIN, ERC and category code.
+  // Space-separated terms are ANDed; a term matching the category code keeps the whole group.
+  const filteredEquipment = useMemo(() => {
+    const terms = eqQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return categorizedEquipment;
+
+    const out = [];
+    for (const group of categorizedEquipment) {
+      const catText = group.category.toLowerCase();
+      const items = group.items.filter((item) => {
+        const hay = `${item.name || ''} ${item.lin || ''} ${item.erc || ''} ${catText}`.toLowerCase();
+        return terms.every((t) => hay.includes(t));
+      });
+      if (!items.length) continue;
+      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      const hasP = items.some((item) => String(item.erc || '').trim().toUpperCase() === 'P');
+      out.push({ ...group, items, totalQty, hasP });
+    }
+    return out;
+  }, [categorizedEquipment, eqQuery]);
+
+  const isFiltering = eqQuery.trim().length > 0;
+
+  const filteredTotals = useMemo(() => {
+    let qty = 0;
+    let lines = 0;
+    for (const group of filteredEquipment) {
+      lines += group.items.length;
+      qty += group.totalQty;
+    }
+    return { qty, lines };
+  }, [filteredEquipment]);
 
   const toggleCategory = (catCode) => {
     setExpandedCats((prev) => {
@@ -202,12 +240,36 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
 
               {tab === 'equipment' && (
                 <div>
+                  <div className="input-group input-group-sm mb-2">
+                    <span className="input-group-text"><i className="bi bi-search" /></span>
+                    <input
+                      type="search"
+                      className="form-control"
+                      placeholder="Filter equipment by nomenclature, LIN, ERC or category…"
+                      aria-label="Filter equipment"
+                      value={eqQuery}
+                      onChange={(e) => setEqQuery(e.target.value)}
+                    />
+                    {isFiltering && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        title="Clear filter"
+                        onClick={() => setEqQuery('')}
+                      >
+                        <i className="bi bi-x-lg" />
+                      </button>
+                    )}
+                  </div>
+
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <span className="small text-body-secondary">
                       ERC P items at top · Sorted ascending by category count · Click item to search tag
                     </span>
                     <span className="badge bg-secondary-subtle text-secondary-emphasis">
-                      Total: {r.eqQty} items ({r.eqLines} lines)
+                      {isFiltering
+                        ? `Matched: ${filteredTotals.qty} items (${filteredTotals.lines} lines)`
+                        : `Total: ${r.eqQty} items (${r.eqLines} lines)`}
                     </span>
                   </div>
 
@@ -222,9 +284,9 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {categorizedEquipment.map((group) => {
+                        {filteredEquipment.map((group) => {
                           const isMulti = group.items.length > 1;
-                          const isExpanded = expandedCats.has(group.category);
+                          const isExpanded = isFiltering || expandedCats.has(group.category);
 
                           if (!isMulti) {
                             const singleItem = group.items[0];
@@ -319,6 +381,13 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                             </React.Fragment>
                           );
                         })}
+                        {!filteredEquipment.length && (
+                          <tr>
+                            <td colSpan={4} className="text-center text-body-secondary py-4">
+                              No equipment matches “{eqQuery.trim()}”.
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
