@@ -288,7 +288,6 @@ export default function App() {
           path={path}
           onGo={goTo}
           onExport={() => setExportOpen(true)}
-          onLoadModel={loadModelFile}
           onReset={reset}
           onZoomIn={() => zoomBy(1.4, size.w / 2, size.h / 2)}
           onZoomOut={() => zoomBy(1 / 1.4, size.w / 2, size.h / 2)}

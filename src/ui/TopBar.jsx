@@ -1,13 +1,11 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import Breadcrumbs from './Breadcrumbs.jsx';
 
 export default function TopBar({
-  path, onGo, onExport, onLoadModel, onReset,
+  path, onGo, onExport, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
   searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree,
 }) {
-  const modelInput = useRef(null);
-
   return (
     <nav className="navbar navbar-expand bg-body-tertiary border-bottom topbar py-1">
       <div className="container-fluid gap-2 flex-nowrap align-items-center">
@@ -17,9 +15,6 @@ export default function TopBar({
           <div className="btn-group btn-group-sm" role="group" aria-label="File Operations">
             <button type="button" className="btn btn-outline-secondary" onClick={onReset} title="Open a different spreadsheet">
               New
-            </button>
-            <button type="button" className="btn btn-outline-secondary" onClick={() => modelInput.current.click()} title="Load a saved model">
-              Load
             </button>
             <button type="button" className="btn btn-outline-info" onClick={onExport} title="Save the parsed model as JSON">
               Export
@@ -119,14 +114,6 @@ export default function TopBar({
           </svg>
           FMSViewer
         </button>
-
-        <input
-          ref={modelInput}
-          type="file"
-          accept=".json"
-          className="d-none"
-          onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; if (f) onLoadModel(f); }}
-        />
       </div>
     </nav>
   );

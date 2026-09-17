@@ -70,7 +70,7 @@ export default function SearchPanel({
           <span>
             {q.trim()
               ? `${results.length} result${results.length === 1 ? '' : 's'}`
-              : 'Use prefixes like MOS:56M or LIN:T73827 for specific queries.'}
+              : 'Use prefixes like MOS:56M or LIN:T73827 for specific queries. Click the info "i" button below for more.'}
           </span>
         </div>
       </div>
