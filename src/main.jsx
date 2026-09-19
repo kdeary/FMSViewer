@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './vendor/bootstrap.bundle.min.js';
 import App from './App.jsx';
+import { registerServiceWorker } from './pwa/register.js';
 import './styles/app.css';
 import USG, { describeToSvg, parse, renderSymbol } from './vendor/usg.min.js';
 
@@ -33,6 +34,11 @@ if (typeof window !== 'undefined') {
 if (import.meta.env.DEV) {
   import('./dev/contrastAudit.js').then((m) => m.installContrastAudit());
 }
+
+// Installable, offline-capable app that keeps itself current (see pwa/).
+// Production only: in development the service worker would serve stale
+// modules over Vite's hot reloading.
+if (import.meta.env.PROD) registerServiceWorker();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

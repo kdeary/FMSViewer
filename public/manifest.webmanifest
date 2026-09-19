@@ -1,0 +1,17 @@
+{
+  "name": "FMSViewer — Force Structure Viewer",
+  "short_name": "FMSViewer",
+  "description": "Explore FMSWeb force structure exports as an interactive map. Everything runs locally in the browser, offline included.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#272b30",
+  "theme_color": "#3b6b4b",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
