@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
  * Model export modal (.fmsmodel.json). Lossless export to save and reload
  * structure without parsing Excel files again.
  */
-export default function ExportModal({ open, model, onExportModel, onClose }) {
+export default function ExportModal({ open, model, supplementCount = 0, censored = false, onExportModel, onClose }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -37,6 +37,7 @@ export default function ExportModal({ open, model, onExportModel, onClose }) {
                   <h3 className="h6 mb-1">Export model</h3>
                   <p className="text-body-secondary small mb-3">
                     {model.meta.nodeCount} nodes · {model.meta.rowCount} rows
+                    {' · '}{supplementCount} supplement row{supplementCount === 1 ? '' : 's'}
                   </p>
                   <button
                     type="button"
@@ -49,8 +50,13 @@ export default function ExportModal({ open, model, onExportModel, onClose }) {
                 <div className="export-explain mt-3">
                   <p>
                     The whole parsed structure as JSON. Every unit, billet and equipment
-                    line, with the layout already computed.
+                    line, with the layout already computed, plus the Supplement Table.
                   </p>
+                  {censored && (
+                    <p className="text-warning-emphasis">
+                      Censor mode is on, so the Supplement Table is left out of this export.
+                    </p>
+                  )}
                   <p className="mb-0">
                     Load it back with <strong>Load</strong> to reopen this exact structure
                     without re-reading the spreadsheet, which is the slow part.

@@ -1,6 +1,7 @@
 import React from 'react';
 import { headerHeight } from '../layout/layoutTree.js';
 import { sortEquipmentList } from '../model/rollups.js';
+import { useSupplement } from './Supplement.jsx';
 
 /**
  * Calculates max chips that fit inside the box container in world space.
@@ -39,7 +40,17 @@ function calculateMaxFit(node, limit) {
  * Dynamically limits shown chips to fit container bounds with '+N more' summary tag.
  */
 export default function EquipmentChips({ equipment, limit = 0, node }) {
+  const eqInfo = useSupplement();
   if (!equipment || !equipment.length) return null;
+
+  // Opens the detail modal instead of selecting the box underneath -- unless
+  // the pointer was dragging the map, which the surface flags on pointerup.
+  const openDetail = (e, item) => {
+    e.stopPropagation();
+    const surface = e.currentTarget.closest('.map-surface');
+    if (surface?.dataset.dragged) { surface.dataset.dragged = ''; return; }
+    eqInfo.open(item);
+  };
 
   // Sorted by ERC "P" priority, then GLOBAL equipment category count ASCENDING
   const sortedEq = sortEquipmentList(equipment, node?.globalCatCounts || node?.catCounts);
@@ -52,9 +63,13 @@ export default function EquipmentChips({ equipment, limit = 0, node }) {
   return (
     <ul className="eq-list">
       {shown.map((e, i) => (
-        <li className="eq-chip" key={`${e.lin}-${i}`} title={`${e.lin} — ${e.name} (ERC ${e.erc || '—'})`}>
-          <span className="eq-lin">{e.lin}</span>
-          <span className="eq-name">{e.name}</span>
+        <li
+          className="eq-chip"
+          key={`${e.lin}-${i}`}
+          title={`${eqInfo.displayName(e)} (ERC ${e.erc || '—'}) · click for details`}
+          onClick={(ev) => openDetail(ev, e)}
+        >
+          <span className="eq-name">{eqInfo.displayName(e)}</span>
           {e.qty > 1 && <span className="eq-qty">×{e.qty}</span>}
           {e.erc && <span className="eq-erc">{e.erc}</span>}
         </li>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { buildMosPalette, fallbackEntry } from '../model/taxonomy.js';
 import { useMosSpecs } from './useMosSpec.js';
+import { useSupplement } from './Supplement.jsx';
 
 // Colours are assigned across the whole loaded structure rather than derived
 // from the code itself, so the MOS codes actually present get the furthest-apart
@@ -22,18 +23,29 @@ export function MosPaletteProvider({ model, children }) {
 }
 
 /**
- * @returns (mos) => { mos, label, title, hue, color, dim }
+ * @returns (mos) => { mos, label, title, officialTitle, description, hue, color, dim }
  *
  * `title` is the MOS's own name ("Wheeled Vehicle Mechanic"); `label` is the
  * branch it sits in ("Maintenance"), which is all there is for the officer and
- * warrant codes that the enlisted chapter doesn't cover.
+ * warrant codes that the enlisted chapter doesn't cover. A Supplement Table
+ * title wins over the DA PAM one, since the user can edit it; `officialTitle`
+ * keeps the DA PAM title and `description` is the supplement's.
  */
 export function useMosInfo() {
   const ctx = useContext(MosPaletteContext);
+  const { getMos } = useSupplement();
   return useMemo(() => (mos) => {
     const key = String(mos || '').toUpperCase();
     const entry = (ctx && ctx.palette && ctx.palette.get(key)) || fallbackEntry(key);
     const found = ctx && ctx.spec ? ctx.spec(key) : null;
-    return found ? { ...entry, title: found.title } : entry;
-  }, [ctx]);
+    const sup = getMos(key);
+    const officialTitle = found ? found.title : undefined;
+    const title = sup?.name || officialTitle;
+    return {
+      ...entry,
+      ...(title ? { title } : null),
+      officialTitle,
+      description: sup?.description || '',
+    };
+  }, [ctx, getMos]);
 }

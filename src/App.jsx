@@ -10,14 +10,22 @@ import StatsModal from './ui/StatsModal.jsx';
 import ExportModal from './ui/ExportModal.jsx';
 import WarningsModal from './ui/WarningsModal.jsx';
 import TreeModal from './ui/TreeModal.jsx';
+import AlternateFormatModal from './ui/AlternateFormatModal.jsx';
+import DetailModals from './ui/DetailModals.jsx';
+import UpdateToast from './ui/UpdateToast.jsx';
+import BusyToast from './ui/BusyToast.jsx';
+import { withBusyToast } from './view/busy.js';
+import { onUpdateAvailable, applyUpdate } from './pwa/register.js';
 import SearchPanel from './ui/SearchPanel.jsx';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { SettingsProvider } from './view/SettingsContext.jsx';
+import { SupplementProvider } from './view/Supplement.jsx';
 import { useViewport } from './view/useViewport.js';
 import { useTooltips } from './view/useTooltips.js';
 import { zoomToOpen, zoomToReveal, DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from './view/lod.js';
 
 const SETTINGS_KEY = 'fmsviewer.settings';
+const NO_ROWS = [];
 
 function loadSettings() {
   try {
@@ -60,6 +68,16 @@ export default function App() {
   const [searchScopeId, setSearchScopeId] = useState(null);
   const [searchPicking, setSearchPicking] = useState(false);
   const [settings, setSettings] = useState(loadSettings);
+  // The Supplement Table (see model/supplement.js). It belongs to the loaded
+  // structure: saved into and restored from the model file.
+  const [supplementRows, setSupplementRows] = useState([]);
+  // A structure from the alternate export, parsed but held on the home page
+  // until the user accepts that its hierarchy is a reconstruction.
+  const [pendingAlt, setPendingAlt] = useState(null); // { model, rows, fileName }
+  const [howToSignal, setHowToSignal] = useState(0);
+  // A newer build is downloaded and waiting (see pwa/register.js).
+  const [updateReady, setUpdateReady] = useState(false);
+  const [updateDeferred, setUpdateDeferred] = useState(false);
 
   const displayModel = useMemo(() => {
     if (!model) return null;
@@ -81,6 +99,27 @@ export default function App() {
 
   // --- loading -------------------------------------------------------------
 
+  const showModel = useCallback((m, rows, name) => {
+    pendingFit.current = true;
+    setModel(m);
+    setSupplementRows(rows);
+    setFileName(name);
+    setFocusId(m.rootId);
+    setSelectedId(null);
+    setSearchScopeId(null);
+    setStage('ready');
+  }, []);
+
+  // Alternate-format structures wait on the home page for the user to decide.
+  const openModel = useCallback((m, rows, name) => {
+    if (m.meta?.format === 'alternate') {
+      setPendingAlt({ model: m, rows, fileName: name });
+      setStage('idle');
+    } else {
+      showModel(m, rows, name);
+    }
+  }, [showModel]);
+
   const parseSheet = useCallback((file) => {
     setError('');
     setFileName(file.name);
@@ -95,13 +134,7 @@ export default function App() {
       const msg = e.data;
       if (msg.type === 'progress') setProgress(msg);
       else if (msg.type === 'done') {
-        const m = hydrate(msg.model);
-        pendingFit.current = true;
-        setModel(m);
-        setFocusId(m.rootId);
-        setSelectedId(null);
-        setSearchScopeId(null);
-        setStage('ready');
+        openModel(hydrate(msg.model), [], file.name);
         worker.terminate();
         workerRef.current = null;
       } else if (msg.type === 'error') {
@@ -116,24 +149,18 @@ export default function App() {
       setStage('idle');
     };
     worker.postMessage({ file });
-  }, []);
+  }, [openModel]);
 
   const loadModelFile = useCallback(async (file) => {
     setError('');
     try {
-      const m = parseModelFile(await file.text());
-      pendingFit.current = true;
-      setModel(m);
-      setFileName(file.name);
-      setFocusId(m.rootId);
-      setSelectedId(null);
-      setSearchScopeId(null);
-      setStage('ready');
+      const { model: m, supplementRows: rows } = parseModelFile(await file.text());
+      openModel(m, rows, file.name);
     } catch (err) {
       setError(err.message);
       setStage('idle');
     }
-  }, []);
+  }, [openModel]);
 
   const download = useCallback((blob, name) => {
     const url = URL.createObjectURL(blob);
@@ -146,13 +173,17 @@ export default function App() {
 
   const exportModel = useCallback(() => {
     if (!displayModel) return;
-    download(toBlob(displayModel), suggestedFileName(displayModel));
-  }, [displayModel, download]);
+    // A censored export leaves the table out: its codes are the real ones.
+    withBusyToast('Preparing the model file…', () => {
+      download(toBlob(displayModel, settings.censor ? [] : supplementRows), suggestedFileName(displayModel));
+    });
+  }, [displayModel, download, settings.censor, supplementRows]);
 
   const reset = useCallback(() => {
     workerRef.current?.terminate();
     workerRef.current = null;
     setModel(null); setStage('idle'); setError(''); setProgress(null);
+    setSupplementRows([]);
     setSelectedId(null); setFocusId(null);
     setSearchScopeId(null); setSearchPicking(false);
     // Nothing about where the last structure was being viewed means anything
@@ -162,6 +193,13 @@ export default function App() {
   }, [setCam]);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
+
+  useEffect(() => onUpdateAvailable(() => setUpdateReady(true)), []);
+  // On the home page there is nothing to lose, so a new build is applied
+  // straight away; with a structure open the user is asked (UpdateToast).
+  useEffect(() => {
+    if (updateReady && stage === 'idle' && !pendingAlt) applyUpdate();
+  }, [updateReady, stage, pendingAlt]);
 
   // --- camera --------------------------------------------------------------
 
@@ -236,7 +274,7 @@ export default function App() {
       // The target is only an element when something is focused -- a bare
       // keypress on the document would otherwise blow up on .matches().
       if (e.target instanceof Element && e.target.matches('input, textarea, button')) return;
-      if (settingsOpen || exportOpen || treeOpen) return; // a modal owns the keyboard while it's up
+      if (settingsOpen || exportOpen || treeOpen || statsOpen) return; // a modal owns the keyboard while it's up
       if (e.key === 'Escape') goUp();
       else if (e.key === 'f' || e.key === 'F') fitAll();
       else if (e.key === '+' || e.key === '=') zoomBy(1.4, size.w / 2, size.h / 2);
@@ -261,12 +299,33 @@ export default function App() {
 
   const selected = selectedId ? displayModel?.byId.get(selectedId) : null;
 
+  // Hand a query to the search panel, closing whatever modal asked for it.
+  // `scopeId` narrows the search to that unit; without it the scope is kept.
+  const openSearch = useCallback((query, scopeId) => {
+    if (scopeId) setSearchScopeId(scopeId);
+    setSearchQuery(query);
+    setSearchOpen(true);
+    setSearchPicking(false);
+    setStatsOpen(false);
+  }, []);
+
   // --- render --------------------------------------------------------------
 
   if (stage === 'idle') {
     return (
       <div className="app-shell app-centered">
-        <FileDrop onSheet={parseSheet} onModel={loadModelFile} error={error} />
+        <FileDrop onSheet={parseSheet} onModel={loadModelFile} error={error} howToSignal={howToSignal} />
+        <AlternateFormatModal
+          open={!!pendingAlt}
+          fileName={pendingAlt?.fileName}
+          onShowHowTo={() => { setPendingAlt(null); setHowToSignal((n) => n + 1); }}
+          onCancel={() => setPendingAlt(null)}
+          onContinue={() => {
+            const { model: m, rows, fileName: name } = pendingAlt;
+            setPendingAlt(null);
+            showModel(m, rows, name);
+          }}
+        />
       </div>
     );
   }
@@ -281,6 +340,8 @@ export default function App() {
 
   return (
     <SettingsProvider settings={settings}>
+    {/* Censor mode hides the table: it is keyed by, and would show, the real codes. */}
+    <SupplementProvider rows={settings.censor ? NO_ROWS : supplementRows} onChange={setSupplementRows}>
     <MosPaletteProvider model={displayModel}>
       <div className="app-shell">
         <TopBar
@@ -330,7 +391,7 @@ export default function App() {
           )}
           {legendOpen && <Legend model={displayModel} onClose={() => setLegendOpen(false)} />}
           {selected && (
-            <SidePanel node={selected} model={displayModel} onGo={goTo} onClose={() => setSelectedId(null)} />
+            <SidePanel node={selected} model={displayModel} onGo={goTo} onSearch={openSearch} onClose={() => setSelectedId(null)} />
           )}
         </div>
 
@@ -350,6 +411,8 @@ export default function App() {
           <span className="d-none d-lg-inline">Esc = up | F = fit | scroll = zoom | drag = pan</span>
           <div className="vr" />
           <span className="d-none d-lg-inline">Developed by 2LT Korbin Deary</span>
+          <div className="vr" />
+          <span title={`Built ${__BUILD_TIME__}`}>v{__APP_VERSION__}</span>
         </div>
 
         <SettingsModal
@@ -362,12 +425,9 @@ export default function App() {
         <StatsModal
           open={statsOpen}
           model={displayModel}
+          censored={settings.censor}
           onClose={() => setStatsOpen(false)}
-          onSearch={(query) => {
-            setSearchQuery(query);
-            setSearchOpen(true);
-            setSearchPicking(false);
-          }}
+          onSearch={openSearch}
         />
 
         <WarningsModal
@@ -379,6 +439,8 @@ export default function App() {
         <ExportModal
           open={exportOpen}
           model={displayModel}
+          supplementCount={settings.censor ? 0 : supplementRows.length}
+          censored={settings.censor}
           onExportModel={exportModel}
           onClose={() => setExportOpen(false)}
         />
@@ -389,8 +451,19 @@ export default function App() {
           onGo={goTo}
           onClose={() => setTreeOpen(false)}
         />
+
+        <DetailModals model={displayModel} onSearch={openSearch} />
+
+        <BusyToast />
+
+        <UpdateToast
+          open={updateReady && !updateDeferred}
+          onReload={applyUpdate}
+          onLater={() => setUpdateDeferred(true)}
+        />
       </div>
     </MosPaletteProvider>
+    </SupplementProvider>
     </SettingsProvider>
   );
 }

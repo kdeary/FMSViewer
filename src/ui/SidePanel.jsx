@@ -1,16 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MosBar from '../view/MosBar.jsx';
 import ImagePlaceholder from '../view/ImagePlaceholder.jsx';
 import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
 import { useMosSpec } from '../view/useMosSpec.js';
-import { sortEquipmentList } from '../model/rollups.js';
 import { titleCut } from '../model/taxonomy.js';
 import { exportNodeToExcel } from '../model/exportExcel.js';
+import { withBusyToast } from '../view/busy.js';
+import { useDetailActions } from '../view/Supplement.jsx';
+import { AssignedEquipment, ContainedEquipment } from './EquipmentSection.jsx';
 
 /** Everything about the selected node, at full fidelity, regardless of zoom. */
-export default function SidePanel({ node, model, onClose, onGo }) {
+export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
   const mosInfo = useMosInfo();
+  // Which equipment accordions are open. Kept across selections, so a reader
+  // browsing units with the contained list open keeps seeing it.
+  const [openEq, setOpenEq] = useState({ assigned: true, contained: false });
+  const toggleEq = (key) => setOpenEq((o) => ({ ...o, [key]: !o[key] }));
+  // Open equipment-tag groups inside the contained list; also kept across selections.
+  const [openTags, setOpenTags] = useState(() => new Set());
+  const toggleTag = (tag) => setOpenTags((prev) => {
+    const next = new Set(prev);
+    if (next.has(tag)) next.delete(tag); else next.add(tag);
+    return next;
+  });
+  const { openMos } = useDetailActions();
   const spec = useMosSpec(node && node.kind === 'BL' ? node.mos : null);
   if (!node) return null;
   const r = node.roll;
@@ -34,7 +48,7 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           type="button"
           className="btn btn-outline-info btn-sm px-2"
           title="Export to Excel"
-          onClick={() => exportNodeToExcel(node, model)}
+          onClick={() => withBusyToast(`Exporting ${node.title} to Excel…`, () => exportNodeToExcel(node, model))}
         >
           <i className="bi bi-download" />
         </button>
@@ -48,11 +62,13 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           {isBillet ? (
             <>
               <dt className="col-5">MOS</dt>
-              <dd className="col-7 mb-0" style={{ color: mosInfo(node.mos).text }}>
-                {node.mos || '—'}{' '}
-                <span className="text-body-secondary">
-                  {spec ? spec.title : mosInfo(node.mos).label}
-                </span>
+              <dd className="col-7 mb-0">
+                {node.mos ? (
+                  <button type="button" className="eq-link" onClick={() => openMos(node.mos)} title="Show MOS details">
+                    <span style={{ color: mosInfo(node.mos).text }}>{node.mos}</span>{' '}
+                    <span className="text-body-secondary">{mosInfo(node.mos).title || mosInfo(node.mos).label}</span>
+                  </button>
+                ) : '—'}
               </dd>
               <dt className="col-5">Grade</dt><dd className="col-7 mb-0">{node.grade || '—'}</dd>
               <dt className="col-5">POSCO</dt><dd className="col-7 mb-0">{node.poscode || '—'}</dd>
@@ -76,6 +92,16 @@ export default function SidePanel({ node, model, onClose, onGo }) {
           <dd className="col-7 mb-0">{r.eqLines} lines · {r.eqQty} items</dd>
         </dl>
 
+        {isBillet && mosInfo(node.mos).description && (
+          <section className="mos-spec">
+            <h3 className="h6 mt-4 mb-2">
+              About this MOS{' '}
+              <span className="text-body-secondary fw-normal small">(Supplement Table)</span>
+            </h3>
+            <p className="small mb-0">{mosInfo(node.mos).description}</p>
+          </section>
+        )}
+
         {isBillet && spec && (
           <section className="mos-spec">
             <h3 className="h6 mt-4 mb-2">
@@ -95,32 +121,20 @@ export default function SidePanel({ node, model, onClose, onGo }) {
         )}
 
         {node.equipment.length > 0 && (
-          <>
-            <h3 className="h6 mt-4 mb-2">
-              Assigned equipment <span className="text-body-secondary fw-normal">({node.equipment.length})</span>
-            </h3>
-            <table className="table table-sm table-dark table-borderless small mb-0">
-              <thead>
-                <tr className="text-body-secondary">
-                  <th scope="col">LIN</th><th scope="col">Nomenclature</th>
-                  <th scope="col" className="text-end">Qty</th><th scope="col" className="text-end">ERC</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortEquipmentList(node.equipment, node.globalCatCounts || node.catCounts).map((e, i) => (
-                  <tr key={`${e.lin}-${i}`}>
-                    <td className="font-monospace">{e.lin}</td>
-                    <td>{e.name}</td>
-                    <td className="text-end">{e.qty}</td>
-                    <td className="text-end">{e.erc || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="text-body-secondary small mt-1 mb-0 fst-italic">
-              Note: Displayed equipment is assigned directly to this unit element, not a rollup of sub-unit equipment.
-            </p>
-          </>
+          <AssignedEquipment node={node} open={openEq.assigned} onToggle={() => toggleEq('assigned')} />
+        )}
+
+        {node.childIds.length > 0 && node.allEq.length > 0 && (
+          <ContainedEquipment
+            key={node.id}
+            node={node}
+            model={model}
+            open={openEq.contained}
+            onToggle={() => toggleEq('contained')}
+            openTags={openTags}
+            onToggleTag={toggleTag}
+            onSearch={onSearch}
+          />
         )}
 
         {children.length > 0 && (
@@ -144,3 +158,4 @@ export default function SidePanel({ node, model, onClose, onGo }) {
     </aside>
   );
 }
+
