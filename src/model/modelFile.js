@@ -3,6 +3,7 @@
 
 // v2: per-depth `levels` replaced the old per-node `revealW`, so level of
 import { getEquipmentCategory } from './rollups.js';
+import { packRows, unpackRows } from './supplement.js';
 
 export const MODEL_VERSION = 2;
 export const MODEL_EXT = '.fmsmodel.json';
@@ -59,9 +60,10 @@ export function hydrate(model) {
   return { ...model, byId, globalCatCounts };
 }
 
-export function toBlob(model) {
-  const { byId, ...rest } = model;
-  return new Blob([JSON.stringify(rest)], { type: 'application/json' });
+/** `supplementRows` is the Supplement Table, packed in alongside the structure. */
+export function toBlob(model, supplementRows = []) {
+  const { byId, supplement, ...rest } = model;
+  return new Blob([JSON.stringify({ ...rest, supplement: packRows(supplementRows) })], { type: 'application/json' });
 }
 
 export function suggestedFileName(model) {
@@ -96,5 +98,7 @@ export function parseModelFile(text) {
   if (!Array.isArray(data.levels) || !data.levels.length) {
     throw new ModelFileError('Model file is missing level sizes.');
   }
-  return hydrate({ meta: {}, ...data });
+  // The Supplement Table is optional: files saved before it existed have none.
+  const { supplement, ...rest } = data;
+  return { model: hydrate({ meta: {}, ...rest }), supplementRows: unpackRows(supplement) };
 }

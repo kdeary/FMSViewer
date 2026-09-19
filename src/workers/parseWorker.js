@@ -91,12 +91,15 @@ self.onmessage = async (e) => {
         uic: root.uic || meta.uic,
         rootTitle: root.title,
         runDate: meta.runDate,
+        // 'alternate' when the hierarchy had to be reconstructed; the app asks
+        // before opening one of those.
+        format: meta.format || 'standard',
         rowCount: meta.rowCount,
         skippedRows: meta.skipped,
         nodeCount: nodes.size,
         generatedAt: new Date().toISOString(),
         parseMs: Math.round(performance.now() - t0),
-        warnings: [...treeWarnings, ...rollWarnings],
+        warnings: [...(meta.warnings || []), ...treeWarnings, ...rollWarnings],
       },
       nodes: serializeNodes(nodes, order),
     };

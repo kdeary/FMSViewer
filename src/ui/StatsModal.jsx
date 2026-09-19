@@ -1,33 +1,66 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMosInfo } from '../view/MosPalette.jsx';
 import { getEquipmentCategory } from '../model/rollups.js';
 import { titleCut } from '../model/taxonomy.js';
+import { useSupplement, useDetail } from '../view/Supplement.jsx';
+import SupplementTab from './SupplementTab.jsx';
+import { useStreamed } from '../view/useStreamed.js';
+import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
 
 /**
  * Unit Statistics Modal.
  * Has multiple tabs:
- *  - "General": Text strength summary & full MOS breakdown table (Code, Title [no parentheticals], Count).
+ *  - "Personnel": Text strength summary & full MOS breakdown table (Code, Title [no parentheticals], Count).
+ *    Clicking an MOS row opens its detail modal; the row's Search button searches for it.
  *  - "Equipment": Scrollable table of all unit equipment grouped by Equipment Category (6-char clean code).
  *    Uses accordions for categories with multiple items, flat rows for single-item categories.
  *    Sorted with ERC "P" priority first, then category count ASCENDING.
  *    A search bar filters items by nomenclature, LIN, ERC or category code; while
  *    filtering, matching categories auto-expand so hits are visible without clicking.
+ *  - "Supplement Table": AI prompt for LIN / MOS names and descriptions, the CSV import for its
+ *    answer, and the editable table itself.
+ *  - Clicking a LIN or nomenclature opens the equipment detail modal.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
-export default function StatsModal({ open, model, onClose, onSearch }) {
-  const [tab, setTab] = useState('general'); // 'general' | 'equipment'
+export default function StatsModal({ open, model, censored, onClose, onSearch }) {
+  const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'info'
   const [expandedCats, setExpandedCats] = useState(new Set());
   const [eqQuery, setEqQuery] = useState('');
   const mosInfo = useMosInfo();
+  const eqInfo = useSupplement();
+  const { detailOpen } = useDetail();
 
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
-  }, [open, onClose]);
 
   useEffect(() => { if (!open) setEqQuery(''); }, [open]);
+
+  // The Supplement Table tab stays mounted (hidden) once visited, so a long
+  // import or row load carries on -- with its progress on the tab -- while
+  // another tab is showing, and switching back doesn't rebuild it.
+  // The selected tab always counts as visited: the modal remembers its tab
+  // across closing, so it can reopen straight onto this one.
+  const [infoVisited, setInfoVisited] = useState(false);
+  const infoMounted = infoVisited || tab === 'info';
+  const [supProgress, setSupProgress] = useState(null);
+  useEffect(() => { if (open && tab === 'info') setInfoVisited(true); }, [open, tab]);
+  useEffect(() => { if (!open) { setInfoVisited(false); setSupProgress(null); } }, [open]);
+
+  // Closing from a Supplement Table full of rows first lets the tab clear its
+  // rows in chunks (with progress); every other close is immediate.
+  const [closing, setClosing] = useState(false);
+  useEffect(() => { if (!open) setClosing(false); }, [open]);
+  const requestClose = useCallback(() => {
+    if (closing) return;
+    if (tab === 'info' && infoMounted) setClosing(true);
+    else onClose();
+  }, [closing, tab, infoMounted, onClose]);
+
+  useEffect(() => {
+    // The equipment detail modal stacks on top of this one and owns Escape while it's up.
+    if (!open || detailOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [open, requestClose, detailOpen]);
 
   const root = useMemo(() => {
     if (!model || !model.rootId) return null;
@@ -90,7 +123,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
     for (const group of categorizedEquipment) {
       const catText = group.category.toLowerCase();
       const items = group.items.filter((item) => {
-        const hay = `${item.name || ''} ${item.lin || ''} ${item.erc || ''} ${catText}`.toLowerCase();
+        const hay = `${item.name || ''} ${eqInfo.getLin(item.lin)?.name || ''} ${item.lin || ''} ${item.erc || ''} ${catText}`.toLowerCase();
         return terms.every((t) => hay.includes(t));
       });
       if (!items.length) continue;
@@ -99,9 +132,23 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
       out.push({ ...group, items, totalQty, hasP });
     }
     return out;
-  }, [categorizedEquipment, eqQuery]);
+  }, [categorizedEquipment, eqQuery, eqInfo]);
 
   const isFiltering = eqQuery.trim().length > 0;
+
+  // Long tables stream in a chunk at a time (see useStreamed), starting over
+  // whenever the modal opens, the tab changes or the filter does, so switching
+  // tabs paints straight away instead of freezing while every row mounts.
+  const mosStream = useStreamed(root?.topMos || [], `${open}|${tab}|${root?.id}`);
+  const eqStream = useStreamed(filteredEquipment, `${open}|${tab}|${eqQuery}`, { first: 30, step: 40 });
+
+  // What each tab is still loading, as { label, pct } or null.
+  const tabProgress = {
+    personnel: mosStream.done ? null : { label: `Loading MOSs… ${mosStream.shown.length} of ${mosStream.total}`, pct: mosStream.progress * 100 },
+    equipment: eqStream.done ? null : { label: `Loading categories… ${eqStream.shown.length} of ${eqStream.total}`, pct: eqStream.progress * 100 },
+    info: supProgress,
+  };
+  const activeProgress = tabProgress[tab];
 
   const filteredTotals = useMemo(() => {
     let qty = 0;
@@ -129,6 +176,19 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
     }
   };
 
+  // LIN and nomenclature open the detail modal; the rest of the row still searches.
+  const openDetail = (e, item) => { e.stopPropagation(); eqInfo.open(item); };
+  const renderName = (item) => (
+    <button type="button" className="eq-link" onClick={(e) => openDetail(e, item)} title={item.name}>
+      {eqInfo.displayName(item) || '—'}
+    </button>
+  );
+  const renderLin = (item) => (item.lin ? (
+    <button type="button" className="eq-link font-monospace" onClick={(e) => openDetail(e, item)} title="Show equipment details">
+      <code>{item.lin}</code>
+    </button>
+  ) : <code>—</code>);
+
   if (!open || !root) return null;
 
   const r = root.roll;
@@ -141,9 +201,9 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
         role="dialog"
         aria-modal="true"
         aria-label="Unit Statistics"
-        onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        onMouseDown={(e) => { if (e.target === e.currentTarget) requestClose(); }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${tab === 'info' ? 'modal-xl' : 'modal-lg'}`}>
           <div className="modal-content">
             <div className="modal-header d-flex align-items-center justify-content-between py-2">
               <div className="d-flex align-items-center gap-2 overflow-hidden">
@@ -154,7 +214,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                   </span>
                 )}
               </div>
-              <button type="button" className="btn-close ms-2" aria-label="Close" onClick={onClose} />
+              <button type="button" className="btn-close ms-2" aria-label="Close" onClick={requestClose} disabled={closing} />
             </div>
 
             <div className="modal-header border-bottom-0 py-1 bg-body-tertiary">
@@ -162,10 +222,11 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                 <li className="nav-item">
                   <button
                     type="button"
-                    className={`nav-link ${tab === 'general' ? 'active' : ''}`}
-                    onClick={() => setTab('general')}
+                    className={`nav-link ${tab === 'personnel' ? 'active' : ''}`}
+                    onClick={() => setTab('personnel')}
                   >
-                    General
+                    Personnel
+                    {tab === 'personnel' && tabProgress.personnel && <TabProgress pct={tabProgress.personnel.pct} />}
                   </button>
                 </li>
                 <li className="nav-item">
@@ -175,13 +236,29 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                     onClick={() => setTab('equipment')}
                   >
                     Equipment ({categorizedEquipment.length} Categories)
+                    {tab === 'equipment' && tabProgress.equipment && <TabProgress pct={tabProgress.equipment.pct} />}
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className={`nav-link ${tab === 'info' ? 'active' : ''}`}
+                    onClick={() => setTab('info')}
+                  >
+                    Supplement Table
+                    {tabProgress.info && <TabProgress pct={tabProgress.info.pct} />}
                   </button>
                 </li>
               </ul>
             </div>
 
             <div className="modal-body p-3">
-              {tab === 'general' && (
+              {activeProgress && (
+                <div className="stats-progress">
+                  <ProgressStrip label={activeProgress.label} pct={activeProgress.pct} />
+                </div>
+              )}
+              {tab === 'personnel' && (
                 <div>
                   {/* General Strength Text Summary */}
                   <div className="p-2 mb-3 border rounded bg-body-tertiary text-body-secondary small d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -198,7 +275,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
 
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <h3 className="h6 fw-semibold mb-0">MOS Breakdown ({root.topMos.length} Unique)</h3>
-                    <span className="small text-body-secondary">Click row to search with MOS: tag</span>
+                    <span className="small text-body-secondary">Click a row for MOS details</span>
                   </div>
 
                   <div className="table-responsive stats-table-container">
@@ -207,19 +284,20 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                         <tr>
                           <th scope="col" style={{ width: '85px' }}>Code</th>
                           <th scope="col">Specialty / Title</th>
-                          <th scope="col" className="text-end" style={{ width: '90px' }}>Count</th>
+                          <th scope="col" className="text-end" style={{ width: '70px' }}>Count</th>
+                          <th scope="col" style={{ width: '84px' }}><span className="visually-hidden">Search</span></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {root.topMos.map(({ mos, n }) => {
+                        {mosStream.shown.map(({ mos, n }) => {
                           const info = mosInfo(mos);
                           const cleanTitle = titleCut(info.title || info.label || '');
                           return (
                             <tr
                               key={mos}
-                              onClick={() => handleRowClick(`MOS:${mos}`)}
+                              onClick={() => eqInfo.openMos(mos)}
                               style={{ cursor: 'pointer' }}
-                              title={`Click to search for MOS:${mos}`}
+                              title={`Show details for MOS ${mos}`}
                             >
                               <td>
                                 <span className="d-inline-flex align-items-center gap-1">
@@ -229,9 +307,20 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                               </td>
                               <td>{cleanTitle}</td>
                               <td className="text-end fw-semibold">{n}</td>
+                              <td className="text-end">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-info btn-xs py-0 px-2"
+                                  title={`Search for MOS:${mos}`}
+                                  onClick={(e) => { e.stopPropagation(); handleRowClick(`MOS:${mos}`); }}
+                                >
+                                  <i className="bi bi-search me-1" aria-hidden="true" />Search
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
+                        {!mosStream.done && <StreamingRow colSpan={4} shown={mosStream.shown.length} total={mosStream.total} what="MOSs" />}
                       </tbody>
                     </table>
                   </div>
@@ -264,7 +353,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
 
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <span className="small text-body-secondary">
-                      ERC P items at top · Sorted ascending by category count · Click item to search tag
+                      ERC P items at top · Sorted ascending by category count · Click LIN/name for details, row to search
                     </span>
                     <span className="badge bg-secondary-subtle text-secondary-emphasis">
                       {isFiltering
@@ -284,7 +373,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredEquipment.map((group) => {
+                        {eqStream.shown.map((group) => {
                           const isMulti = group.items.length > 1;
                           const isExpanded = isFiltering || expandedCats.has(group.category);
 
@@ -300,8 +389,8 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                                 style={{ cursor: 'pointer' }}
                                 title={`Click to search for ${targetQuery}`}
                               >
-                                <td className="fw-medium">{singleItem.name || '—'}</td>
-                                <td><code>{singleItem.lin || '—'}</code></td>
+                                <td className="fw-medium">{renderName(singleItem)}</td>
+                                <td>{renderLin(singleItem)}</td>
                                 <td>
                                   {singleItem.erc && (
                                     <span className={`badge ${isP ? 'bg-warning-subtle text-warning-emphasis fw-bold' : 'bg-body-secondary text-body'}`}>
@@ -364,9 +453,9 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                                     >
                                       <td className="ps-4 fw-medium text-body-secondary">
                                         <i className="bi bi-arrow-return-right me-2 text-body-secondary" />
-                                        {item.name || '—'}
+                                        {renderName(item)}
                                       </td>
-                                      <td><code>{item.lin || '—'}</code></td>
+                                      <td>{renderLin(item)}</td>
                                       <td>
                                         {item.erc && (
                                           <span className={`badge ${isP ? 'bg-warning-subtle text-warning-emphasis fw-bold' : 'bg-body-secondary text-body'}`}>
@@ -381,6 +470,7 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                             </React.Fragment>
                           );
                         })}
+                        {!eqStream.done && <StreamingRow colSpan={4} shown={eqStream.shown.length} total={eqStream.total} what="categories" />}
                         {!filteredEquipment.length && (
                           <tr>
                             <td colSpan={4} className="text-center text-body-secondary py-4">
@@ -393,15 +483,41 @@ export default function StatsModal({ open, model, onClose, onSearch }) {
                   </div>
                 </div>
               )}
+
+              {infoMounted && (
+                <div hidden={tab !== 'info'}>
+                  <SupplementTab
+                    root={root}
+                    censored={censored}
+                    onProgress={setSupProgress}
+                    active={tab === 'info'}
+                    closing={closing}
+                    onDrained={onClose}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="modal-footer py-2 border-top-0">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>Close</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={requestClose} disabled={closing}>
+                {closing ? 'Closing…' : 'Close'}
+              </button>
             </div>
           </div>
         </div>
       </div>
       <div className="modal-backdrop show" />
     </>
+  );
+}
+
+function StreamingRow({ colSpan, shown, total, what }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className="text-center text-body-secondary small py-2">
+        <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+        Loading {what}… {shown} of {total}
+      </td>
+    </tr>
   );
 }

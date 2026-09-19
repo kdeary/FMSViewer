@@ -7,12 +7,16 @@ const SHEET_RE = /\.(xlsx|xlsm|xlsb|xls|csv)$/i;
 const MODEL_RE = /\.json$/i;
 
 /** Landing screen: take an FMSWeb export, or a model file saved earlier. */
-export default function FileDrop({ onSheet, onModel, error }) {
+export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
   const inputRef = useRef(null);
   const [over, setOver] = useState(false);
   const [howTo, setHowTo] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [loadingExample, setLoadingExample] = useState(false);
+
+  // The app bumps `howToSignal` to open the instructions from outside, e.g.
+  // after declining an alternate-format spreadsheet.
+  useEffect(() => { if (howToSignal) setHowTo(true); }, [howToSignal]);
 
   useEffect(() => {
     if (!imgModalOpen) return undefined;

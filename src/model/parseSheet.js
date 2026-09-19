@@ -71,6 +71,7 @@ export function mosOf(poscode) {
  */
 export function parseRows(rows, onProgress = () => { }) {
   if (!rows || rows.length < 2) throw new ParseError('Spreadsheet has no data rows.');
+  if (isAlternateFormat(rows[0])) return parseAlternateRows(rows, onProgress);
 
   const col = mapHeaders(rows[0]);
   const has = (name) => name in col;
@@ -150,4 +151,188 @@ export function parseRows(rows, onProgress = () => { }) {
 
   onProgress(1);
   return { nodes, equipment, meta, columns: COLUMNS.filter(has) };
+}
+
+// --------------------------------------------------------------------------
+// Alternate export format.
+//
+// Same rows (UN / CR / BL / EQ, and EQ rows keyed by their owner's ID), but
+// with ORG in place of ORGTYPE, LIN and AUTHQTY columns, and -- the hard part
+// -- no PARENTID. The hierarchy is rebuilt from paragraph numbers and titles,
+// following the MTOE conventions the export itself follows:
+//   * A UN with no PARNO is the company (the first one) or a platoon (the rest).
+//   * Each paragraph's first UN is its section; any further UNs in the
+//     paragraph are sub-sections of it, and its crews and billets hang off it.
+//   * A paragraph whose section is a "... Headquarters" opens the platoon its
+//     title best matches, and the paragraphs after it belong to that platoon
+//     until the next headquarters paragraph. "Company Headquarters" matches no
+//     platoon, so it and anything after it sit directly under the company.
+// What can't be recovered is which sub-section or crew inside a paragraph a
+// soldier belongs to, so billets and crews are placed at the section.
+
+const ALT_REQUIRED = ['ID', 'ORG', 'TITLE', 'PARNO'];
+
+export function isAlternateFormat(headerRow) {
+  const names = new Set((headerRow || []).map((c) => str(c).toUpperCase()));
+  return !names.has('PARENTID') && ALT_REQUIRED.every((c) => names.has(c));
+}
+
+const HQ_TITLE = /head\s*quarters|\bhqs?\b/i;
+// Words that say what kind of element something is rather than which one.
+const GENERIC_WORDS = new Set([
+  'and', 'of', 'the', 'for', 'headquarters', 'hq', 'hqs', 'section', 'platoon', 'plt', 'team', 'element',
+]);
+const titleWords = (title) => new Set(
+  String(title || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ')
+    .filter((w) => w && !GENERIC_WORDS.has(w)),
+);
+
+/**
+ * Best-matching platoon for a headquarters title: platoons not yet taken
+ * first, then most shared words, then the closest overall match.
+ */
+function matchPlatoon(title, platoons, taken) {
+  const words = titleWords(title);
+  let best = null;
+  let bestScore = null;
+  for (const p of platoons) {
+    const pw = titleWords(p.title);
+    let overlap = 0;
+    for (const w of words) if (pw.has(w)) overlap++;
+    if (!overlap) continue;
+    const score = [taken.has(p.id) ? 0 : 1, overlap, overlap / (words.size + pw.size - overlap)];
+    const better = !bestScore || score[0] - bestScore[0] || score[1] - bestScore[1] || score[2] - bestScore[2];
+    if (!bestScore || better > 0) { best = p; bestScore = score; }
+  }
+  return best;
+}
+
+const emptyNode = (id, fields) => ({
+  id,
+  parentId: '',
+  kind: 'UN',
+  title: '',
+  uic: '',
+  parno: '',
+  grade: '',
+  poscode: '',
+  mos: '',
+  sheet: { off: 0, wo: 0, enl: 0, mil: 0, civ: 0 },
+  childIds: [],
+  equipment: [],
+  ...fields,
+});
+
+function parseAlternateRows(rows, onProgress) {
+  const col = {};
+  rows[0].forEach((cell, i) => {
+    const key = str(cell).toUpperCase();
+    if (key && !(key in col)) col[key] = i;
+  });
+  const has = (name) => name in col;
+  const get = (row, name) => (has(name) ? row[col[name]] : undefined);
+
+  const nodes = new Map();
+  const equipment = new Map();
+  const meta = {
+    uic: '', runDate: '', rowCount: rows.length - 1, skipped: 0, format: 'alternate',
+    warnings: [
+      'This sheet is in the alternate FMS format, which has no parent links. The hierarchy was rebuilt '
+      + 'from paragraph numbers and titles; soldiers and vehicles are shown at their section, since the '
+      + 'sheet does not say which crew or sub-section they belong to.',
+    ],
+  };
+  const total = rows.length - 1;
+  const step = Math.max(1, Math.floor(total / 50));
+
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row) continue;
+    const id = str(get(row, 'ID'));
+    if (!id) { meta.skipped++; continue; }
+    const kind = str(get(row, 'ORG')).toUpperCase();
+    const title = str(get(row, 'TITLE'));
+    const qty = Math.max(1, num(get(row, 'AUTHQTY')));
+
+    if (kind === 'EQ') {
+      const lin = str(get(row, 'LIN'));
+      let lines = equipment.get(id);
+      if (!lines) { lines = []; equipment.set(id, lines); }
+      const dupe = lin && lines.find((l) => l.lin === lin && l.name === title);
+      if (dupe) dupe.qty += qty;
+      else lines.push({ lin, name: title, erc: str(get(row, 'ERC')), qty });
+    } else if (kind === 'UN' || kind === 'CR' || kind === 'BL') {
+      if (nodes.has(id)) { meta.skipped++; continue; }
+      const uic = str(get(row, 'UIC'));
+      const fields = { kind, title, uic, parno: str(get(row, 'PARNO')) };
+      if (kind === 'BL') {
+        fields.grade = str(get(row, 'GRADE'));
+        fields.poscode = str(get(row, 'POSCO'));
+        fields.mos = mosOf(fields.poscode);
+      }
+      nodes.set(id, emptyNode(id, fields));
+      // A billet line authorising several soldiers becomes that many billets.
+      if (kind === 'BL') for (let k = 2; k <= qty; k++) nodes.set(`${id}#${k}`, emptyNode(`${id}#${k}`, fields));
+      if (!meta.uic && uic) meta.uic = uic;
+    } else {
+      meta.skipped++;
+    }
+    if (r % step === 0) onProgress(r / total);
+  }
+
+  if (nodes.size === 0) throw new ParseError('No unit, crew or billet rows (ORG UN/CR/BL) were found.');
+
+  // Rebuild the hierarchy one UIC at a time.
+  const byUic = new Map();
+  for (const n of nodes.values()) {
+    let list = byUic.get(n.uic);
+    if (!list) { list = []; byUic.set(n.uic, list); }
+    list.push(n);
+  }
+
+  for (const [uic, list] of byUic) {
+    const tops = list.filter((n) => n.kind === 'UN' && !n.parno);
+    let company = tops[0];
+    if (!company) {
+      company = emptyNode(`__company__${uic}`, { title: uic || 'Unit', uic, synthetic: true });
+      nodes.set(company.id, company);
+    }
+    const platoons = tops.slice(1);
+    for (const p of platoons) p.parentId = company.id;
+
+    const paragraphs = new Map();
+    for (const n of list) {
+      if (!n.parno) continue;
+      let para = paragraphs.get(n.parno);
+      if (!para) { para = []; paragraphs.set(n.parno, para); }
+      para.push(n);
+    }
+    const parnos = [...paragraphs.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    const taken = new Set();
+    let platoon = null;
+    for (const parno of parnos) {
+      const members = paragraphs.get(parno);
+      let section = members.find((n) => n.kind === 'UN') || members.find((n) => n.kind === 'CR');
+      if (!section) {
+        section = emptyNode(`__para__${uic}__${parno}`, { title: `Paragraph ${parno}`, uic, parno, synthetic: true });
+        nodes.set(section.id, section);
+      }
+      for (const n of members) if (n !== section) n.parentId = section.id;
+
+      if (HQ_TITLE.test(section.title)) {
+        platoon = matchPlatoon(section.title, platoons, taken);
+        if (platoon) taken.add(platoon.id);
+      }
+      section.parentId = (platoon || company).id;
+    }
+  }
+
+  for (const [ownerId, lines] of equipment) {
+    const owner = nodes.get(ownerId);
+    if (owner) owner.equipment = lines;
+  }
+
+  onProgress(1);
+  return { nodes, equipment, meta, columns: Object.keys(col) };
 }
