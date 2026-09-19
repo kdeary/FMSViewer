@@ -1,12 +1,14 @@
 import React from 'react';
 import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
+import { useDetailActions } from '../view/Supplement.jsx';
 
 /** Colour key for the whole loaded structure, ordered by how common each MOS is. */
 export default function Legend({ model, onClose }) {
   // Titles come with the palette; the branch is only a fallback for codes
   // outside the enlisted chapter.
   const mosInfo = useMosInfo();
+  const { openMos } = useDetailActions();
   const root = model.byId.get(model.rootId);
 
   return (
@@ -33,13 +35,18 @@ export default function Legend({ model, onClose }) {
             const rawTitle = info.title || info.label || '';
             const cleanTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim();
             return (
-              <li key={mos} className="legend-mos d-flex gap-2 mb-1">
-                <i className="legend-swatch" style={{ background: info.color }} />
-                <span className="font-monospace">{mos}</span>
-                <span className="text-body-secondary flex-grow-1" title={cleanTitle}>
-                  {cleanTitle}
-                </span>
-                <span className="fw-semibold">{n}</span>
+              <li key={mos} className="mb-1">
+                <button
+                  type="button"
+                  className="legend-mos legend-mos-btn d-flex gap-2 w-100"
+                  onClick={() => openMos(mos)}
+                  title={`${cleanTitle} — show MOS details`}
+                >
+                  <i className="legend-swatch" style={{ background: info.color }} />
+                  <span className="font-monospace">{mos}</span>
+                  <span className="text-body-secondary flex-grow-1 text-start">{cleanTitle}</span>
+                  <span className="fw-semibold">{n}</span>
+                </button>
               </li>
             );
           })}
