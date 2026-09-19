@@ -49,9 +49,11 @@ export function parseSearchQuery(query) {
 }
 
 /**
+ * @param supplement the indexed Supplement Table (`indexSupplement`), optional.
+ *   Its LIN nomenclatures and MOS titles are searchable alongside the FMS text.
  * @returns [{ node, score, field, hint }] -- `field` says why it matched and `hint` is the matching text.
  */
-export function searchSubtree(model, scopeId, query) {
+export function searchSubtree(model, scopeId, query, supplement = null) {
   const parsed = parseSearchQuery(query);
   if (!parsed.term || !model) return [];
   const scope = model.byId.get(scopeId) || model.byId.get(model.rootId);
@@ -65,7 +67,7 @@ export function searchSubtree(model, scopeId, query) {
     if (!node) continue;
     for (const id of node.childIds) stack.push(id);
 
-    const hit = match(node, parsed);
+    const hit = match(node, parsed, supplement);
     if (hit) out.push({ node, ...hit });
   }
 
@@ -75,23 +77,34 @@ export function searchSubtree(model, scopeId, query) {
   return out.slice(0, MAX_RESULTS);
 }
 
-function match(node, parsed) {
+// Supplement Table lookups: the alternative name for a LIN / MOS, upper-cased, or ''.
+const supLin = (sup, lin) => (sup?.lin.get((lin || '').toUpperCase())?.name || '').toUpperCase();
+const supMos = (sup, mos) => (sup?.mos.get((mos || '').toUpperCase())?.name || '').toUpperCase();
+
+function match(node, parsed, sup) {
   const { prefix, term: q } = parsed;
   if (!q) return null;
+  // Equipment hints read with the supplement nomenclature when there is one.
+  const eqHint = (e) => `${e.lin} ${sup?.lin.get((e.lin || '').toUpperCase())?.name || e.name}`;
+  const mosHint = () => {
+    const title = sup?.mos.get((node.mos || '').toUpperCase())?.name;
+    return title ? `${node.mos} ${title}` : node.mos;
+  };
 
   if (prefix) {
     switch (prefix) {
       case 'MOS': {
         const mos = (node.mos || '').toUpperCase();
-        if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: node.mos };
-        if (mos.includes(q)) return { score: CODE_PREFIX, field: 'mos', hint: node.mos };
+        if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: mosHint() };
+        if (mos.includes(q)) return { score: CODE_PREFIX, field: 'mos', hint: mosHint() };
+        if (supMos(sup, node.mos).includes(q)) return { score: TITLE_PART, field: 'mos', hint: mosHint() };
         return null;
       }
       case 'LIN': {
         for (const e of node.equipment) {
           const lin = (e.lin || '').toUpperCase();
-          if (lin === q) return { score: EXACT_CODE, field: 'lin', hint: `${e.lin} ${e.name}` };
-          if (lin.includes(q)) return { score: CODE_PREFIX, field: 'lin', hint: `${e.lin} ${e.name}` };
+          if (lin === q) return { score: EXACT_CODE, field: 'lin', hint: eqHint(e) };
+          if (lin.includes(q)) return { score: CODE_PREFIX, field: 'lin', hint: eqHint(e) };
         }
         return null;
       }
@@ -99,8 +112,9 @@ function match(node, parsed) {
         for (const e of node.equipment) {
           const lin = (e.lin || '').toUpperCase();
           const name = (e.name || '').toUpperCase();
-          if (lin === q || name === q) return { score: EXACT_CODE, field: 'lin', hint: `${e.lin} ${e.name}` };
-          if (lin.includes(q) || name.includes(q)) return { score: EQUIP, field: 'lin', hint: `${e.lin} ${e.name}` };
+          const nom = supLin(sup, e.lin);
+          if (lin === q || name === q || nom === q) return { score: EXACT_CODE, field: 'lin', hint: eqHint(e) };
+          if (lin.includes(q) || name.includes(q) || nom.includes(q)) return { score: EQUIP, field: 'lin', hint: eqHint(e) };
         }
         return null;
       }
@@ -109,6 +123,7 @@ function match(node, parsed) {
         if (title === q) return { score: EXACT_CODE, field: 'title', hint: node.title };
         if (title.startsWith(q)) return { score: TITLE_START, field: 'title', hint: node.title };
         if (title.includes(q)) return { score: TITLE_PART, field: 'title', hint: node.title };
+  if (node.mos && supMos(sup, node.mos).includes(q)) return { score: TITLE_PART, field: 'mos', hint: mosHint() };
         return null;
       }
       case 'GRADE': {
@@ -163,7 +178,7 @@ function match(node, parsed) {
   const grade = (node.grade || '').toUpperCase();
   const uic = (node.uic || '').toUpperCase();
 
-  if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: node.mos };
+  if (mos === q) return { score: EXACT_CODE, field: 'mos', hint: mosHint() };
   if (posco === q) return { score: EXACT_CODE, field: 'poscode', hint: node.poscode };
   if (uic === q) return { score: EXACT_CODE, field: 'uic', hint: node.uic };
   if (grade === q || grade.replace('-', '') === q.replace('-', '')) {
@@ -172,7 +187,7 @@ function match(node, parsed) {
 
   for (const e of node.equipment) {
     if ((e.lin || '').toUpperCase() === q) {
-      return { score: EXACT_CODE, field: 'lin', hint: `${e.lin} ${e.name}` };
+      return { score: EXACT_CODE, field: 'lin', hint: eqHint(e) };
     }
   }
 
@@ -181,12 +196,13 @@ function match(node, parsed) {
   if (posco.startsWith(q)) return { score: CODE_PREFIX, field: 'poscode', hint: node.poscode };
   if (uic.startsWith(q)) return { score: CODE_PREFIX, field: 'uic', hint: node.uic };
   if (title.includes(q)) return { score: TITLE_PART, field: 'title', hint: node.title };
+  if (node.mos && supMos(sup, node.mos).includes(q)) return { score: TITLE_PART, field: 'mos', hint: mosHint() };
 
   for (const e of node.equipment) {
     const lin = (e.lin || '').toUpperCase();
     const name = (e.name || '').toUpperCase();
-    if (lin.startsWith(q)) return { score: CODE_PREFIX, field: 'lin', hint: `${e.lin} ${e.name}` };
-    if (name.includes(q)) return { score: EQUIP, field: 'lin', hint: `${e.lin} ${e.name}` };
+    if (lin.startsWith(q)) return { score: CODE_PREFIX, field: 'lin', hint: eqHint(e) };
+    if (name.includes(q) || supLin(sup, e.lin).includes(q)) return { score: EQUIP, field: 'lin', hint: eqHint(e) };
   }
   return null;
 }

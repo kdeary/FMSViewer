@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { searchSubtree, fieldLabel, ancestorTrail } from '../model/search.js';
 import { KIND_STYLE, abbreviateTitle } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
+import { useSupplement } from '../view/Supplement.jsx';
 
 /**
  * Find something inside a chosen unit.
@@ -15,6 +16,7 @@ export default function SearchPanel({
   const [showHelp, setShowHelp] = useState(false);
   const input = useRef(null);
   const mosInfo = useMosInfo();
+  const { lin: supLin, mos: supMos } = useSupplement();
 
   useEffect(() => {
     if (initialQuery) setQ(initialQuery);
@@ -22,8 +24,8 @@ export default function SearchPanel({
   }, [initialQuery]);
 
   const results = useMemo(
-    () => searchSubtree(model, scopeNode?.id, q),
-    [model, scopeNode, q],
+    () => searchSubtree(model, scopeNode?.id, q, { lin: supLin, mos: supMos }),
+    [model, scopeNode, q, supLin, supMos],
   );
 
   return (
@@ -160,7 +162,8 @@ export default function SearchPanel({
               <div><code className="text-info-emphasis">PAR:01</code> — Search Paragraph Number</div>
             </div>
             <div className="mt-2 pt-2 border-top text-body-tertiary" style={{ fontSize: '0.78rem' }}>
-              Plain text (e.g. <code>91B</code> or <code>M4</code>) searches across all fields simultaneously.
+              Plain text (e.g. <code>91B</code> or <code>M4</code>) searches across all fields simultaneously,
+              including LIN nomenclatures and MOS titles from the Supplement Table.
             </div>
           </div>
         </div>
