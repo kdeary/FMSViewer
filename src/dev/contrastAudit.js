@@ -10,8 +10,8 @@
  * Never shipped -- main.jsx only imports it under import.meta.env.DEV, so the
  * whole module is dropped from production builds.
  *
- * Console:
- *   __contrastAudit()      re-run now, returns the grouped failures
+ * Console (nothing runs or logs on its own):
+ *   __contrastAudit()      run now, returns the grouped failures
  *   __contrastAudit(3)     only report worse than 3:1
  */
 
@@ -149,39 +149,13 @@ export function auditContrast(threshold = AA_NORMAL) {
   return [...groups.values()].sort((a, b) => a.ratio - b.ratio);
 }
 
-/** Re-checks shortly after the DOM settles, so a newly opened panel is covered. */
+/**
+ * Exposes the audit on the console, run on demand only. It used to re-run
+ * (and log) after every DOM change, which walked every painted element's
+ * computed style each time -- noisy, and a visible stall in dev after any
+ * large change such as closing a modal full of rows.
+ */
 export function installContrastAudit() {
   if (typeof window === 'undefined') return;
-
-  window.__contrastAudit = (threshold) => {
-    const failures = auditContrast(threshold);
-    if (failures.length) console.table(failures.map(({ node, ...row }) => row));
-    else console.info('[contrast] no failures');
-    return failures;
-  };
-
-  let timer = 0;
-  const schedule = () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      const failures = auditContrast();
-      if (!failures.length) return;
-      const worst = failures.filter((f) => f.ratio < 3);
-      const log = worst.length ? console.error : console.warn;
-      log(
-        `[contrast] ${failures.length} pairing(s) under ${AA_NORMAL}:1` +
-          (worst.length ? `, ${worst.length} under 3:1` : '') +
-          ' -- see the contrast contract in styles/app.css. __contrastAudit() for detail.',
-      );
-      console.table(failures.map(({ node, ...row }) => row));
-    }, 600);
-  };
-
-  new MutationObserver(schedule).observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['class', 'style'],
-  });
-  schedule();
+  window.__contrastAudit = (threshold) => auditContrast(threshold);
 }
