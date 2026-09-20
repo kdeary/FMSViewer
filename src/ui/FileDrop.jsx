@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import HowToModal from './HowToModal.jsx';
+import { canInstall, onInstallAvailable, promptInstall } from '../pwa/install.js';
 import exampleImg from '../../images/example.png';
 import exampleUnitUrl from '../../data/EXAMPLE_UNIT.xlsx?url';
 
@@ -13,6 +14,11 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
   const [howTo, setHowTo] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [loadingExample, setLoadingExample] = useState(false);
+  const [installable, setInstallable] = useState(canInstall);
+
+  // Only offered while the browser actually has a prompt waiting: it arrives
+  // a moment after load, and is gone once used or once the app is installed.
+  useEffect(() => onInstallAvailable(() => setInstallable(canInstall())), []);
 
   // The app bumps `howToSignal` to open the instructions from outside, e.g.
   // after declining an alternate-format spreadsheet.
@@ -72,7 +78,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
               </li>
             </ul>
 
-            <div className="mb-3">
+            <div className="mb-3 d-grid gap-2">
               <button
                 type="button"
                 className="btn btn-outline-info btn-sm w-100"
@@ -80,6 +86,16 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
               >
                 How do I get the spreadsheet?
               </button>
+              {installable && (
+                <button
+                  type="button"
+                  className="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  onClick={() => { promptInstall(); }}
+                >
+                  <i className="bi bi-download" aria-hidden="true" />
+                  Install FMSViewer as an app
+                </button>
+              )}
             </div>
 
             <div className="example-preview mt-auto pt-3">

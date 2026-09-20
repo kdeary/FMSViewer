@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './vendor/bootstrap.bundle.min.js';
 import App from './App.jsx';
+import { watchInstallPrompt } from './pwa/install.js';
 import { registerServiceWorker } from './pwa/register.js';
 import './styles/app.css';
 import USG, { describeToSvg, parse, renderSymbol } from './vendor/usg.min.js';
@@ -39,6 +40,11 @@ if (import.meta.env.DEV) {
 // Production only: in development the service worker would serve stale
 // modules over Vite's hot reloading.
 if (import.meta.env.PROD) registerServiceWorker();
+
+// Catch the browser's install offer before it shows a banner of its own, so
+// the landing page can offer it on a button instead. Harmless in development,
+// where no service worker means no browser will make the offer.
+watchInstallPrompt();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
