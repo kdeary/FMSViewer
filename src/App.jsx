@@ -274,7 +274,7 @@ export default function App() {
       // The target is only an element when something is focused -- a bare
       // keypress on the document would otherwise blow up on .matches().
       if (e.target instanceof Element && e.target.matches('input, textarea, button')) return;
-      if (settingsOpen || exportOpen || treeOpen || statsOpen) return; // a modal owns the keyboard while it's up
+      if (settingsOpen || exportOpen || treeOpen || statsOpen || warningsOpen) return; // a modal owns the keyboard while it's up
       if (e.key === 'Escape') goUp();
       else if (e.key === 'f' || e.key === 'F') fitAll();
       else if (e.key === '+' || e.key === '=') zoomBy(1.4, size.w / 2, size.h / 2);
@@ -282,7 +282,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [goUp, fitAll, zoomBy, size, settingsOpen, exportOpen]);
+  }, [goUp, fitAll, zoomBy, size, settingsOpen, exportOpen, treeOpen, statsOpen, warningsOpen]);
 
   // Root -> focused node, for the breadcrumb trail.
   const path = useMemo(() => {
