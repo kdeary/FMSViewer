@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!--
+    Source for public/og-image.png (the social preview card).
+    Re-export after editing with:  npm run og-image
+  -->
+  <defs>
+    <!-- Soft 45° edge between the slate background and the green corner. -->
+    <linearGradient id="corner" gradientUnits="userSpaceOnUse" x1="668" y1="668" x2="712" y2="712">
+      <stop offset="0" stop-color="#272b30" />
+      <stop offset="1" stop-color="#2c3d37" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#corner)" />
+  <rect width="16" height="630" fill="#4d8760" />
+
+  <!-- Logo mark -->
+  <rect x="96" y="104" width="132" height="132" fill="#3b6b4b" />
+  <g font-family="'Segoe UI', system-ui, sans-serif" font-size="48" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <text x="132" y="157">F</text>
+    <text x="186" y="157">M</text>
+    <text x="132" y="219">S</text>
+    <text x="183" y="219">V</text>
+  </g>
+
+  <g font-family="'Segoe UI', system-ui, sans-serif">
+    <text x="96" y="384" font-size="92" font-weight="700" fill="#f5f8f6">FMSViewer</text>
+    <text x="96" y="439" font-size="40" fill="#9aa49e">Interactive force structure visualization</text>
+    <text x="96" y="500" font-size="27" fill="#7ea68b" xml:space="preserve">echelon visualization  ·  unit analytics  ·  comprehensive filtering</text>
+    <text x="96" y="564" font-size="26" fill="#6e7872">kdeary.github.io/FMSViewer</text>
+  </g>
+</svg>
