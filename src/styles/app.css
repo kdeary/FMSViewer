@@ -369,12 +369,13 @@ body { overflow: hidden; }
 .map-surface.is-panning, .map-surface.is-panning .nb { cursor: grabbing; }
 .map-surface.is-flying, .map-surface.is-flying .nb { cursor: progress; }
 
-/* No `will-change: transform` here. It pins the layer's raster and scales that
-   texture rather than re-rastering, which leaves every glyph in the map blurred
-   the moment you zoom past the scale it was drawn at. The translate3d() on this
-   element already gets it composited for panning; the raster has to stay live
-   because the scale is part of the same transform. */
-.world { position: absolute; top: 0; left: 0; width: 0; height: 0; transform-origin: 0 0; }
+/* Untransformed at rest. While a zoom is moving, MapCanvas scales it from the
+   boxes' last layout to the live camera, and lays the boxes out again once the
+   camera settles. No `will-change` here: it would pin the raster, and the
+   boxes must re-raster crisp at that settled layout. The z-index makes it a
+   stacking context, so the boxes' depth z-indexes stay inside the map rather
+   than competing with the panels and overlays around it. */
+.world { position: absolute; top: 0; left: 0; width: 0; height: 0; transform-origin: 0 0; z-index: 0; }
 
 .map-count {
   position: absolute; right: 0.5rem; bottom: 0.4rem;

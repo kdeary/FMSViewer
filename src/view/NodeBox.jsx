@@ -9,6 +9,14 @@ const CHAR_EM = 0.52;
 // A header never shrinks below this on screen
 const MIN_HEADER_PX = 11;
 
+// Type sizes snap to a fixed ladder, 2^(1/16) (about 4.4%) apart. The browser
+// measures text per exact font size, and laying out at a size the page hasn't
+// used yet costs several times what a size it has seen does. Sizes read
+// straight off the zoom were new on every re-layout -- the bulk of what made
+// zooming slow on a big structure. On the ladder they keep coming round again.
+const FS_STEP = Math.log(2) / 16;
+const snapFontSize = (px) => Math.round(Math.exp(Math.round(Math.log(px) / FS_STEP) * FS_STEP) * 100) / 100;
+
 /**
  * Header type size in screen pixels.
  */
@@ -26,6 +34,9 @@ function headerFontSize(node, screenW, hh) {
  */
 function NodeBox({ node, view, face = 1, appear = 1, cam, selected, focused }) {
   const mosInfo = useMosInfo();
+  // An empty slot (see MapCanvas) keeps its element, just hidden, so the next
+  // box to need a slot can reuse it without touching the DOM order.
+  if (!node) return <div className="nb" hidden />;
   const { rect: r, kind } = node;
   const isLeaf = node.childIds.length === 0;
 
@@ -36,8 +47,8 @@ function NodeBox({ node, view, face = 1, appear = 1, cam, selected, focused }) {
   const screenH = r.h * cam.k;
 
   const hh = Math.max(14, headerHeight(r) * cam.k);
-  const headFs = headerFontSize(node, screenW, hh);
-  const bodyFs = Math.max(9, Math.min(screenW * 0.048, screenH * 0.07));
+  const headFs = snapFontSize(headerFontSize(node, screenW, hh));
+  const bodyFs = snapFontSize(Math.max(9, Math.min(screenW * 0.048, screenH * 0.07)));
 
   const accent = kind === 'BL' && node.mos ? mosInfo(node.mos).color : undefined;
   const cls = [
@@ -57,6 +68,9 @@ function NodeBox({ node, view, face = 1, appear = 1, cam, selected, focused }) {
         width: `${screenW.toFixed(2)}px`,
         height: `${screenH.toFixed(2)}px`,
         opacity: appear,
+        // Stacked by depth: boxes sit in slots, not tree order, so a child's
+        // place in the DOM no longer puts it above its parent.
+        zIndex: node.depth,
         pointerEvents: appear < 0.3 ? 'none' : undefined,
         '--accent': accent,
         '--hh': `${hh.toFixed(2)}px`,

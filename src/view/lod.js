@@ -48,11 +48,6 @@ export function getNodeEffectiveTextWorld(node, byId) {
   return node._maxChildTextWorld;
 }
 
-const K_STEP = Math.log(1.04);
-export function quantizeK(k) {
-  return Math.exp(Math.round(Math.log(Math.max(k, 1e-6)) / K_STEP) * K_STEP);
-}
-
 /**
  * The zoom level at which a node's children become readable (>= minTextPx).
  */
