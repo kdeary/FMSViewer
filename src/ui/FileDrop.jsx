@@ -14,6 +14,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
   const [howTo, setHowTo] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [loadingExample, setLoadingExample] = useState(false);
+  const [exampleNotice, setExampleNotice] = useState(false);
   const [installable, setInstallable] = useState(canInstall);
 
   // Only offered while the browser actually has a prompt waiting: it arrives
@@ -25,11 +26,15 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
   useEffect(() => { if (howToSignal) setHowTo(true); }, [howToSignal]);
 
   useEffect(() => {
-    if (!imgModalOpen) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') setImgModalOpen(false); };
+    if (!imgModalOpen && !exampleNotice) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      setImgModalOpen(false);
+      setExampleNotice(false);
+    };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [imgModalOpen]);
+  }, [imgModalOpen, exampleNotice]);
 
   const handle = (file) => {
     if (!file) return;
@@ -62,8 +67,8 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
           <section className="intro-card">
             <h1 className="h4 mb-2">FMSViewer</h1>
             <p className="text-body-secondary mb-3">
-              Turns an FMSWeb structure export into a map you can move around in.
-              Units are nested inside units, down to individual soldiers and their equipment.
+              Turns an FMSWeb spreadsheet file into a map you can move around in.
+              Units are nested inside units, down to individual soldier billets and their assigned equipment.
             </p>
 
             <ul className="intro-points mb-3">
@@ -71,32 +76,12 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
                 <strong>Zoom and pan.</strong> Explore the hierarchical unit structure.
               </li>
               <li>
-                <strong>Search and filter.</strong> Use the search bar to find units by name, UIC, or equipment.
+                <strong>Search and filter.</strong> Use the search bar to find units by name, LIN, MOS, equipment, etc.
               </li>
               <li>
-                <strong>Local processing.</strong> There is no server and no data is uploaded anywhere.
+                <strong>Local processing.</strong> For both speed and security, imported data is not uploaded to a server. This tool can also work offline.
               </li>
             </ul>
-
-            <div className="mb-3 d-grid gap-2">
-              <button
-                type="button"
-                className="btn btn-outline-info btn-sm w-100"
-                onClick={() => setHowTo(true)}
-              >
-                How do I get the spreadsheet?
-              </button>
-              {installable && (
-                <button
-                  type="button"
-                  className="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
-                  onClick={() => { promptInstall(); }}
-                >
-                  <i className="bi bi-download" aria-hidden="true" />
-                  Install FMSViewer as an app
-                </button>
-              )}
-            </div>
 
             <div className="example-preview mt-auto pt-3">
               <div className="position-relative">
@@ -120,7 +105,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
           </section>
         </div>
 
-        {/* Right Column: Dropzone & Fake Example Unit Button */}
+        {/* Right Column: action card above the dropzone */}
         <div className="landing-right">
           <div
             className={`drop-zone${over ? ' is-over' : ''}`}
@@ -138,10 +123,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
             </svg>
             <h2 className="fs-3 fw-bold mb-2">Drop an FMSWeb spreadsheet</h2>
             <p className="fs-5 text-body-secondary mb-2">
-              or click to browse &mdash; <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>
-            </p>
-            <p className="fs-6 text-body-secondary mb-0">
-              A previously exported <code>.fmsmodel.json</code> works too, and loads instantly.
+              or click to browse &mdash; <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>, <code>.fmsmodel.json</code>
             </p>
             <input
               ref={inputRef}
@@ -152,17 +134,41 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
             />
           </div>
 
-          <div className="mt-3">
-            <button
-              type="button"
-              className="btn btn-info btn-lg w-100 py-2.5 shadow-sm fw-semibold d-flex align-items-center justify-content-center gap-2"
-              onClick={loadExampleUnit}
-              disabled={loadingExample}
-            >
-              <i className="bi bi-play-fill fs-5" />
-              {loadingExample ? 'Loading example…' : 'Use Fake Example Unit'}
-            </button>
-          </div>
+          <section className="intro-card landing-actions mt-4">
+            <h1 className="h4 mb-1">Getting Started</h1>
+            <p className="text-body-secondary mb-0">
+              Here are some ways to start using the tool.
+            </p>
+            <hr />
+            <div className="d-grid gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-info btn-sm w-100"
+                onClick={() => setHowTo(true)}
+              >
+                How do I get the spreadsheet?
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                onClick={() => setExampleNotice(true)}
+                disabled={loadingExample}
+              >
+                <i className="bi bi-play-fill" aria-hidden="true" />
+                {loadingExample ? 'Loading example…' : 'Use Fake Example Unit'}
+              </button>
+              {installable && (
+                <button
+                  type="button"
+                  className="btn btn-outline-success btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  onClick={() => { promptInstall(); }}
+                >
+                  <i className="bi bi-download" aria-hidden="true" />
+                  Install FMSViewer as an app
+                </button>
+              )}
+            </div>
+          </section>
 
           {error && (
             <div className="alert alert-danger mt-3 mb-0" role="alert">
@@ -174,6 +180,55 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
       </div>
 
       <HowToModal open={howTo} onClose={() => setHowTo(false)} />
+
+      {exampleNotice && (
+        <>
+          <div
+            className="modal d-block"
+            tabIndex="-1"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="example-notice-title"
+            onMouseDown={(e) => { if (e.target === e.currentTarget) setExampleNotice(false); }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h2 id="example-notice-title" className="modal-title h5 mb-0">
+                    <i className="bi bi-info-circle text-info me-2" aria-hidden="true" />
+                    This is an example unit
+                  </h2>
+                  <button type="button" className="btn-close" aria-label="Close" onClick={() => setExampleNotice(false)} />
+                </div>
+                <div className="modal-body">
+                  <p className="mb-2">
+                    You are about to open a <strong>fake example unit</strong>. Its units, billets and
+                    equipment are made up for demonstration.
+                  </p>
+                  <p className="mb-0">
+                    To load a real unit, click the drop area at the top right or drag your FMSWeb
+                    spreadsheet onto it.
+                  </p>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-outline-secondary" onClick={() => setExampleNotice(false)}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-info"
+                    autoFocus
+                    onClick={() => { setExampleNotice(false); loadExampleUnit(); }}
+                  >
+                    Open example
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop show" />
+        </>
+      )}
 
       {/* Maximize image preview modal */}
       {imgModalOpen && (

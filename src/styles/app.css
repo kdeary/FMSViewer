@@ -224,6 +224,7 @@ body { overflow: hidden; }
   display: flex;
   flex-direction: column;
 }
+.landing-right .landing-actions { height: auto; flex: 0 0 auto; padding: 1rem; }
 .landing-right .drop-zone {
   flex: 1;
   min-height: 20rem;
