@@ -59,8 +59,7 @@ function SupplementNote({ has, what }) {
     </p>
   ) : (
     <p className="small text-body-secondary mt-3 mb-0">
-      This {what} isn't in the Supplement Table yet. Open <strong>Stats → Supplement Table</strong> to generate an
-      AI prompt and import the CSV it returns.
+      This {what} isn't in the Supplement Table yet. Open <strong>Stats → Supplement Table</strong> to generate more specific data on this {what}.
     </p>
   );
 }

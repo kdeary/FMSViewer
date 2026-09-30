@@ -17,7 +17,7 @@ const CAPTIONS = [
   ['AOS Unit Structure', 'From the document toolbar, click "AOS Unit Structure". This is the view that can produce the full position-and-equipment listing.'],
   ['Download', 'Click "Download" above the structure tree.'],
   ['Choose Spreadsheet', 'FMSWeb offers several formats. Pick "Spreadsheet" to get the .xlsx file.'],
-  ['Bring it here', 'When the file finishes generating, drop the downloaded .xlsx onto the upload area. Nothing is sent anywhere; it is read in your browser.'],
+  ['Bring it here', 'When the file finishes generating, drop the downloaded .xlsx onto the import area. Nothing is sent anywhere; it is read in your browser.'],
 ];
 
 /** The steps to get a structure export out of FMSWeb, as a carousel. */
