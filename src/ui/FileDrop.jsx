@@ -121,8 +121,8 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
               <path d="M12 16V4m0 0L7 9m5-5l5 5" />
               <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
             </svg>
-            <h2 className="fs-3 fw-bold mb-2">Drop an FMSWeb spreadsheet</h2>
-            <p className="fs-5 text-body-secondary mb-2">
+            <h2 className="drop-title fw-bold mb-2">Drop an FMSWeb spreadsheet</h2>
+            <p className="drop-sub text-body-secondary mb-2">
               or click to browse &mdash; <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>, <code>.fmsmodel.json</code>
             </p>
             <input
@@ -206,7 +206,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
                     equipment are made up for demonstration.
                   </p>
                   <p className="mb-0">
-                    To load a real unit, click the drop area at the top right or drag your FMSWeb
+                    To load a real unit, use the upload area on this page, or drag your FMSWeb
                     spreadsheet onto it.
                   </p>
                 </div>

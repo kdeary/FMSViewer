@@ -208,7 +208,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
         aria-label="Unit Statistics"
         onMouseDown={(e) => { if (e.target === e.currentTarget) requestClose(); }}
       >
-        <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${tab === 'info' ? 'modal-xl' : 'modal-lg'}`}>
+        <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down ${tab === 'info' ? 'modal-xl' : 'modal-lg'}`}>
           <div className="modal-content">
             <div className="modal-header d-flex align-items-center justify-content-between py-2">
               <div className="d-flex align-items-center gap-2 overflow-hidden">

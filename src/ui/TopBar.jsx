@@ -1,130 +1,71 @@
 import React from 'react';
 import Breadcrumbs from './Breadcrumbs.jsx';
 
+const LOGO = `${import.meta.env.BASE_URL}favicon.png`;
+
+/** One icon-only toolbar button; the label is its tooltip and accessible name. */
+function IconButton({ icon, label, onClick, active, variant = 'secondary', className = '', children, ...rest }) {
+  return (
+    <button
+      type="button"
+      className={`btn btn-sm topbar-btn ${active ? `btn-${variant}` : `btn-outline-${variant}`} ${className}`}
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+      aria-pressed={active === undefined ? undefined : active}
+      {...rest}
+    >
+      <i className={`bi ${icon}`} aria-hidden="true" />
+      {children}
+    </button>
+  );
+}
+
 export default function TopBar({
-  path, onGo, onExport, onReset,
-  onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
+  path, onGo, onExport, onReset, legendOpen, onToggleLegend, warnings, onOpenSettings,
   searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree, onOpenTutorial,
 }) {
   return (
-    <nav className="navbar navbar-expand bg-body-tertiary border-bottom topbar py-1">
-      <div className="container-fluid gap-2 flex-nowrap align-items-center">
-        {/* LEFT SIDE: Buttons reordered logically */}
-        <div className="d-flex align-items-center gap-2">
-          {/* File Operations */}
-          <div className="btn-group btn-group-sm" role="group" aria-label="File Operations" data-tour="file">
-            <button type="button" className="btn btn-outline-secondary" onClick={onReset} title="Open a different spreadsheet">
-              New
-            </button>
-            <button type="button" className="btn btn-outline-info" onClick={onExport} title="Save the parsed model as JSON">
-              Export
-            </button>
+    <nav className="navbar bg-body-tertiary border-bottom topbar py-1">
+      <div className="topbar-inner">
+        <div className="topbar-tools">
+          <div className="btn-group btn-group-sm" role="group" aria-label="File" data-tour="file">
+            <IconButton icon="bi-file-earmark-plus" label="New: open a different spreadsheet" onClick={onReset} />
+            <IconButton icon="bi-box-arrow-down" label="Export the parsed model" onClick={onExport} variant="info" />
           </div>
-
-          {/* Search */}
-          <button
-            type="button"
-            className={`btn btn-sm ${searchOpen ? 'btn-secondary' : 'btn-outline-secondary'} d-flex align-items-center gap-1`}
-            onClick={onToggleSearch}
-            title="Search within a unit"
-            aria-pressed={searchOpen}
-          >
-            <svg className="icon-search" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="M16 16l4.5 4.5" />
-            </svg>
-            Search
-          </button>
-
-          {/* Tree & Stats & Legend */}
-          <button
-            type="button"
-            className={`btn btn-sm ${treeOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
-            onClick={onOpenTree}
-            title="Unit breakdown tree"
-          >
-            Tree
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            onClick={onOpenStats}
-            title="Unit statistics"
-          >
-            Stats
-          </button>
-
-          <button
-            type="button"
-            className={`btn btn-sm ${legendOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
-            onClick={onToggleLegend}
-            title="MOS legend"
-          >
-            Legend
-          </button>
-
-          {/* Zoom controls */}
-          <div className="btn-group btn-group-sm" role="group" aria-label="Zoom" data-tour="zoom">
-            <button type="button" className="btn btn-outline-secondary" onClick={onZoomOut} title="Zoom out">−</button>
-            <button type="button" className="btn btn-outline-secondary" onClick={onFit} title="Fit whole structure (F)">Fit</button>
-            <button type="button" className="btn btn-outline-secondary" onClick={onZoomIn} title="Zoom in">+</button>
-          </div>
-
-          {/* Settings button (text instead of gear icon) */}
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            onClick={onOpenSettings}
-            title="Settings"
-          >
-            Settings
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-info d-flex align-items-center gap-1"
+          <IconButton icon="bi-search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
+          <IconButton icon="bi-diagram-3" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
+          <IconButton icon="bi-bar-chart" label="Unit statistics" onClick={onOpenStats} />
+          <IconButton icon="bi-palette" label="MOS legend" onClick={onToggleLegend} active={legendOpen} />
+          <IconButton icon="bi-gear" label="Settings" onClick={onOpenSettings} />
+          <IconButton
+            icon="bi-question-circle"
+            label="Tutorial: guided tour of the viewer"
             onClick={onOpenTutorial}
-            title="Guided tour of the viewer"
+            variant="info"
             data-tour="tutorial-btn"
-          >
-            <i className="bi bi-question-circle" aria-hidden="true" />
-            Tutorial
-          </button>
-
-          {/* Warnings */}
+          />
           {warnings?.length > 0 && (
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-warning d-flex align-items-center gap-1"
-              title="View model warnings"
-              data-tour="warnings-btn"
+            <IconButton
+              icon="bi-exclamation-triangle-fill"
+              label={`${warnings.length} model warning${warnings.length === 1 ? '' : 's'}`}
               onClick={onOpenWarnings}
+              variant="warning"
+              className="topbar-warn"
+              data-tour="warnings-btn"
             >
-              <i className="bi bi-exclamation-triangle-fill" /> {warnings.length}
-            </button>
+              <span className="ms-1">{warnings.length}</span>
+            </IconButton>
           )}
         </div>
 
-        {/* MIDDLE: Breadcrumbs trail */}
-        <div className="flex-grow-1 overflow-hidden" data-tour="crumbs">
+        <div className="topbar-crumbs" data-tour="crumbs">
           <Breadcrumbs path={path} onGo={onGo} />
         </div>
 
-        {/* RIGHT SIDE: FMS Viewer Brand (Clicking returns to home screen) */}
-        <button
-          type="button"
-          className="navbar-brand d-flex align-items-center gap-2 ms-auto"
-          onClick={onReset}
-          title="Return to home screen"
-        >
-          <svg className="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="2" y="2" width="20" height="20" rx="3" />
-            <rect x="5.5" y="5.5" width="8" height="7" rx="1" />
-            <rect x="15" y="5.5" width="3.5" height="7" rx="1" />
-            <rect x="5.5" y="14.5" width="13" height="4" rx="1" />
-          </svg>
-          FMSViewer
+        {/* Clicking the logo returns to the home screen. */}
+        <button type="button" className="topbar-logo" onClick={onReset} title="FMSViewer: return to home screen" aria-label="FMSViewer home">
+          <img src={LOGO} alt="" width={32} height={32} />
         </button>
       </div>
     </nav>

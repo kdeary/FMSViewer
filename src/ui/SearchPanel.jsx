@@ -10,7 +10,7 @@ import { useSupplement } from '../view/Supplement.jsx';
  * Features a circular info button in the bottom right corner to toggle query syntax help.
  */
 export default function SearchPanel({
-  model, scopeNode, picking, onPick, onGo, onClose, initialQuery = '',
+  model, scopeNode, picking, hidden = false, onPick, onGo, onClose, onQueryChange, initialQuery = '',
 }) {
   const [q, setQ] = useState(initialQuery);
   const [showHelp, setShowHelp] = useState(false);
@@ -23,13 +23,17 @@ export default function SearchPanel({
     input.current?.focus();
   }, [initialQuery]);
 
+  useEffect(() => { onQueryChange?.(q); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const results = useMemo(
     () => searchSubtree(model, scopeNode?.id, q, { lin: supLin, mos: supMos }),
     [model, scopeNode, q, supLin, supMos],
   );
 
   return (
-    <aside className="search-panel card border-0 rounded-0">
+    // `hidden` keeps the panel (and what's typed in it) mounted while it steps
+    // out of the way, e.g. on a phone while the user picks a unit on the map.
+    <aside className={`search-panel card border-0 rounded-0${hidden ? ' d-none' : ''}`}>
       <div className="search-head">
         <button
           type="button"
@@ -72,7 +76,7 @@ export default function SearchPanel({
           <span>
             {q.trim()
               ? `${results.length} result${results.length === 1 ? '' : 's'}`
-              : 'Use prefixes like MOS:56M or LIN:T73827 for specific queries. Click the info "i" button below for more.'}
+              : 'Use prefixes like MOS:56M or LIN:T73827 for specific queries. The "i" button below lists them all.'}
           </span>
         </div>
       </div>

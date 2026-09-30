@@ -50,6 +50,18 @@ export function fitTo(rect, size, margin = 0.86, minK = 0, opts = {}) {
   return { k, x: targetX, y: targetY };
 }
 
+/**
+ * How much of the surface's width a panel takes from the map, for framing.
+ * A panel as wide as the map (the phone layout) is an overlay the user closes
+ * to see the map, so it takes nothing -- framing against the sliver left over
+ * would zoom a unit down to nothing.
+ */
+export function overlayOffset(panel, surfaceW) {
+  if (!panel) return 0;
+  const w = panel.offsetWidth;
+  return surfaceW && w >= surfaceW * 0.9 ? 0 : w;
+}
+
 export function useViewport() {
   const [cam, setCam] = useState({ x: 0, y: 0, k: 1 });
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -87,13 +99,13 @@ export function useViewport() {
     let offsetLeft = opts.offsetLeft;
     if (offsetLeft === undefined) {
       const leftPanel = node.parentElement?.querySelector('.search-panel') || document.querySelector('.search-panel');
-      offsetLeft = leftPanel ? leftPanel.offsetWidth : 0;
+      offsetLeft = overlayOffset(leftPanel, box.w);
     }
 
     let offsetRight = opts.offsetRight;
     if (offsetRight === undefined) {
       const rightPanel = node.parentElement?.querySelector('.side-panel') || document.querySelector('.side-panel');
-      offsetRight = rightPanel ? rightPanel.offsetWidth : 0;
+      offsetRight = overlayOffset(rightPanel, box.w);
     }
 
     const target = fitTo(rect, box, opts.margin ?? 0.86, opts.minK ?? 0, { offsetLeft, offsetRight });
@@ -159,12 +171,22 @@ export function useViewport() {
     };
 
     let drag = null;
+    // Two-finger pinch. Declared up here because a pinch also suspends the
+    // one-finger pan: the first finger's pointer events keep coming, and
+    // panning by them as well as zooming makes the view lurch.
+    const touches = new Map();
+    let pinch = null;
     const onPointerDown = (e) => {
       if (e.button !== 0 && e.pointerType === 'mouse') return;
       drag = { id: e.pointerId, px: e.clientX, py: e.clientY, moved: 0, captured: false };
     };
     const onPointerMove = (e) => {
       if (!drag || drag.id !== e.pointerId) return;
+      if (pinch) {
+        drag.px = e.clientX; drag.py = e.clientY;
+        drag.moved += 10; // a pinch is never a tap
+        return;
+      }
       const dx = e.clientX - drag.px;
       const dy = e.clientY - drag.py;
       drag.moved += Math.abs(dx) + Math.abs(dy);
@@ -194,14 +216,15 @@ export function useViewport() {
       drag = null;
     };
 
-    // Two-finger pinch.
-    const touches = new Map();
-    let pinch = null;
     const onTouchStart = (e) => {
       for (const t of e.changedTouches) touches.set(t.identifier, t);
       if (touches.size === 2) {
         const [a, b] = [...touches.values()];
-        pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) };
+        pinch = {
+          d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY),
+          mx: (a.clientX + b.clientX) / 2,
+          my: (a.clientY + b.clientY) / 2,
+        };
       }
     };
     const onTouchMove = (e) => {
@@ -211,10 +234,15 @@ export function useViewport() {
         const [a, b] = [...touches.values()];
         const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
         const r = el.getBoundingClientRect();
+        const mx = (a.clientX + b.clientX) / 2;
+        const my = (a.clientY + b.clientY) / 2;
         if (pinch.d > 0) {
-          zoomBy(d / pinch.d, (a.clientX + b.clientX) / 2 - r.left, (a.clientY + b.clientY) / 2 - r.top);
+          const dx = mx - pinch.mx;
+          const dy = my - pinch.my;
+          if (dx || dy) setCam((c) => ({ ...c, x: c.x + dx, y: c.y + dy }));
+          zoomBy(d / pinch.d, mx - r.left, my - r.top);
         }
-        pinch.d = d;
+        pinch.d = d; pinch.mx = mx; pinch.my = my;
       }
     };
     const onTouchEnd = (e) => {

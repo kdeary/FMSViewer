@@ -23,9 +23,11 @@ import { tutorialSeen, markTutorialSeen, loadTourPos, saveTourPos } from './tuto
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { SettingsProvider } from './view/SettingsContext.jsx';
 import { SupplementProvider } from './view/Supplement.jsx';
-import { useViewport } from './view/useViewport.js';
+import { useViewport, overlayOffset } from './view/useViewport.js';
+import { useIsMobile, isMobile } from './view/useIsMobile.js';
 import { useTooltips } from './view/useTooltips.js';
 import { zoomToOpen, zoomToReveal, DEFAULT_MIN_TEXT_PX, MIN_TEXT_PX_RANGE } from './view/lod.js';
+import { truncate } from './model/taxonomy.js';
 
 const SETTINGS_KEY = 'fmsviewer.settings';
 const NO_ROWS = [];
@@ -56,6 +58,11 @@ export default function App() {
   const [fileName, setFileName] = useState('');
 
   const [selectedId, setSelectedId] = useState(null);
+  // Phones only: the side panel covers the whole map there, so selecting
+  // something doesn't open it -- the Details button in the corner does.
+  // On a wider screen the panel simply follows the selection.
+  const [panelOpen, setPanelOpen] = useState(false);
+  const mobile = useIsMobile();
   const [focusId, setFocusId] = useState(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
@@ -72,6 +79,9 @@ export default function App() {
   // Null means the whole structure.
   const [searchScopeId, setSearchScopeId] = useState(null);
   const [searchPicking, setSearchPicking] = useState(false);
+  // What's typed in the search box, so a phone can close the panel to show a
+  // result and reopen it on the same query.
+  const searchDraft = useRef('');
   const [settings, setSettings] = useState(loadSettings);
   // The Supplement Table (see model/supplement.js). It belongs to the loaded
   // structure: saved into and restored from the model file.
@@ -194,7 +204,7 @@ export default function App() {
     workerRef.current = null;
     setModel(null); setStage('idle'); setError(''); setProgress(null);
     setSupplementRows([]);
-    setSelectedId(null); setFocusId(null);
+    setSelectedId(null); setFocusId(null); setPanelOpen(false);
     setSearchScopeId(null); setSearchPicking(false);
     setTourOpen(false); setOfferOpen(false);
     // Nothing about where the last structure was being viewed means anything
@@ -220,12 +230,13 @@ export default function App() {
     if (!node) return;
     const hasKids = node.childIds.length > 0;
 
-    const leftPanel = document.querySelector('.search-panel');
-    const offsetLeft = leftPanel ? leftPanel.offsetWidth : 0;
-
+    // Panels that sit beside the map narrow the space a unit is framed in. On a
+    // phone they cover the map instead, and frame nothing (see overlayOffset).
+    const offsetLeft = overlayOffset(document.querySelector('.search-panel'), size.w);
     const rightPanel = document.querySelector('.side-panel');
-    const defaultPanelW = size.w <= 720 ? size.w : Math.min(352, size.w * 0.4);
-    const offsetRight = rightPanel ? rightPanel.offsetWidth : defaultPanelW;
+    const offsetRight = rightPanel
+      ? overlayOffset(rightPanel, size.w)
+      : isMobile() ? 0 : Math.min(352, size.w * 0.4); // the panel about to open
 
     const availW = Math.max(1, size.w - offsetLeft - offsetRight);
 
@@ -238,6 +249,8 @@ export default function App() {
 
     setFocusId(id);
     setSelectedId(id);
+    // On a phone, going somewhere means seeing it: close whatever covers the map.
+    if (isMobile()) setPanelOpen(false);
     flyTo(node.rect, { margin: hasKids ? 0.92 : 0.6, minK, offsetLeft, offsetRight, ...opts });
   }, [displayModel, flyTo, size.w, settings.minTextPx]);
 
@@ -398,6 +411,7 @@ export default function App() {
       }
       // The side panel only shows on steps about a unit or soldier.
       setSelectedId(ui.focus && ui.panel !== false ? id : null);
+      setPanelOpen(!!ui.focus && ui.panel !== false);
     },
   }), [tourCtx, goTo, fitAll]);
 
@@ -442,9 +456,6 @@ export default function App() {
           onGo={goTo}
           onExport={() => setExportOpen(true)}
           onReset={reset}
-          onZoomIn={() => zoomBy(1.4, size.w / 2, size.h / 2)}
-          onZoomOut={() => zoomBy(1 / 1.4, size.w / 2, size.h / 2)}
-          onFit={fitAll}
           legendOpen={legendOpen}
           onToggleLegend={() => setLegendOpen((v) => !v)}
           warnings={displayModel.meta.warnings}
@@ -476,36 +487,69 @@ export default function App() {
               model={displayModel}
               scopeNode={displayModel.byId.get(searchScopeId) || displayModel.byId.get(displayModel.rootId)}
               picking={searchPicking}
+              hidden={mobile && searchPicking}
               onPick={() => setSearchPicking((v) => !v)}
-              onGo={goTo}
+              onGo={(id) => {
+                goTo(id);
+                // A phone's search panel covers the map: step aside to show
+                // the result, keeping the query for when it's reopened.
+                if (mobile) { setSearchQuery(searchDraft.current); setSearchOpen(false); }
+              }}
+              onQueryChange={(q) => { searchDraft.current = q; }}
               onClose={() => { setSearchOpen(false); setSearchPicking(false); setSearchQuery(''); }}
               initialQuery={searchQuery}
             />
           )}
+          {mobile && searchOpen && searchPicking && (
+            <div className="pick-banner card shadow">
+              <span>Tap a unit to search within it</span>
+              <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setSearchPicking(false)}>
+                Cancel
+              </button>
+            </div>
+          )}
           {legendOpen && <Legend model={displayModel} onClose={() => setLegendOpen(false)} />}
-          {selected && (
-            <SidePanel node={selected} model={displayModel} onGo={goTo} onSearch={openSearch} onClose={() => setSelectedId(null)} />
+          {selected && (!mobile || panelOpen) && (
+            <SidePanel
+              node={selected}
+              model={displayModel}
+              onGo={goTo}
+              onSearch={openSearch}
+              onClose={() => (mobile ? setPanelOpen(false) : setSelectedId(null))}
+            />
+          )}
+          {mobile && selected && !panelOpen && !(searchOpen && !searchPicking) && (
+            <button
+              type="button"
+              className="details-fab btn btn-info shadow"
+              onClick={() => setPanelOpen(true)}
+              aria-label={`Show details for ${selected.title}`}
+            >
+              <i className="bi bi-layout-sidebar-reverse" aria-hidden="true" />
+              <span>{truncate(selected.title, 28)}</span>
+            </button>
           )}
         </div>
 
+        {/* On a phone only the UIC, file name and version stay (.status-extra). */}
         <div className="statusbar text-body-secondary small" data-tour="statusbar">
           <div className="status-file">
             <span className="fw-semibold text-body">{displayModel.meta.uic || '—'}</span>
             <span title={displayModel.meta.sourceFile}>{displayModel.meta.sourceFile}</span>
-            {displayModel.meta.runDate && <span>run {displayModel.meta.runDate}</span>}
+            {displayModel.meta.runDate && <span className="status-extra">run {displayModel.meta.runDate}</span>}
           </div>
-          <div className="vr" />
-          <span>{displayModel.meta.nodeCount} nodes</span>
-          <span>{displayModel.meta.rowCount} rows</span>
-          <span>parsed in {displayModel.meta.parseMs ?? 0} ms</span>
+          <div className="vr status-extra" />
+          <span className="status-extra">{displayModel.meta.nodeCount} nodes</span>
+          <span className="status-extra">{displayModel.meta.rowCount} rows</span>
+          <span className="status-extra">parsed in {displayModel.meta.parseMs ?? 0} ms</span>
           <div className="vr ms-auto" />
-          <span>zoom {cam.k.toFixed(2)}×</span>
-          <div className="vr" />
-          <span className="d-none d-lg-inline">Esc = up | F = fit | scroll = zoom | drag = pan</span>
-          <div className="vr" />
+          <span className="status-extra">zoom {cam.k.toFixed(2)}×</span>
+          <div className="vr status-extra" />
+          <span className="d-none d-xl-inline">Esc = up | F = fit | scroll = zoom | drag = pan</span>
+          <div className="vr status-extra" />
           <span className="d-none d-lg-inline">Developed by 2LT Korbin Deary</span>
-          <div className="vr" />
-          <span title={`Built ${__BUILD_TIME__}`}>v{__APP_VERSION__}</span>
+          <div className="vr status-extra" />
+          <span className="status-version" title={`Built ${__BUILD_TIME__}`}>v{__APP_VERSION__}</span>
         </div>
 
         <SettingsModal

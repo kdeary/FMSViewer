@@ -30,6 +30,51 @@
   --ink-on-dark: #f8f9fa;
 }
 
+/* -- accent ------------------------------------------------------------ */
+/* The site accent is the logo's green, carried on Bootstrap's "info" slot so
+   every .btn-info, .text-info, .bg-info and var(--bs-info) follows it. The
+   green itself is a dark fill (white ink on it is 5.9:1) but only 2.3:1 as
+   text on the shell, so text in the accent colour uses --accent-ink instead.
+   The doubled :root outranks Slate's [data-bs-theme=dark] block. */
+:root, :root[data-bs-theme=dark] {
+  --accent: #3b6b4b;
+  --accent-hover: #447655;
+  --accent-active: #325c40;
+  --accent-ink: #8cc29f;
+  --bs-info: var(--accent);
+  --bs-info-rgb: 59, 107, 75;
+  --bs-cyan: var(--accent);
+  --bs-info-text-emphasis: #9cc9aa;
+  --bs-info-bg-subtle: #16261c;
+  --bs-info-border-subtle: #2f5a3d;
+}
+.btn-info {
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: var(--accent-hover);
+  --bs-btn-hover-border-color: var(--accent-hover);
+  --bs-btn-active-bg: var(--accent-active);
+  --bs-btn-active-border-color: var(--accent-active);
+  --bs-btn-disabled-bg: var(--accent);
+  --bs-btn-disabled-border-color: var(--accent);
+  --bs-btn-focus-shadow-rgb: 59, 107, 75;
+}
+/* Slate paints its blue gradient over the fill, and again on hover and press
+   through selectors four classes deep. */
+.btn-info, .btn-info:hover, .btn-info:active, .btn-info.active { background-image: none !important; }
+.btn-outline-info {
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: var(--accent);
+  --bs-btn-hover-border-color: var(--accent);
+  --bs-btn-active-bg: var(--accent-active);
+  --bs-btn-active-border-color: var(--accent-active);
+  --bs-btn-disabled-color: var(--accent-ink);
+  --bs-btn-disabled-border-color: var(--accent);
+  --bs-btn-focus-shadow-rgb: 59, 107, 75;
+}
+.alert-info, .list-group-item-info { background-color: var(--bs-info-bg-subtle); border-color: var(--bs-info-border-subtle); }
+.text-info, .link-info { color: var(--accent-ink) !important; }
+
 /* Derive legible ink from whatever --fill holds. The static declaration is
    the fallback for browsers without relative colour syntax; the @supports
    block upgrades it to the computed answer. */
@@ -51,13 +96,13 @@
 /* A solid variant keeps its own fill when disabled, so its disabled ink has to
    follow the fill as well -- the muted grey above would sit light-on-light. */
 .btn-secondary, .btn-success, .btn-danger,
-.btn-warning, .btn-info, .btn-light {
+.btn-warning, .btn-light {
   --bs-btn-color: var(--ink-on-light);
   --bs-btn-hover-color: var(--ink-on-light);
   --bs-btn-active-color: var(--ink-on-light);
   --bs-btn-disabled-color: var(--ink-on-light);
 }
-.btn-primary, .btn-dark {
+.btn-primary, .btn-dark, .btn-info {
   --bs-btn-color: var(--ink-on-dark);
   --bs-btn-hover-color: var(--ink-on-dark);
   --bs-btn-active-color: var(--ink-on-dark);
@@ -69,12 +114,13 @@
    mid-tone -- readable as a fill, thin against the dark shell -- so the resting
    ink is lifted toward the emphasis colour. */
 .btn-outline-dark, .btn-outline-secondary { --bs-btn-color: var(--bs-body-color); }
-.btn-outline-info { --bs-btn-color: color-mix(in oklab, var(--bs-info), var(--bs-emphasis-color) 35%); }
+/* Lighter than --accent-ink: these also sit on the raised panel headers. */
+.btn-outline-info { --bs-btn-color: #b0dabd; }
 .btn-outline-danger { --bs-btn-color: color-mix(in oklab, var(--bs-danger), var(--bs-emphasis-color) 35%); }
 .btn-outline-primary { --bs-btn-color: color-mix(in oklab, var(--bs-primary), var(--bs-emphasis-color) 55%); }
 
 /* Slate links are a mid grey that lands under AA on the panels. */
-.btn-link { --bs-btn-color: var(--bs-body-color); --bs-btn-hover-color: var(--bs-info); }
+.btn-link { --bs-btn-color: var(--bs-body-color); --bs-btn-hover-color: var(--accent-ink); }
 
 @supports (color: oklch(from #000 l c h)) {
   .btn-primary, .btn-secondary, .btn-success, .btn-danger,
@@ -92,23 +138,24 @@
   }
 }
 
-.badge.bg-info, .badge.bg-success, .badge.bg-warning,
+.badge.bg-success, .badge.bg-warning,
 .badge.bg-danger, .badge.bg-secondary, .badge.bg-light,
-.alert-info, .alert-success, .alert-warning, .alert-danger,
+.alert-success, .alert-warning, .alert-danger,
 .alert-secondary, .alert-light {
   color: var(--ink-on-light);
 }
-.badge.bg-primary, .badge.bg-dark, .alert-primary, .alert-dark {
+.alert-info { color: var(--bs-info-text-emphasis); }
+.badge.bg-primary, .badge.bg-dark, .badge.bg-info, .alert-primary, .alert-dark {
   color: var(--ink-on-dark);
 }
 
 /* .text-bg-* ships its own `color: #fff !important`, so overriding it needs
    the same weight. */
-.text-bg-info, .text-bg-success, .text-bg-warning,
+.text-bg-success, .text-bg-warning,
 .text-bg-danger, .text-bg-secondary, .text-bg-light {
   color: var(--ink-on-light) !important;
 }
-.text-bg-primary, .text-bg-dark { color: var(--ink-on-dark) !important; }
+.text-bg-primary, .text-bg-dark, .text-bg-info { color: var(--ink-on-dark) !important; }
 
 /* -- form controls ----------------------------------------------------- */
 /* Slate leaves inputs white in a dark shell, which puts the (light)
@@ -159,38 +206,37 @@
 html, body, #root { height: 100%; }
 body { overflow: hidden; }
 
-.app-shell { display: flex; flex-direction: column; height: 100%; }
-.app-centered { align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
+/* dvh, so a phone's collapsing address bar never hides the status bar. */
+.app-shell { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
+/* Centred with auto margins on the child rather than justify-content: a
+   centred flex child taller than the screen overflows off the top as well as
+   the bottom, and the top part can never be scrolled back into view. */
+.app-centered { padding: 1.5rem; overflow-y: auto; }
+.app-centered > * { margin: auto; }
 .app-body { position: relative; flex: 1 1 auto; min-height: 0; }
 
 /* ---------------------------------------------------------------- top bar */
 
 .topbar { flex: 0 0 auto; z-index: 10; }
-.topbar .navbar-brand {
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  font-family: inherit;
-  color: var(--bs-emphasis-color, var(--bs-body-color));
-  background: transparent;
-  border: none;
-  border-left: 1px solid var(--bs-border-color);
-  padding: 0 0 0 1rem;
-  margin-right: 0;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.15s ease, opacity 0.15s ease;
+.topbar-inner {
+  display: flex; align-items: center; gap: 0.5rem;
+  width: 100%; padding: 0 0.75rem; min-width: 0;
 }
-.topbar .navbar-brand:hover,
-.topbar .navbar-brand:focus {
-  color: var(--bs-info);
-  opacity: 0.9;
-  outline: none;
-  box-shadow: none;
+.topbar-tools { display: flex; align-items: center; gap: 0.35rem; flex: none; }
+.topbar-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 2rem; height: 2rem; padding: 0 0.45rem; font-size: 1rem; line-height: 1;
 }
-.brand-mark { width: 1.25rem; height: 1.25rem; fill: none; stroke: var(--bs-info); stroke-width: 2; }
-.topbar-meta { max-width: 22rem; }
+.topbar-warn span { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.topbar-crumbs { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.topbar-logo {
+  flex: none; display: block; padding: 0; margin-left: auto;
+  border: 0; border-radius: 0.35rem; background: none; cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+.topbar-logo img { display: block; width: 2rem; height: 2rem; border-radius: 0.35rem; }
+.topbar-logo:hover { filter: brightness(1.15); }
+.topbar-logo:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent-ink); }
 .crumbs .breadcrumb { overflow-x: auto; scrollbar-width: none; font-size: 0.875rem; }
 .crumbs .breadcrumb::-webkit-scrollbar { display: none; }
 .crumbs .breadcrumb-item { white-space: nowrap; }
@@ -208,15 +254,19 @@ body { overflow: hidden; }
 }
 /* Separates the file's identity from the live readouts either side of it. */
 .statusbar .vr { opacity: 0.35; align-self: stretch; margin: 0.1rem 0; }
-.statusbar .status-file { min-width: 0; display: flex; gap: 0.5rem; align-items: center; }
+.statusbar { overflow: hidden; }
+.statusbar > span { white-space: nowrap; flex: none; }
+.statusbar .status-file { min-width: 0; flex: 0 1 auto; display: flex; gap: 0.5rem; align-items: center; }
 .statusbar .status-file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The UIC is short and the thing to read; the file name gives way first. */
+.statusbar .status-file span:first-child { flex: none; }
 
 /* ------------------------------------------------------------ landing page */
 
-.drop-wrap { width: min(72rem, 100%); margin: 0 auto; }
+.drop-wrap { width: min(72rem, 100%); }
 .landing-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1.5rem;
   align-items: stretch;
 }
@@ -246,7 +296,7 @@ body { overflow: hidden; }
 }
 .intro-points li::before {
   content: ''; position: absolute; left: 0; top: 0.5em;
-  width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--bs-info);
+  width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--accent-ink);
 }
 .intro-points strong { color: var(--bs-body-color); font-weight: 600; }
 
@@ -300,7 +350,7 @@ body { overflow: hidden; }
 
 @media (max-width: 840px) {
   .landing-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -335,9 +385,12 @@ body { overflow: hidden; }
   background: var(--bs-tertiary-bg);
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
-.drop-zone:hover, .drop-zone:focus-visible { border-color: var(--bs-info); background: var(--bs-secondary-bg); }
-.drop-zone.is-over { border-color: var(--bs-info); transform: scale(1.01); }
-.drop-icon { width: 3.5rem; height: 3.5rem; margin-bottom: 0.75rem; fill: none; stroke: var(--bs-info); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.drop-zone:hover, .drop-zone:focus-visible { border-color: var(--accent-ink); background: var(--bs-secondary-bg); }
+.drop-zone.is-over { border-color: var(--accent-ink); transform: scale(1.01); }
+.drop-title { font-size: calc(1.3rem + 0.6vw); }
+.drop-sub { font-size: 1.25rem; }
+.drop-sub code { white-space: nowrap; }
+.drop-icon { width: 3.5rem; height: 3.5rem; margin-bottom: 0.75rem; fill: none; stroke: var(--accent-ink); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .drop-note { display: flex; align-items: center; margin-top: 1rem; }
 
 .progress-card { width: 100%; }
@@ -416,8 +469,8 @@ body { overflow: hidden; }
 .nb-CR { --nb-fill: #413b30; --nb-fill-2: #4b4438; border-color: rgba(201, 162, 39, 0.45); }
 .nb-BL { --nb-fill: #333c33; --nb-fill-2: #3c463c; }
 
-.nb.is-selected { outline: 2px solid var(--bs-info); outline-offset: -1px; }
-.nb.is-focused { border-color: var(--bs-info); }
+.nb.is-selected { outline: 2px solid var(--accent-ink); outline-offset: -1px; }
+.nb.is-focused { border-color: var(--accent-ink); }
 /* Lightening the fill, not `filter: brightness()` -- a filter puts the box in
    its own paint pass, and under the cursor during a pan that is every box the
    pointer crosses. */
@@ -629,7 +682,7 @@ body { overflow: hidden; }
   border-left: 3px solid transparent;
 }
 .search-scope:hover, .search-scope:focus-visible {
-  background: var(--bs-secondary-bg); border-left-color: var(--bs-info);
+  background: var(--bs-secondary-bg); border-left-color: var(--accent-ink);
 }
 .search-scope-label {
   font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em;
@@ -643,12 +696,12 @@ body { overflow: hidden; }
 /* Waiting for a click on the map. The pulse is what says "this is unfinished"
    while the pointer is somewhere else entirely. */
 .search-scope.is-picking {
-  border-left-color: var(--bs-info);
+  border-left-color: var(--accent-ink);
   background: var(--bs-secondary-bg);
   animation: search-wait 1.6s ease-in-out infinite;
 }
 .search-scope.is-picking .search-scope-label,
-.search-scope.is-picking .search-scope-name { color: var(--bs-info); }
+.search-scope.is-picking .search-scope-name { color: var(--accent-ink); }
 @keyframes search-wait { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 
 .search-query { padding: 0.5rem; border-bottom: 1px solid var(--bs-border-color); }
@@ -741,9 +794,66 @@ body { overflow: hidden; }
   .export-explain { border-left: 0; border-top: 1px solid var(--bs-border-color); padding: 0.75rem 0 0; }
 }
 
+/* ------------------------------------------------------------------ phone */
+
+/* Keep in step with MOBILE_QUERY in view/useIsMobile.js. */
 @media (max-width: 720px) {
   :root { --panel-w: 100%; }
-  .topbar-meta { display: none !important; }
+
+  /* Landing: the drop area first, everything tighter. */
+  .app-centered { padding: 0.75rem; }
+  .landing-grid { gap: 0.75rem; }
+  .landing-right { order: -1; }
+  .landing-right .drop-zone { min-height: 0; }
+  .landing-actions.mt-4 { margin-top: 0.75rem !important; }
+  .drop-zone { padding: 1.75rem 1rem; }
+  .drop-icon { width: 2.5rem; height: 2.5rem; margin-bottom: 0.4rem; }
+  .drop-title { font-size: 1.2rem; }
+  .drop-sub { font-size: 0.95rem; }
+  .intro-card { padding: 1rem; }
+  .example-img-overlay { display: none; }
+
+  /* Top bar: two rows -- the tools and the logo, then the breadcrumbs. */
+  .topbar-inner { flex-wrap: wrap; row-gap: 0.25rem; padding: 0 0.5rem; }
+  .topbar-tools {
+    flex: 1 1 0; min-width: 0; gap: 0.25rem;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .topbar-tools::-webkit-scrollbar { display: none; }
+  .topbar-btn { min-width: 2.25rem; height: 2.25rem; font-size: 1.05rem; }
+  .topbar-logo img { width: 2.25rem; height: 2.25rem; }
+  .topbar-crumbs { order: 3; flex-basis: 100%; }
+
+  /* Status bar: just the UIC, file and version. */
+  .statusbar { gap: 0.6rem; padding: 0.2rem 0.6rem calc(0.2rem + env(safe-area-inset-bottom)); }
+  .statusbar .status-extra { display: none !important; }
+  .statusbar .status-file { flex: 1 1 auto; }
+  .status-version { flex: none; }
+
+  /* The legend sits over the Details button's corner, so it steps up. */
+  .legend { left: 0.5rem; bottom: 3.75rem; width: min(19rem, calc(100% - 1rem)); max-height: calc(100% - 4.5rem); }
+  .search-help-popover { width: calc(100% - 1.5rem); }
+}
+
+/* Phone only: opens the side panel for what's selected (App.jsx). */
+.details-fab {
+  position: absolute; left: 0.75rem; bottom: 0.75rem; z-index: 5;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.5rem 0.9rem; border-radius: 2rem;
+  font-weight: 600; font-size: 0.9rem;
+  animation: panel-in 0.18s ease-out;
+}
+.details-fab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Phone only: shown while the search panel waits for a unit to be tapped. */
+.pick-banner {
+  position: absolute; top: 0.75rem; left: 50%; transform: translateX(-50%); z-index: 7;
+  display: flex; flex-direction: row; align-items: center; gap: 0.75rem;
+  width: max-content; max-width: calc(100% - 1.5rem);
+  padding: 0.5rem 0.5rem 0.5rem 0.9rem;
+  border: 1px solid var(--accent-ink);
+  font-size: 0.875rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -854,7 +964,7 @@ body { overflow: hidden; }
 }
 
 .tree-title-btn:hover span.fw-semibold {
-  color: var(--bs-info);
+  color: var(--accent-ink);
   text-decoration: underline;
 }
 
@@ -884,7 +994,7 @@ body { overflow: hidden; }
   cursor: pointer; text-decoration: underline dotted; text-underline-offset: 0.2em;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
 }
-.eq-link:hover, .eq-link:focus-visible { color: var(--bs-info); text-decoration-color: currentColor; }
+.eq-link:hover, .eq-link:focus-visible { color: var(--accent-ink); text-decoration-color: currentColor; }
 .eq-chip { cursor: pointer; }
 .eq-chip:not(.eq-more):hover { background: rgba(255, 255, 255, 0.12); }
 .eq-chip.eq-more { cursor: default; }
@@ -953,7 +1063,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
 /* Loading progress in the stats modal. */
 .progress-strip .progress { height: 4px; background: var(--bs-tertiary-bg); }
 .progress-strip .progress-bar { transition: width 0.15s linear; }
-.tab-progress { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--bs-info); }
+.tab-progress { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--accent-ink); }
 .tab-progress .spinner-border { width: 0.8rem; height: 0.8rem; border-width: 0.15em; }
 /* Pinned to the top of the scrolling modal body so it stays in view. */
 .stats-progress {
@@ -975,7 +1085,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
   transform: translateX(-50%);
   animation: busy-toast-in 0.18s ease-out;
 }
-.busy-toast .spinner-border { color: var(--bs-info); }
+.busy-toast .spinner-border { color: var(--accent-ink); }
 @keyframes busy-toast-in {
   from { transform: translate(-50%, -150%); opacity: 0; }
   to { transform: translate(-50%, 0); opacity: 1; }
@@ -993,7 +1103,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
   background: var(--bs-body-bg);
   animation: offer-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s both;
 }
-.tutorial-offer-icon { font-size: 1.6rem; line-height: 1; color: var(--bs-info); }
+.tutorial-offer-icon { font-size: 1.6rem; line-height: 1; color: var(--accent-ink); }
 @keyframes offer-in {
   from { transform: translate(30%, 40%); opacity: 0; }
   to { transform: none; opacity: 1; }
@@ -1009,7 +1119,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
 .tour-shade path { fill: rgba(8, 10, 12, 0.72); pointer-events: fill; }
 .tour-ring {
   position: fixed; left: 0; top: 0; z-index: 1076; pointer-events: none;
-  border: 2px solid var(--bs-info); border-radius: 10px;
+  border: 2px solid var(--accent-ink); border-radius: 10px;
   transition: opacity 0.2s ease;
   animation: tour-pulse 1.8s ease-out infinite;
 }
@@ -1021,7 +1131,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
 .tour-card {
   position: fixed; z-index: 1080;
   width: min(22rem, calc(100vw - 24px));
-  max-height: calc(100vh - 24px); overflow-y: auto;
+  max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto;
   background: var(--bs-body-bg);
   border: 1px solid rgba(var(--bs-info-rgb), 0.45);
   transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease;
@@ -1032,7 +1142,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
 .tour-card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
 .tour-section {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--bs-info);
+  color: var(--accent-ink);
 }
 .tour-count { color: var(--bs-secondary-color); font-weight: 400; letter-spacing: 0; text-transform: none; }
 .tour-body { font-size: 0.875rem; color: var(--bs-body-color); }
@@ -1042,7 +1152,7 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
   font-size: 0.8rem; color: var(--bs-info-text-emphasis);
   background: rgba(var(--bs-info-rgb), 0.12); border: 1px solid rgba(var(--bs-info-rgb), 0.3);
 }
-.tour-try > i { color: var(--bs-info); }
+.tour-try > i { color: var(--accent-ink); }
 .tour-lost {
   display: flex; gap: 0.5rem; align-items: flex-start;
   margin: -0.5rem 0 0.85rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem;
@@ -1072,12 +1182,16 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
   font-size: 0.85rem; color: var(--bs-body-color);
   background: transparent; border: 1px solid transparent;
 }
-.tour-menu-item > i { font-size: 1.05rem; color: var(--bs-info); width: 1.2rem; text-align: center; }
+.tour-menu-item > i { font-size: 1.05rem; color: var(--accent-ink); width: 1.2rem; text-align: center; }
 .tour-menu-item small { color: var(--bs-secondary-color); opacity: 1; }
 .tour-menu-item:hover, .tour-menu-item:focus-visible {
   background: var(--bs-tertiary-bg); border-color: var(--bs-border-color); outline: none;
 }
 .tour-menu-item.is-current { border-color: rgba(var(--bs-info-rgb), 0.45); }
-@media (max-height: 700px) {
+@media (max-height: 700px), (max-width: 720px) {
   .tour-menu-item small { display: none; }
+}
+@media (max-width: 720px) {
+  .tour-card .card-body { padding: 0.75rem; }
+  .tour-body { font-size: 0.83rem; }
 }

@@ -23,7 +23,7 @@ export default function WarningsModal({ open, warnings = [], onClose }) {
         aria-label="Model Warnings"
         onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
           <div className="modal-content">
             <div className="modal-header py-2 d-flex align-items-center justify-content-between">
               <h2 className="modal-title h5 mb-0 text-warning d-flex align-items-center gap-2">

@@ -81,7 +81,7 @@ export default function TreeModal({ open, model, onClose, onGo }) {
         aria-label="Unit Breakdown Tree"
         onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
           <div className="modal-content">
             <div className="modal-header py-2 px-3">
               <div className="d-flex align-items-center gap-2">

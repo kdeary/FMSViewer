@@ -50,7 +50,7 @@ export default function HowToModal({ open, onClose }) {
         aria-label="Getting a spreadsheet out of FMSWeb"
         onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="modal-dialog modal-xl modal-dialog-centered">
+        <div className="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-sm-down">
           <div className="modal-content">
             <div className="modal-header">
               <h2 className="modal-title h5">Getting the spreadsheet from FMSWeb</h2>
