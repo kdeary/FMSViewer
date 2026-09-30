@@ -35,95 +35,103 @@ export default function SettingsModal({ open, settings, onChange, onClose }) {
             </div>
 
             <div className="modal-body">
-              <div className="d-flex align-items-center justify-content-between mb-1">
-                <label htmlFor="minTextPx" className="form-label mb-0">
-                  Minimum readable text size: <strong>{textPx}px</strong> on screen
-                </label>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm py-0 px-2"
-                  style={{ fontSize: '0.78rem' }}
-                  onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX })}
-                  disabled={textPx === DEFAULT_MIN_TEXT_PX}
-                  title={`Reset to default ${DEFAULT_MIN_TEXT_PX}px`}
-                >
-                  Reset ({DEFAULT_MIN_TEXT_PX}px)
-                </button>
-              </div>
+              <div data-tour="settings-detail">
+                <div className="d-flex align-items-center justify-content-between mb-1">
+                  <label htmlFor="minTextPx" className="form-label mb-0">
+                    Minimum readable text size: <strong>{textPx}px</strong> on screen
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm py-0 px-2"
+                    style={{ fontSize: '0.78rem' }}
+                    onClick={() => onChange({ ...settings, minTextPx: DEFAULT_MIN_TEXT_PX })}
+                    disabled={textPx === DEFAULT_MIN_TEXT_PX}
+                    title={`Reset to default ${DEFAULT_MIN_TEXT_PX}px`}
+                  >
+                    Reset ({DEFAULT_MIN_TEXT_PX}px)
+                  </button>
+                </div>
 
-              <input
-                id="minTextPx"
-                type="range"
-                className="form-range"
-                min={MIN_PX}
-                max={MAX_PX}
-                step={1}
-                value={textPx}
-                onChange={(e) => onChange({ ...settings, minTextPx: Number(e.target.value) })}
-              />
-              <div className="d-flex justify-content-between text-body-secondary small">
-                <span>{MIN_PX}px: opens sooner, smaller text</span>
-                <span>{MAX_PX}px: opens later, larger readable text</span>
-              </div>
+                <input
+                  id="minTextPx"
+                  type="range"
+                  className="form-range"
+                  min={MIN_PX}
+                  max={MAX_PX}
+                  step={1}
+                  value={textPx}
+                  onChange={(e) => onChange({ ...settings, minTextPx: Number(e.target.value) })}
+                />
+                <div className="d-flex justify-content-between text-body-secondary small">
+                  <span>{MIN_PX}px: opens sooner, smaller text</span>
+                  <span>{MAX_PX}px: opens later, larger readable text</span>
+                </div>
 
-              <p className="text-body-secondary small mt-3 mb-0">
-                A unit shows what's inside it once the smallest text inside its sub-units reaches this size on screen.
-                All sub-units within the same unit transition together so sibling layout stays perfectly synchronized.
-              </p>
+                <p className="text-body-secondary small mt-3 mb-0">
+                  A unit shows what's inside it once the smallest text inside its sub-units reaches this size on screen.
+                  All sub-units within the same unit transition together so sibling layout stays perfectly synchronized.
+                </p>
+              </div>
 
               <hr />
 
-              <div className="form-check">
-                <input
-                  id="perfHud"
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={!!settings.perf}
-                  onChange={(e) => onChange({ ...settings, perf: e.target.checked })}
-                />
-                <label htmlFor="perfHud" className="form-check-label">Show frame timings</label>
+              <div data-tour="settings-censor">
+                <div className="form-check">
+                  <input
+                    id="censorInfo"
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={!!settings.censor}
+                    onChange={(e) => onChange({ ...settings, censor: e.target.checked })}
+                  />
+                  <label htmlFor="censorInfo" className="form-check-label">Censor information</label>
+                </div>
+                <p className="text-body-secondary small mt-1 mb-0">
+                  Renames units, crew, billets, equipment names, LINs, and MOSs with generic identifiers.
+                </p>
               </div>
-              <p className="text-body-secondary small mt-1 mb-0">
-                Overlays a live breakdown of where each frame goes. Anything the browser
-                spends on style, paint and raster is the gap between the total and the two
-                JavaScript figures.
-              </p>
 
               <hr />
 
-              <div className="form-check">
-                <input
-                  id="censorInfo"
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={!!settings.censor}
-                  onChange={(e) => onChange({ ...settings, censor: e.target.checked })}
-                />
-                <label htmlFor="censorInfo" className="form-check-label">Censor information</label>
+              <div data-tour="settings-symbols">
+                <div className="form-check">
+                  <input
+                    id="unitSymbols"
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={!!settings.unitSymbols}
+                    onChange={(e) => onChange({ ...settings, unitSymbols: e.target.checked })}
+                  />
+                  <label htmlFor="unitSymbols" className="form-check-label">Generate unit symbols</label>
+                </div>
+                <p className="text-body-secondary small mt-1 mb-0">
+                  On: Draws a unit symbol for each unit in place of the placeholder icon.
+                  Off: Shows the placeholder icon everywhere.
+                </p>
+                <p className="text-warning small mt-1 mb-0">
+                  ⚠ The symbol is guessed from the unit&rsquo;s title text alone and may not be correct.
+                </p>
               </div>
-              <p className="text-body-secondary small mt-1 mb-0">
-                Renames units, crew, billets, equipment names, LINs, and MOSs with generic identifiers.
-              </p>
 
               <hr />
 
-              <div className="form-check">
-                <input
-                  id="unitSymbols"
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={!!settings.unitSymbols}
-                  onChange={(e) => onChange({ ...settings, unitSymbols: e.target.checked })}
-                />
-                <label htmlFor="unitSymbols" className="form-check-label">Generate unit symbols</label>
+              <div data-tour="settings-perf">
+                <div className="form-check">
+                  <input
+                    id="perfHud"
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={!!settings.perf}
+                    onChange={(e) => onChange({ ...settings, perf: e.target.checked })}
+                  />
+                  <label htmlFor="perfHud" className="form-check-label">Show frame timings</label>
+                </div>
+                <p className="text-body-secondary small mt-1 mb-0">
+                  For development and testing purposes.
+                </p>
               </div>
-              <p className="text-body-secondary small mt-1 mb-0">
-                On: Draws a unit symbol for each unit in place of the placeholder icon.
-                Off: Shows the placeholder icon everywhere.
-              </p>
-              <p className="text-warning small mt-1 mb-0">
-                ⚠ The symbol is guessed from the unit&rsquo;s title text alone and may not be correct.
-              </p>
+
+              
             </div>
 
             <div className="modal-footer">

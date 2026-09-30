@@ -4,7 +4,7 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 export default function TopBar({
   path, onGo, onExport, onReset,
   onZoomIn, onZoomOut, onFit, legendOpen, onToggleLegend, warnings, onOpenSettings,
-  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree,
+  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree, onOpenTutorial,
 }) {
   return (
     <nav className="navbar navbar-expand bg-body-tertiary border-bottom topbar py-1">
@@ -12,7 +12,7 @@ export default function TopBar({
         {/* LEFT SIDE: Buttons reordered logically */}
         <div className="d-flex align-items-center gap-2">
           {/* File Operations */}
-          <div className="btn-group btn-group-sm" role="group" aria-label="File Operations">
+          <div className="btn-group btn-group-sm" role="group" aria-label="File Operations" data-tour="file">
             <button type="button" className="btn btn-outline-secondary" onClick={onReset} title="Open a different spreadsheet">
               New
             </button>
@@ -65,7 +65,7 @@ export default function TopBar({
           </button>
 
           {/* Zoom controls */}
-          <div className="btn-group btn-group-sm" role="group" aria-label="Zoom">
+          <div className="btn-group btn-group-sm" role="group" aria-label="Zoom" data-tour="zoom">
             <button type="button" className="btn btn-outline-secondary" onClick={onZoomOut} title="Zoom out">−</button>
             <button type="button" className="btn btn-outline-secondary" onClick={onFit} title="Fit whole structure (F)">Fit</button>
             <button type="button" className="btn btn-outline-secondary" onClick={onZoomIn} title="Zoom in">+</button>
@@ -81,12 +81,24 @@ export default function TopBar({
             Settings
           </button>
 
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-info d-flex align-items-center gap-1"
+            onClick={onOpenTutorial}
+            title="Guided tour of the viewer"
+            data-tour="tutorial-btn"
+          >
+            <i className="bi bi-question-circle" aria-hidden="true" />
+            Tutorial
+          </button>
+
           {/* Warnings */}
           {warnings?.length > 0 && (
             <button
               type="button"
               className="btn btn-sm btn-outline-warning d-flex align-items-center gap-1"
               title="View model warnings"
+              data-tour="warnings-btn"
               onClick={onOpenWarnings}
             >
               <i className="bi bi-exclamation-triangle-fill" /> {warnings.length}
@@ -95,7 +107,7 @@ export default function TopBar({
         </div>
 
         {/* MIDDLE: Breadcrumbs trail */}
-        <div className="flex-grow-1 overflow-hidden">
+        <div className="flex-grow-1 overflow-hidden" data-tour="crumbs">
           <Breadcrumbs path={path} onGo={onGo} />
         </div>
 

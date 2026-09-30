@@ -98,7 +98,7 @@ export default function TreeModal({ open, model, onClose, onGo }) {
 
             <div className="modal-body p-3">
               {/* Controls bar */}
-              <div className="d-flex align-items-center justify-content-between gap-2 mb-3 bg-body-tertiary p-2 rounded border">
+              <div className="d-flex align-items-center justify-content-between gap-2 mb-3 bg-body-tertiary p-2 rounded border" data-tour="tree-controls">
                 <div className="form-check form-switch mb-0 small ms-1">
                   <input
                     className="form-check-input"

@@ -17,6 +17,9 @@ import BusyToast from './ui/BusyToast.jsx';
 import { withBusyToast } from './view/busy.js';
 import { onUpdateAvailable, applyUpdate } from './pwa/register.js';
 import SearchPanel from './ui/SearchPanel.jsx';
+import Tour from './tutorial/Tour.jsx';
+import TutorialOffer from './tutorial/TutorialOffer.jsx';
+import { tutorialSeen, markTutorialSeen, loadTourPos, saveTourPos } from './tutorial/storage.js';
 import { MosPaletteProvider } from './view/MosPalette.jsx';
 import { SettingsProvider } from './view/SettingsContext.jsx';
 import { SupplementProvider } from './view/Supplement.jsx';
@@ -56,6 +59,8 @@ export default function App() {
   const [focusId, setFocusId] = useState(null);
   const [legendOpen, setLegendOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  // Tab the stats modal should open on; null keeps the one it remembers.
+  const [statsTab, setStatsTab] = useState(null);
   const [treeOpen, setTreeOpen] = useState(false);
   const [warningsOpen, setWarningsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -78,6 +83,11 @@ export default function App() {
   // A newer build is downloaded and waiting (see pwa/register.js).
   const [updateReady, setUpdateReady] = useState(false);
   const [updateDeferred, setUpdateDeferred] = useState(false);
+  // The guided tour, and its first-run offer (see tutorial/).
+  const [tourOpen, setTourOpen] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
+  // Where the tour was left, so Tutorial picks it back up there.
+  const tourPos = useRef(loadTourPos());
 
   const displayModel = useMemo(() => {
     if (!model) return null;
@@ -186,6 +196,7 @@ export default function App() {
     setSupplementRows([]);
     setSelectedId(null); setFocusId(null);
     setSearchScopeId(null); setSearchPicking(false);
+    setTourOpen(false); setOfferOpen(false);
     // Nothing about where the last structure was being viewed means anything
     // for the next one, and a camera left deep inside the old world would show
     // empty space until something re-framed it.
@@ -309,6 +320,87 @@ export default function App() {
     setStatsOpen(false);
   }, []);
 
+  // --- tutorial ------------------------------------------------------------
+
+  // Offered once per browser, the first time a structure is on screen.
+  useEffect(() => {
+    if (stage === 'ready' && !tutorialSeen()) setOfferOpen(true);
+  }, [stage]);
+
+  const startTour = useCallback(() => {
+    markTutorialSeen();
+    setOfferOpen(false);
+    setTourOpen(true);
+  }, []);
+
+  const dismissOffer = useCallback(() => {
+    markTutorialSeen();
+    setOfferOpen(false);
+  }, []);
+
+  // What the tour shows off: a unit one level under the top (one with units
+  // or billets inside, so it has something to open onto), and the first
+  // soldier with an MOS inside that.
+  const tourCtx = useMemo(() => {
+    if (!displayModel) return null;
+    const { byId, rootId } = displayModel;
+    const root = byId.get(rootId);
+    const kids = root.childIds.map((id) => byId.get(id));
+    const unit = kids.find((n) => n.kind === 'UN' && n.childIds.length > 0 && n.roll.billets > 0)
+      || kids.find((n) => n.childIds.length > 0)
+      || root;
+    let billet = null;
+    for (const queue = [unit.id]; queue.length && !billet;) {
+      const n = byId.get(queue.shift());
+      if (n.kind === 'BL' && n.mos) billet = n;
+      else queue.push(...n.childIds);
+    }
+    return {
+      demo: {
+        unitId: unit.id,
+        billetId: billet?.id ?? null,
+        mos: billet?.mos ?? root.topMos[0]?.mos ?? null,
+        unitHasMos: unit.topMos.length > 0,
+        unitHasEq: unit.equipment.length > 0 || (unit.childIds.length > 0 && unit.allEq.length > 0),
+      },
+      hasWarnings: displayModel.meta.warnings?.length > 0,
+    };
+  }, [displayModel]);
+
+  // Puts the app in the state a tour step asks for (see tutorial/steps.js):
+  // everything a step doesn't list is closed.
+  const tourApi = useMemo(() => ({
+    apply(ui, focus, moveCamera) {
+      if (!tourCtx) return;
+      const { demo } = tourCtx;
+      setSearchPicking(false);
+      if (ui.search) {
+        const q = ui.search === 'demo-mos' ? (demo.mos ? `MOS:${demo.mos}` : '') : '';
+        setSearchScopeId(null);
+        setSearchQuery(q);
+        setSearchOpen(true);
+      } else {
+        setSearchOpen(false);
+        setSearchQuery('');
+      }
+      setStatsTab(ui.stats || null);
+      setStatsOpen(!!ui.stats);
+      setTreeOpen(!!ui.tree);
+      setLegendOpen(!!ui.legend);
+      setSettingsOpen(!!ui.settings);
+      setExportOpen(!!ui.exportOpen);
+      setWarningsOpen(false);
+
+      const id = focus === 'unit' ? demo.unitId : focus === 'billet' ? demo.billetId : null;
+      if (moveCamera) {
+        if (id) goTo(id);
+        else fitAll();
+      }
+      // The side panel only shows on steps about a unit or soldier.
+      setSelectedId(ui.focus && ui.panel !== false ? id : null);
+    },
+  }), [tourCtx, goTo, fitAll]);
+
   // --- render --------------------------------------------------------------
 
   if (stage === 'idle') {
@@ -363,6 +455,7 @@ export default function App() {
           onOpenTree={() => setTreeOpen(true)}
           onOpenStats={() => setStatsOpen(true)}
           onOpenWarnings={() => setWarningsOpen(true)}
+          onOpenTutorial={startTour}
         />
 
         <div className="app-body">
@@ -395,7 +488,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="statusbar text-body-secondary small">
+        <div className="statusbar text-body-secondary small" data-tour="statusbar">
           <div className="status-file">
             <span className="fw-semibold text-body">{displayModel.meta.uic || '—'}</span>
             <span title={displayModel.meta.sourceFile}>{displayModel.meta.sourceFile}</span>
@@ -424,9 +517,10 @@ export default function App() {
 
         <StatsModal
           open={statsOpen}
+          initialTab={statsTab}
           model={displayModel}
           censored={settings.censor}
-          onClose={() => setStatsOpen(false)}
+          onClose={() => { setStatsOpen(false); setStatsTab(null); }}
           onSearch={openSearch}
         />
 
@@ -455,6 +549,17 @@ export default function App() {
         <DetailModals model={displayModel} onSearch={openSearch} />
 
         <BusyToast />
+
+        <TutorialOffer open={offerOpen && !tourOpen} onStart={startTour} onDismiss={dismissOffer} />
+        {tourOpen && tourCtx && (
+          <Tour
+            ctx={tourCtx}
+            api={tourApi}
+            startAt={tourPos.current}
+            onPosition={(p) => { tourPos.current = p; saveTourPos(p); }}
+            onEnd={() => setTourOpen(false)}
+          />
+        )}
 
         <UpdateToast
           open={updateReady && !updateDeferred}

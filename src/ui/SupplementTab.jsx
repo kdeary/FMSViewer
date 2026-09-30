@@ -192,7 +192,7 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
 
   return (
     <div>
-      <div className="p-2 mb-3 border rounded bg-body-tertiary small d-flex flex-wrap align-items-center gap-3">
+      <div className="p-2 mb-3 border rounded bg-body-tertiary small d-flex flex-wrap align-items-center gap-3" data-tour="sup-coverage">
         <span>
           <strong className="text-body">{linsCovered}</strong>
           <span className="text-body-secondary"> of </span>
@@ -208,95 +208,99 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
         <span className="text-body-secondary">in this unit are in the Supplement Table ({sup.rows.length} rows)</span>
       </div>
 
-      <h3 className="h6 fw-semibold mb-1">1. Copy this prompt into any AI chat</h3>
-      <p className="small text-body-secondary mb-2">
-        It lists every LIN and MOS in the unit and asks for a CSV with <code>TYPE</code>, <code>CODE</code>,{' '}
-        <code>NAME</code>, <code>TAG</code> and <code>DESCRIPTION</code> columns. For large units, an AI may stop partway — ask it to
-        continue, or import what you get and re-copy with “only codes not in the table”.
-      </p>
-      <textarea
-        ref={promptRef}
-        className="form-control eq-prompt mb-2"
-        readOnly
-        value={prompt}
-        aria-label="AI prompt"
-        onFocus={(e) => e.target.select()}
-      />
-      <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
-        <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
-          <i className={`bi ${copied ? 'bi-check2' : 'bi-clipboard'} me-1`} />{copied ? 'Copied' : 'Copy prompt'}
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => downloadText(prompt, 'supplement-table-prompt.txt', 'text/plain')}
-        >
-          <i className="bi bi-download me-1" />Download .txt
-        </button>
-        <div className="form-check form-check-inline small ms-sm-2 mb-0">
-          <input
-            id="sup-missing-only"
-            className="form-check-input"
-            type="checkbox"
-            checked={missingOnly}
-            onChange={(e) => setMissingOnly(e.target.checked)}
-          />
-          <label className="form-check-label" htmlFor="sup-missing-only">
-            Only codes not in the table ({missing})
-          </label>
-        </div>
-      </div>
-
-      <h3 className="h6 fw-semibold mb-1">2. Import the CSV the AI returns</h3>
-      <p className="small text-body-secondary mb-2">
-        Save the AI's answer as a <code>.csv</code> file and choose it below. The table is saved inside the
-        .fmsmodel.json when you export the model.
-      </p>
-      {hasTable && (
-        <div className="d-flex flex-wrap gap-3 small mb-2" role="radiogroup" aria-label="Import mode">
-          <div className="form-check mb-0">
+      <section data-tour="sup-prompt">
+        <h3 className="h6 fw-semibold mb-1">1. Copy this prompt into any AI chat</h3>
+        <p className="small text-body-secondary mb-2">
+          It lists every LIN and MOS in the unit and asks for a CSV with <code>TYPE</code>, <code>CODE</code>,{' '}
+          <code>NAME</code>, <code>TAG</code> and <code>DESCRIPTION</code> columns. For large units, an AI may stop partway — ask it to
+          continue, or import what you get and re-copy with “only codes not in the table”.
+        </p>
+        <textarea
+          ref={promptRef}
+          className="form-control eq-prompt mb-2"
+          readOnly
+          value={prompt}
+          aria-label="AI prompt"
+          onFocus={(e) => e.target.select()}
+        />
+        <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
+          <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
+            <i className={`bi ${copied ? 'bi-check2' : 'bi-clipboard'} me-1`} />{copied ? 'Copied' : 'Copy prompt'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            onClick={() => downloadText(prompt, 'supplement-table-prompt.txt', 'text/plain')}
+          >
+            <i className="bi bi-download me-1" />Download .txt
+          </button>
+          <div className="form-check form-check-inline small ms-sm-2 mb-0" data-tour="sup-missing">
             <input
-              id="sup-mode-amend"
+              id="sup-missing-only"
               className="form-check-input"
-              type="radio"
-              name="sup-mode"
-              checked={mode === 'amend'}
-              onChange={() => setMode('amend')}
+              type="checkbox"
+              checked={missingOnly}
+              onChange={(e) => setMissingOnly(e.target.checked)}
             />
-            <label className="form-check-label" htmlFor="sup-mode-amend">
-              Amend current table <span className="text-body-secondary">(adds new codes, overwrites matching ones)</span>
-            </label>
-          </div>
-          <div className="form-check mb-0">
-            <input
-              id="sup-mode-replace"
-              className="form-check-input"
-              type="radio"
-              name="sup-mode"
-              checked={mode === 'replace'}
-              onChange={() => setMode('replace')}
-            />
-            <label className="form-check-label" htmlFor="sup-mode-replace">
-              Replace current table
+            <label className="form-check-label" htmlFor="sup-missing-only">
+              Only codes not in the table ({missing})
             </label>
           </div>
         </div>
-      )}
-      <input
-        type="file"
-        className="form-control form-control-sm"
-        accept=".csv,text/csv,.txt,text/plain"
-        aria-label="Import Supplement Table CSV"
-        onChange={onFile}
-        disabled={!!busy}
-      />
-      {status && (
-        <div className={`alert alert-${status.kind} small py-2 mt-2 mb-0`} role="status">
-          {status.text}
-        </div>
-      )}
+      </section>
 
-      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4 mb-2">
+      <section data-tour="sup-import">
+        <h3 className="h6 fw-semibold mb-1">2. Import the CSV the AI returns</h3>
+        <p className="small text-body-secondary mb-2">
+          Save the AI's answer as a <code>.csv</code> file and choose it below. The table is saved inside the
+          .fmsmodel.json when you export the model.
+        </p>
+        {hasTable && (
+          <div className="d-flex flex-wrap gap-3 small mb-2" role="radiogroup" aria-label="Import mode">
+            <div className="form-check mb-0">
+              <input
+                id="sup-mode-amend"
+                className="form-check-input"
+                type="radio"
+                name="sup-mode"
+                checked={mode === 'amend'}
+                onChange={() => setMode('amend')}
+              />
+              <label className="form-check-label" htmlFor="sup-mode-amend">
+                Amend current table <span className="text-body-secondary">(adds new codes, overwrites matching ones)</span>
+              </label>
+            </div>
+            <div className="form-check mb-0">
+              <input
+                id="sup-mode-replace"
+                className="form-check-input"
+                type="radio"
+                name="sup-mode"
+                checked={mode === 'replace'}
+                onChange={() => setMode('replace')}
+              />
+              <label className="form-check-label" htmlFor="sup-mode-replace">
+                Replace current table
+              </label>
+            </div>
+          </div>
+        )}
+        <input
+          type="file"
+          className="form-control form-control-sm"
+          accept=".csv,text/csv,.txt,text/plain"
+          aria-label="Import Supplement Table CSV"
+          onChange={onFile}
+          disabled={!!busy}
+        />
+        {status && (
+          <div className={`alert alert-${status.kind} small py-2 mt-2 mb-0`} role="status">
+            {status.text}
+          </div>
+        )}
+      </section>
+
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4 mb-2" data-tour="sup-table-head">
         <h3 className="h6 fw-semibold mb-0">3. Supplement Table</h3>
         <div className="d-flex flex-wrap gap-2">
           <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addRow}>
@@ -316,69 +320,71 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
         </div>
       </div>
 
-      {hasTable ? (
-        <>
-          <div className="input-group input-group-sm mb-2">
-            <select
-              className="form-select flex-grow-0 sup-type-filter"
-              aria-label="Filter by type"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <option value="ALL">All</option>
-              <option value="LIN">LIN</option>
-              <option value="MOS">MOS</option>
-            </select>
-            <span className="input-group-text"><i className="bi bi-search" /></span>
-            <input
-              type="search"
-              className="form-control"
-              placeholder="Filter by code, name or description…"
-              aria-label="Filter Supplement Table"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-          </div>
-          {/* Hidden while closing: rows removed from a table still on screen
-              made the browser re-lay out all the rest after every chunk. */}
-          <div className="table-responsive stats-table-container sup-table" hidden={!!drain}>
-            <table className="table table-sm table-dark table-borderless align-middle mb-0">
-              <thead className="sticky-top border-bottom">
-                <tr>
-                  <th scope="col" style={{ width: '96px' }}>Type</th>
-                  <th scope="col" style={{ width: '104px' }}>Code</th>
-                  <th scope="col" style={{ width: '24%' }}>Name</th>
-                  <th scope="col" style={{ width: '168px' }}>Tag</th>
-                  <th scope="col">Description</th>
-                  <th scope="col" style={{ width: '36px' }}><span className="visually-hidden">Delete</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRows.map((r) => (
-                  <SupRow key={r.id} row={r} fmsName={fmsNames.get(r.code)} onUpdate={update} onRemove={remove} />
-                ))}
-                {!allShown && !drain && (
+      <div data-tour="sup-rows">
+        {hasTable ? (
+          <>
+            <div className="input-group input-group-sm mb-2">
+              <select
+                className="form-select flex-grow-0 sup-type-filter"
+                aria-label="Filter by type"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="ALL">All</option>
+                <option value="LIN">LIN</option>
+                <option value="MOS">MOS</option>
+              </select>
+              <span className="input-group-text"><i className="bi bi-search" /></span>
+              <input
+                type="search"
+                className="form-control"
+                placeholder="Filter by code, name or description…"
+                aria-label="Filter Supplement Table"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </div>
+            {/* Hidden while closing: rows removed from a table still on screen
+                made the browser re-lay out all the rest after every chunk. */}
+            <div className="table-responsive stats-table-container sup-table" hidden={!!drain}>
+              <table className="table table-sm table-dark table-borderless align-middle mb-0">
+                <thead className="sticky-top border-bottom">
                   <tr>
-                    <td colSpan={6} className="text-center text-body-secondary small py-2">
-                      <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                      Loading rows… {streamedRows.length} of {shownRows.length}
-                    </td>
+                    <th scope="col" style={{ width: '96px' }}>Type</th>
+                    <th scope="col" style={{ width: '104px' }}>Code</th>
+                    <th scope="col" style={{ width: '24%' }}>Name</th>
+                    <th scope="col" style={{ width: '168px' }}>Tag</th>
+                    <th scope="col">Description</th>
+                    <th scope="col" style={{ width: '36px' }}><span className="visually-hidden">Delete</span></th>
                   </tr>
-                )}
-                {!shownRows.length && (
-                  <tr>
-                    <td colSpan={6} className="text-center text-body-secondary py-4">No rows match the filter.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </>
-      ) : (
-        <p className="small text-body-secondary mb-0">
-          The table is empty. Import a CSV above, or add rows by hand.
-        </p>
-      )}
+                </thead>
+                <tbody>
+                  {visibleRows.map((r) => (
+                    <SupRow key={r.id} row={r} fmsName={fmsNames.get(r.code)} onUpdate={update} onRemove={remove} />
+                  ))}
+                  {!allShown && !drain && (
+                    <tr>
+                      <td colSpan={6} className="text-center text-body-secondary small py-2">
+                        <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+                        Loading rows… {streamedRows.length} of {shownRows.length}
+                      </td>
+                    </tr>
+                  )}
+                  {!shownRows.length && (
+                    <tr>
+                      <td colSpan={6} className="text-center text-body-secondary py-4">No rows match the filter.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          <p className="small text-body-secondary mb-0">
+            The table is empty. Import a CSV above, or add rows by hand.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

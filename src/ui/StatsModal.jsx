@@ -22,8 +22,13 @@ import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
  *  - Clicking a LIN or nomenclature opens the equipment detail modal.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
-export default function StatsModal({ open, model, censored, onClose, onSearch }) {
+export default function StatsModal({ open, initialTab, model, censored, onClose, onSearch }) {
   const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'info'
+  // Opened on a particular tab (the guided tour); otherwise the last one stays.
+  // A name that isn't a tab is ignored rather than leaving the body blank.
+  useEffect(() => {
+    if (open && ['personnel', 'equipment', 'info'].includes(initialTab)) setTab(initialTab);
+  }, [open, initialTab]);
   const [expandedCats, setExpandedCats] = useState(new Set());
   const [eqQuery, setEqQuery] = useState('');
   const mosInfo = useMosInfo();
@@ -218,7 +223,7 @@ export default function StatsModal({ open, model, censored, onClose, onSearch })
             </div>
 
             <div className="modal-header border-bottom-0 py-1 bg-body-tertiary">
-              <ul className="nav nav-tabs card-header-tabs">
+              <ul className="nav nav-tabs card-header-tabs" data-tour="stats-tabs">
                 <li className="nav-item">
                   <button
                     type="button"

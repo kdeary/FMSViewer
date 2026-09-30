@@ -114,10 +114,10 @@ export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
         )}
 
         {!isBillet && node.topMos.length > 0 && (
-          <>
+          <section data-tour="panel-mos">
             <h3 className="h6 mt-4 mb-2">MOS breakdown</h3>
             <MosBar topMos={node.topMos} total={r.billets} />
-          </>
+          </section>
         )}
 
         {node.equipment.length > 0 && (
@@ -138,7 +138,7 @@ export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
         )}
 
         {children.length > 0 && (
-          <>
+          <section data-tour="panel-contains">
             <h3 className="h6 mt-4 mb-2">Contains</h3>
             <ul className="list-group list-group-flush small">
               {children.map((c) => (
@@ -152,7 +152,7 @@ export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
                 </li>
               ))}
             </ul>
-          </>
+          </section>
         )}
       </div>
     </aside>

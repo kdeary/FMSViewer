@@ -747,6 +747,7 @@ body { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .side-panel, .legend, .drop-zone { animation: none; transition: none; }
+  .tour-ring, .tour-card, .tutorial-offer { animation: none; transition: none; }
 }
 
 /* ------------------------------------------------------------- stats modal */
@@ -979,3 +980,103 @@ select.sup-cell { padding-right: 1.75rem; background-position: right 0.4rem cent
   to { transform: translate(-50%, 0); opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .busy-toast { animation: none; } }
+
+/* ------------------------------------------------------------ guided tour */
+
+/* First-run offer: a card that slides in from the bottom-right corner, not a
+   modal -- no backdrop, and the map behind it keeps working. */
+.tutorial-offer {
+  position: fixed; right: 1rem; bottom: 2.5rem; z-index: 1045;
+  width: 25vw; min-width: 280px; max-width: calc(100vw - 2rem);
+  border: 1px solid rgba(var(--bs-info-rgb), 0.45);
+  background: var(--bs-body-bg);
+  animation: offer-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s both;
+}
+.tutorial-offer-icon { font-size: 1.6rem; line-height: 1; color: var(--bs-info); }
+@keyframes offer-in {
+  from { transform: translate(30%, 40%); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@media (max-width: 720px) {
+  .tutorial-offer { width: auto; min-width: 0; left: 1rem; }
+}
+
+/* Everything outside the spotlight is dimmed by this; the hole is cut and
+   moved by the tour each frame. The dimmed part takes the clicks, so only
+   what's inside the spotlight can be used during the tour. */
+.tour-shade { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1075; pointer-events: none; }
+.tour-shade path { fill: rgba(8, 10, 12, 0.72); pointer-events: fill; }
+.tour-ring {
+  position: fixed; left: 0; top: 0; z-index: 1076; pointer-events: none;
+  border: 2px solid var(--bs-info); border-radius: 10px;
+  transition: opacity 0.2s ease;
+  animation: tour-pulse 1.8s ease-out infinite;
+}
+@keyframes tour-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--bs-info-rgb), 0.55); }
+  70%, 100% { box-shadow: 0 0 0 12px rgba(var(--bs-info-rgb), 0); }
+}
+
+.tour-card {
+  position: fixed; z-index: 1080;
+  width: min(22rem, calc(100vw - 24px));
+  max-height: calc(100vh - 24px); overflow-y: auto;
+  background: var(--bs-body-bg);
+  border: 1px solid rgba(var(--bs-info-rgb), 0.45);
+  transition: left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease;
+}
+.tour-card.is-waiting { opacity: 0; }
+.tour-progress { height: 3px; background: var(--bs-tertiary-bg); }
+.tour-progress i { display: block; height: 100%; background: var(--bs-info); transition: width 0.3s ease; }
+.tour-card-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
+.tour-section {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--bs-info);
+}
+.tour-count { color: var(--bs-secondary-color); font-weight: 400; letter-spacing: 0; text-transform: none; }
+.tour-body { font-size: 0.875rem; color: var(--bs-body-color); }
+.tour-try {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  margin: -0.5rem 0 0.85rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem;
+  font-size: 0.8rem; color: var(--bs-info-text-emphasis);
+  background: rgba(var(--bs-info-rgb), 0.12); border: 1px solid rgba(var(--bs-info-rgb), 0.3);
+}
+.tour-try > i { color: var(--bs-info); }
+.tour-lost {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  margin: -0.5rem 0 0.85rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem;
+  font-size: 0.8rem; color: var(--bs-warning-text-emphasis);
+  background: rgba(var(--bs-warning-rgb), 0.12); border: 1px solid rgba(var(--bs-warning-rgb), 0.3);
+}
+.tour-lost .btn-link, .tour-resumed .btn-link { font-size: inherit; }
+.tour-resumed { margin: -0.1rem 0 0.4rem; font-size: 0.78rem; color: var(--bs-secondary-color); }
+.tour-dots { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: -0.35rem 0 0.85rem; }
+.tour-dots i {
+  width: 0.4rem; height: 0.4rem; border-radius: 50%;
+  background: var(--bs-border-color); transition: background 0.2s ease, transform 0.2s ease;
+}
+.tour-dots i.is-done { background: rgba(var(--bs-info-rgb), 0.45); }
+.tour-dots i.is-on { background: var(--bs-info); transform: scale(1.3); }
+
+.tour-option {
+  display: flex; align-items: center; gap: 0.65rem; text-align: left; padding: 0.45rem 0.65rem;
+}
+.tour-option > i { font-size: 1.1rem; }
+.tour-option small, .tour-menu-item small { display: block; font-size: 0.75rem; opacity: 0.8; }
+
+.tour-menu { display: flex; flex-direction: column; gap: 0.25rem; }
+.tour-menu-item {
+  display: flex; align-items: center; gap: 0.65rem; width: 100%; text-align: left;
+  padding: 0.4rem 0.55rem; border-radius: 0.4rem;
+  font-size: 0.85rem; color: var(--bs-body-color);
+  background: transparent; border: 1px solid transparent;
+}
+.tour-menu-item > i { font-size: 1.05rem; color: var(--bs-info); width: 1.2rem; text-align: center; }
+.tour-menu-item small { color: var(--bs-secondary-color); opacity: 1; }
+.tour-menu-item:hover, .tour-menu-item:focus-visible {
+  background: var(--bs-tertiary-bg); border-color: var(--bs-border-color); outline: none;
+}
+.tour-menu-item.is-current { border-color: rgba(var(--bs-info-rgb), 0.45); }
+@media (max-height: 700px) {
+  .tour-menu-item small { display: none; }
+}
