@@ -3,8 +3,11 @@ import Breadcrumbs from './Breadcrumbs.jsx';
 
 const LOGO = `${import.meta.env.BASE_URL}favicon.png`;
 
-/** One icon-only toolbar button; the label is its tooltip and accessible name. */
-function IconButton({ icon, label, onClick, active, variant = 'secondary', className = '', children, ...rest }) {
+/**
+ * One toolbar button: icon and a short name, the name dropped on a phone to
+ * fit the bar (app.css). `label` is the tooltip and accessible name either way.
+ */
+function IconButton({ icon, text, label, onClick, active, variant = 'secondary', className = '', children, ...rest }) {
   return (
     <button
       type="button"
@@ -16,6 +19,7 @@ function IconButton({ icon, label, onClick, active, variant = 'secondary', class
       {...rest}
     >
       <i className={`bi ${icon}`} aria-hidden="true" />
+      {text && <span className="topbar-label" aria-hidden="true">{text}</span>}
       {children}
     </button>
   );
@@ -30,16 +34,17 @@ export default function TopBar({
       <div className="topbar-inner">
         <div className="topbar-tools">
           <div className="btn-group btn-group-sm" role="group" aria-label="File" data-tour="file">
-            <IconButton icon="bi-file-earmark-plus" label="New: open a different spreadsheet" onClick={onReset} />
-            <IconButton icon="bi-box-arrow-down" label="Export the parsed model" onClick={onExport} variant="info" />
+            <IconButton icon="bi-file-earmark-plus" text="New" label="New: back to the home page to open another spreadsheet" onClick={onReset} />
+            <IconButton icon="bi-box-arrow-down" text="Export" label="Export the parsed model" onClick={onExport} variant="info" />
           </div>
-          <IconButton icon="bi-search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
-          <IconButton icon="bi-diagram-3" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
-          <IconButton icon="bi-bar-chart" label="Unit statistics" onClick={onOpenStats} />
-          <IconButton icon="bi-palette" label="MOS legend" onClick={onToggleLegend} active={legendOpen} />
-          <IconButton icon="bi-gear" label="Settings" onClick={onOpenSettings} />
+          <IconButton icon="bi-search" text="Search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
+          <IconButton icon="bi-diagram-3" text="Tree" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
+          <IconButton icon="bi-bar-chart" text="Stats" label="Unit statistics" onClick={onOpenStats} />
+          <IconButton icon="bi-palette" text="Legend" label="MOS legend" onClick={onToggleLegend} active={legendOpen} />
+          <IconButton icon="bi-gear" text="Settings" label="Settings" onClick={onOpenSettings} />
           <IconButton
             icon="bi-question-circle"
+            text="Tutorial"
             label="Tutorial: guided tour of the viewer"
             onClick={onOpenTutorial}
             variant="info"

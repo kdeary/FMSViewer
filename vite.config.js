@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync } from 'node:fs';
+import { copyFileSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -27,6 +28,22 @@ function serviceWorker() {
   };
 }
 
+// GitHub Pages has no SPA fallback: a reload of /FMSViewer/view would get
+// its stock 404. Pages serves 404.html for any missing path, so that is the
+// app itself, and routing.js takes it from there. Its asset paths are
+// relative (base './'), which from /FMSViewer/view still resolve to
+// /FMSViewer/assets/.
+function spaFallback() {
+  return {
+    name: 'fmsviewer-spa-fallback',
+    apply: 'build',
+    // After writing: the page isn't in the bundle yet when plugins see it.
+    writeBundle(options) {
+      copyFileSync(join(options.dir, 'index.html'), join(options.dir, '404.html'));
+    },
+  };
+}
+
 // Shown in the status bar so anyone can tell which build they are running.
 // The build time makes every build distinct, which in turn gives every build
 // its own service-worker version (the version hashes the emitted files).
@@ -39,7 +56,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(appVersion),
     __BUILD_TIME__: JSON.stringify(builtAt),
   },
-  plugins: [react(), serviceWorker()],
+  plugins: [react(), serviceWorker(), spaFallback()],
   server: { open: true },
   worker: { format: 'es' },
 });

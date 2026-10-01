@@ -16,6 +16,7 @@ import UpdateToast from './ui/UpdateToast.jsx';
 import BusyToast from './ui/BusyToast.jsx';
 import { withBusyToast } from './view/busy.js';
 import { onUpdateAvailable, applyUpdate } from './pwa/register.js';
+import { HOME, VIEW, currentRoute, navigate, onRouteChange } from './routing.js';
 import SearchPanel from './ui/SearchPanel.jsx';
 import Tour from './tutorial/Tour.jsx';
 import TutorialOffer from './tutorial/TutorialOffer.jsx';
@@ -125,10 +126,15 @@ export default function App() {
     setSupplementRows(rows);
     setFileName(name);
     setFocusId(m.rootId);
-    setSelectedId(null);
-    setSearchScopeId(null);
+    setSelectedId(null); setPanelOpen(false);
+    setSearchScopeId(null); setSearchPicking(false);
+    // Nothing about where the last structure was being viewed means anything
+    // for the next one, and a camera left deep inside the old world would show
+    // empty space until something re-framed it.
+    setCam({ x: 0, y: 0, k: 1 });
     setStage('ready');
-  }, []);
+    navigate(VIEW);
+  }, [setCam]);
 
   // Alternate-format structures wait on the home page for the user to decide.
   const openModel = useCallback((m, rows, name) => {
@@ -199,28 +205,50 @@ export default function App() {
     });
   }, [displayModel, download, settings.censor, supplementRows]);
 
-  const reset = useCallback(() => {
-    workerRef.current?.terminate();
-    workerRef.current = null;
-    setModel(null); setStage('idle'); setError(''); setProgress(null);
-    setSupplementRows([]);
-    setSelectedId(null); setFocusId(null); setPanelOpen(false);
-    setSearchScopeId(null); setSearchPicking(false);
+  // --- routing (see routing.js) ---------------------------------------------
+
+  // Leaving the viewer for the home page keeps the structure, selection and
+  // camera: Back is one swipe away on a phone, and Forward (or Return on the
+  // home page) should land where the user was. Only loading another file
+  // replaces it. What was floating over the map is closed.
+  const leaveView = useCallback(() => {
+    setStage('idle'); setError(''); setProgress(null);
+    setStatsOpen(false); setTreeOpen(false); setWarningsOpen(false);
+    setSettingsOpen(false); setExportOpen(false);
+    setSearchPicking(false);
     setTourOpen(false); setOfferOpen(false);
-    // Nothing about where the last structure was being viewed means anything
-    // for the next one, and a camera left deep inside the old world would show
-    // empty space until something re-framed it.
-    setCam({ x: 0, y: 0, k: 1 });
-  }, [setCam]);
+  }, []);
+
+  const goHome = useCallback(() => { navigate(HOME); leaveView(); }, [leaveView]);
+  const returnToView = useCallback(() => { setStage('ready'); navigate(VIEW); }, []);
+
+  // Read by the Back/Forward handler, which is subscribed once.
+  const routeState = useRef({});
+  routeState.current = { model, stage };
+
+  useEffect(() => {
+    // Nothing is loaded when the page opens, so /view has nothing to show.
+    if (currentRoute() === VIEW) navigate(HOME, { replace: true });
+    return onRouteChange((route) => {
+      const { model: m, stage: st } = routeState.current;
+      if (route === VIEW) {
+        if (m && st !== 'parsing') setStage('ready');
+        else navigate(HOME, { replace: true });
+      } else if (st === 'ready') {
+        leaveView();
+      }
+    });
+  }, [leaveView]);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
   useEffect(() => onUpdateAvailable(() => setUpdateReady(true)), []);
-  // On the home page there is nothing to lose, so a new build is applied
-  // straight away; with a structure open the user is asked (UpdateToast).
+  // On the home page with nothing loaded there is nothing to lose, so a new
+  // build is applied straight away; with a structure open, or kept to return
+  // to, the user is asked (UpdateToast).
   useEffect(() => {
-    if (updateReady && stage === 'idle' && !pendingAlt) applyUpdate();
-  }, [updateReady, stage, pendingAlt]);
+    if (updateReady && stage === 'idle' && !pendingAlt && !model) applyUpdate();
+  }, [updateReady, stage, pendingAlt, model]);
 
   // --- camera --------------------------------------------------------------
 
@@ -420,7 +448,13 @@ export default function App() {
   if (stage === 'idle') {
     return (
       <div className="app-shell app-centered">
-        <FileDrop onSheet={parseSheet} onModel={loadModelFile} error={error} howToSignal={howToSignal} />
+        <FileDrop
+          onSheet={parseSheet}
+          onModel={loadModelFile}
+          error={error}
+          howToSignal={howToSignal}
+          resume={model ? { title: model.byId.get(model.rootId)?.title || model.meta.uic, fileName, onResume: returnToView } : null}
+        />
         <AlternateFormatModal
           open={!!pendingAlt}
           fileName={pendingAlt?.fileName}
@@ -455,7 +489,7 @@ export default function App() {
           path={path}
           onGo={goTo}
           onExport={() => setExportOpen(true)}
-          onReset={reset}
+          onReset={goHome}
           legendOpen={legendOpen}
           onToggleLegend={() => setLegendOpen((v) => !v)}
           warnings={displayModel.meta.warnings}

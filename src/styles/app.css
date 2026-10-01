@@ -225,8 +225,9 @@ body { overflow: hidden; }
 .topbar-tools { display: flex; align-items: center; gap: 0.35rem; flex: none; }
 .topbar-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 2rem; height: 2rem; padding: 0 0.45rem; font-size: 1rem; line-height: 1;
+  flex: none; min-width: 2rem; height: 2rem; padding: 0 0.45rem; font-size: 1rem; line-height: 1;
 }
+.topbar-label { margin-left: 0.35rem; font-size: 0.875rem; }
 .topbar-warn span { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
 .topbar-crumbs { flex: 1 1 auto; min-width: 0; overflow: hidden; }
 .topbar-logo {
@@ -237,6 +238,14 @@ body { overflow: hidden; }
 .topbar-logo img { display: block; width: 2rem; height: 2rem; border-radius: 0.35rem; }
 .topbar-logo:hover { filter: brightness(1.15); }
 .topbar-logo:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--accent-ink); }
+/* Below lg the labelled tools leave the breadcrumbs no room: they get a row
+   of their own, as on a phone. */
+@media (max-width: 991.98px) {
+  .topbar-inner { flex-wrap: wrap; row-gap: 0.25rem; }
+  .topbar-tools { flex: 1 1 0; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .topbar-tools::-webkit-scrollbar { display: none; }
+  .topbar-crumbs { order: 3; flex-basis: 100%; }
+}
 .crumbs .breadcrumb { overflow-x: auto; scrollbar-width: none; font-size: 0.875rem; }
 .crumbs .breadcrumb::-webkit-scrollbar { display: none; }
 .crumbs .breadcrumb-item { white-space: nowrap; }
@@ -821,6 +830,7 @@ body { overflow: hidden; }
   }
   .topbar-tools::-webkit-scrollbar { display: none; }
   .topbar-btn { min-width: 2.25rem; height: 2.25rem; font-size: 1.05rem; }
+  .topbar-label { display: none; }
   .topbar-logo img { width: 2.25rem; height: 2.25rem; }
   .topbar-crumbs { order: 3; flex-basis: 100%; }
 

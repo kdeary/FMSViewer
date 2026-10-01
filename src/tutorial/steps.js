@@ -32,7 +32,7 @@ export const OVERVIEW = [
   {
     id: 'welcome',
     title: 'Welcome to FMSViewer',
-    body: 'This quick tour touches every part of the viewer. At the end you can stop, go through each part in depth, or pick just one section. Use Next and Back (or the arrow keys) to move. Feel free to close the tutorial at any point to test out a feature. You can resume it with the ? button at the top of the site.',
+    body: 'This quick tour touches every part of the viewer. At the end you can stop, go through each part in depth, or pick just one section. Use Next and Back (or the arrow keys) to move. Feel free to close the tutorial at any point to test out a feature. You can resume it with the Tutorial (?) button at the top of the site.',
     ui: { focus: 'root' },
   },
   {
@@ -78,7 +78,7 @@ export const OVERVIEW = [
   {
     id: 'toolbar',
     title: 'The toolbar',
-    body: 'Every tool lives in this row of icons: New, Export, Search, Tree, Stats, Legend, Settings and this tutorial. Hover over one (or long-press it) to see its name. The logo on the right takes you back to the home page.',
+    body: 'Every tool lives in this row: New, Export, Search, Tree, Stats, Legend, Settings and this tutorial. On a phone they shrink to icons; long-press one to see its name. The logo on the right takes you back to the home page.',
     target: '.topbar-tools',
     ui: { focus: 'root', panel: false },
   },
@@ -129,7 +129,7 @@ export const OVERVIEW = [
   {
     id: 'replay',
     title: 'Come back any time',
-    body: 'The ? button reopens this tour where you left off. From there you can also jump straight to a single section.',
+    body: 'The Tutorial (?) button reopens this tour where you left off. From there you can also jump straight to a single section.',
     target: '[data-tour="tutorial-btn"]',
     ui: {},
   },

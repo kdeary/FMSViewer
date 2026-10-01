@@ -332,7 +332,7 @@ export default function Tour({ ctx, api, startAt, onPosition, onEnd }) {
             <>
               <p id="tour-body" className="tour-body mb-2">
                 Feel free to close the tutorial at any point to test out a feature.
-                You can resume the tutorial with the <i className="bi bi-question-circle text-info" aria-label="Tutorial" /> button at the top of the site.
+                You can resume the tutorial with the <span className="text-info">Tutorial</span> (<i className="bi bi-question-circle text-info" aria-hidden="true" />) button at the top of the site.
               </p>
               <div className="tour-menu">
                 {CHAPTERS.map((c, i) => (
@@ -357,7 +357,7 @@ export default function Tour({ ctx, api, startAt, onPosition, onEnd }) {
           {step.kind === 'done' && (
             <>
               <p id="tour-body" className="tour-body mb-3">
-                That’s every part of FMSViewer. The <i className="bi bi-question-circle text-info" aria-label="Tutorial" /> button in the top bar brings this back whenever you need it.
+                That’s every part of FMSViewer. The <span className="text-info">Tutorial</span> (<i className="bi bi-question-circle text-info" aria-hidden="true" />) button in the top bar brings this back whenever you need it.
               </p>
               <div className="d-flex align-items-center gap-2">
                 <button type="button" className="btn btn-outline-secondary btn-sm" onClick={back}>Back</button>

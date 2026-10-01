@@ -7,8 +7,12 @@ import exampleUnitUrl from '../../data/EXAMPLE_UNIT.xlsx?url';
 const SHEET_RE = /\.(xlsx|xlsm|xlsb|xls|csv)$/i;
 const MODEL_RE = /\.json$/i;
 
-/** Landing screen: take an FMSWeb export, or a model file saved earlier. */
-export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
+/**
+ * Landing screen: take an FMSWeb export, or a model file saved earlier.
+ * `resume` ({ title, fileName, onResume }) offers a way back to a structure
+ * that's still loaded, after the user came home from the viewer.
+ */
+export default function FileDrop({ onSheet, onModel, error, howToSignal = 0, resume = null }) {
   const inputRef = useRef(null);
   const [over, setOver] = useState(false);
   const [howTo, setHowTo] = useState(false);
@@ -141,6 +145,17 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0 }) {
             </p>
             <hr />
             <div className="d-grid gap-2">
+              {resume && (
+                <button
+                  type="button"
+                  className="btn btn-info btn-sm w-100 d-flex align-items-center justify-content-center gap-2 text-truncate"
+                  onClick={resume.onResume}
+                  title={resume.fileName}
+                >
+                  <i className="bi bi-arrow-return-left" aria-hidden="true" />
+                  <span className="text-truncate">Return to {resume.title}</span>
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-outline-info btn-sm w-100"
