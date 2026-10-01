@@ -78,7 +78,7 @@ export const OVERVIEW = [
   {
     id: 'toolbar',
     title: 'The toolbar',
-    body: 'Every tool lives in this row: New, Export, Search, Tree, Stats, Legend, Settings and this tutorial. On a phone they shrink to icons; long-press one to see its name. The logo on the right takes you back to the home page.',
+    body: 'Every tool is in this row: New, Export, Search, Tree, Stats, Legend, Settings and this tutorial.',
     target: '.topbar-tools',
     ui: { focus: 'root', panel: false },
   },
@@ -121,7 +121,7 @@ export const OVERVIEW = [
   {
     id: 'statusbar',
     title: 'Status bar',
-    body: 'The UIC and file you loaded and the app version. On a wider screen it also shows how big the file is, the current zoom and the keyboard shortcuts.',
+    body: 'The UIC, imported file, and the app version.',
     target: '[data-tour="statusbar"]',
     placement: 'top',
     ui: {},
