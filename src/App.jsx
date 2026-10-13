@@ -17,6 +17,7 @@ import BusyToast from './ui/BusyToast.jsx';
 import { withBusyToast } from './view/busy.js';
 import { onUpdateAvailable, applyUpdate } from './pwa/register.js';
 import { HOME, VIEW, currentRoute, navigate, onRouteChange } from './routing.js';
+import ParseWorker from './workers/parseWorker.js?worker';
 import SearchPanel from './ui/SearchPanel.jsx';
 import Tour from './tutorial/Tour.jsx';
 import TutorialOffer from './tutorial/TutorialOffer.jsx';
@@ -153,7 +154,7 @@ export default function App() {
     setProgress({ pct: 0, label: 'Starting…', phase: 'read' });
 
     workerRef.current?.terminate();
-    const worker = new Worker(new URL('./workers/parseWorker.js', import.meta.url), { type: 'module' });
+    const worker = new ParseWorker();
     workerRef.current = worker;
 
     worker.onmessage = (e) => {

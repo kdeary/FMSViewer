@@ -38,8 +38,9 @@ if (import.meta.env.DEV) {
 
 // Installable, offline-capable app that keeps itself current (see pwa/).
 // Production only: in development the service worker would serve stale
-// modules over Vite's hot reloading.
-if (import.meta.env.PROD) registerServiceWorker();
+// modules over Vite's hot reloading. Nor in the portable build: it is opened
+// from a file, where service workers don't exist and offline is a given.
+if (import.meta.env.PROD && !__PORTABLE__) registerServiceWorker();
 
 // Catch the browser's install offer before it shows a banner of its own, so
 // the landing page can offer it on a button instead. Harmless in development,

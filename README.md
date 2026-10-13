@@ -58,6 +58,20 @@ npm run build
 
 The compiled production bundle will be generated in the `dist` directory.
 
+### Portable Offline Version
+
+The build also writes `dist/FMSViewer.html`: the whole app in a single HTML
+file, with scripts, styles, fonts, images, MOS data and the spreadsheet parser
+all inlined. It runs straight from disk (double-click it, or open it from a USB
+stick or a shared drive) with no server and no network connection. The hosted
+app offers it on the home page as **Download offline version**.
+
+To build only the portable file, into `dist-portable/`:
+
+```bash
+npm run build:portable
+```
+
 ### Deployment
 
 Deploy to GitHub Pages:

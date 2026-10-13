@@ -1,7 +1,6 @@
 import React from 'react';
 import Breadcrumbs from './Breadcrumbs.jsx';
-
-const LOGO = `${import.meta.env.BASE_URL}favicon.png`;
+import LOGO from '../../images/favicon.png';
 
 /**
  * One toolbar button: icon and a short name, the name dropped on a phone to

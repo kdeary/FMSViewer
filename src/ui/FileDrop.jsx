@@ -7,6 +7,12 @@ import exampleUnitUrl from '../../data/EXAMPLE_UNIT.xlsx?url';
 const SHEET_RE = /\.(xlsx|xlsm|xlsb|xls|csv)$/i;
 const MODEL_RE = /\.json$/i;
 
+// The single-file offline copy of the app, built next to the hosted one
+// (`--mode portable`, see vite.config.js). Not offered by that copy itself,
+// nor in development, where it isn't built.
+const PORTABLE_FILE = 'FMSViewer.html';
+const OFFER_PORTABLE = import.meta.env.PROD && !__PORTABLE__;
+
 /**
  * Landing screen: take an FMSWeb export, or a model file saved earlier.
  * `resume` ({ title, fileName, onResume }) offers a way back to a structure
@@ -20,6 +26,7 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0, res
   const [loadingExample, setLoadingExample] = useState(false);
   const [exampleNotice, setExampleNotice] = useState(false);
   const [installable, setInstallable] = useState(canInstall);
+  const [portableState, setPortableState] = useState('idle'); // 'idle' | 'loading' | 'failed'
 
   // Only offered while the browser actually has a prompt waiting: it arrives
   // a moment after load, and is gone once used or once the app is installed.
@@ -60,6 +67,27 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0, res
       console.error('Could not load example unit:', err);
     } finally {
       setLoadingExample(false);
+    }
+  };
+
+  // Fetched rather than linked: a link is a navigation, which the service
+  // worker would take for the app's own page. As a plain fetch it is cached
+  // like any other file, so it can be saved again while offline.
+  const downloadPortable = async () => {
+    try {
+      setPortableState('loading');
+      const res = await fetch(`./${PORTABLE_FILE}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = PORTABLE_FILE;
+      a.click();
+      URL.revokeObjectURL(url);
+      setPortableState('idle');
+    } catch (err) {
+      console.error('Could not download the offline copy:', err);
+      setPortableState('failed');
     }
   };
 
@@ -181,6 +209,23 @@ export default function FileDrop({ onSheet, onModel, error, howToSignal = 0, res
                   <i className="bi bi-download" aria-hidden="true" />
                   Install FMSViewer as an app
                 </button>
+              )}
+              {OFFER_PORTABLE && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  onClick={downloadPortable}
+                  disabled={portableState === 'loading'}
+                  title="One HTML file that runs the whole app with no internet or server: open it straight from a folder, a USB stick or a shared drive"
+                >
+                  <i className="bi bi-file-earmark-zip" aria-hidden="true" />
+                  {portableState === 'loading' ? 'Preparing download…' : 'Download offline version (.html)'}
+                </button>
+              )}
+              {portableState === 'failed' && (
+                <p className="small text-danger-emphasis mb-0">
+                  Couldn&apos;t download the offline version. Check your connection and try again.
+                </p>
               )}
             </div>
           </section>
