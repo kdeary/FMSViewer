@@ -78,7 +78,7 @@ export const OVERVIEW = [
   {
     id: 'toolbar',
     title: 'The toolbar',
-    body: 'Every tool is in this row: New, Export, Search, Tree, Stats, Legend, Settings and this tutorial.',
+    body: 'Every tool is in this row: New, Search, Tree, Data, Legend, Settings and this tutorial.',
     target: '.topbar-tools',
     ui: { focus: 'root', panel: false },
   },
@@ -113,8 +113,8 @@ export const OVERVIEW = [
   },
   {
     id: 'files',
-    title: 'New and Export',
-    body: 'New (the page icon) takes you back to the home page to open another file. Export saves this structure as a .fmsmodel.json file, which reopens instantly without reading the spreadsheet again.',
+    title: 'New',
+    body: 'New (the page icon) takes you back to the home page to open another file.',
     target: '[data-tour="file"]',
     ui: {},
   },

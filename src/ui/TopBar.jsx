@@ -34,7 +34,6 @@ export default function TopBar({
         <div className="topbar-tools">
           <div className="btn-group btn-group-sm" role="group" aria-label="File" data-tour="file">
             <IconButton icon="bi-file-earmark-plus" text="New" label="New: back to the home page to open another spreadsheet" onClick={onReset} />
-            <IconButton icon="bi-box-arrow-down" text="Export" label="Export the parsed model" onClick={onExport} variant="info" />
           </div>
           <IconButton icon="bi-search" text="Search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
           <IconButton icon="bi-diagram-3" text="Tree" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
