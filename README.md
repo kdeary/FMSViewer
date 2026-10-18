@@ -25,7 +25,7 @@ FMSViewer is an interactive web-based force structure visualization tool designe
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/username/FMS_Viewer.git
+   git clone https://github.com/kdeary/FMS_Viewer.git
    ```
 
 2. Navigate into the project directory:
