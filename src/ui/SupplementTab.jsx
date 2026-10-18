@@ -3,7 +3,6 @@ import {
   TYPES, amendRows, buildPrompt, makeRow, normCode, parseSupplementCsv, toCsv, uniqueLins, uniqueMos,
 } from '../model/supplement.js';
 import { useSupplement } from '../view/Supplement.jsx';
-import { useMosInfo } from '../view/MosPalette.jsx';
 import { TAGS, guessTag } from '../model/equipmentTags.js';
 import { useStreamed, afterPaint } from '../view/useStreamed.js';
 
@@ -17,17 +16,22 @@ function downloadText(text, name, type) {
 }
 
 /**
- * Stats modal tab for the Supplement Table: a copyable prompt listing every
- * LIN and MOS in the unit, which any LLM turns into a TYPE,CODE,NAME,DESCRIPTION
- * CSV; the import for that CSV (amending or replacing the table); and the
- * table itself, every cell editable, exportable back to CSV.
+ * Data modal tab for the Supplement Table. It opens on three big buttons:
+ *  - Load Table: pick a CSV (this app's export, or an AI's answer) and amend
+ *    the table with it.
+ *  - Generate Table: a copyable prompt listing every LIN and MOS in the unit,
+ *    which any LLM turns into a TYPE,CODE,NAME,TAG,DESCRIPTION CSV.
+ *  - Edit Table: the table itself, every cell editable, exportable back to CSV.
+ * `initialView` ('menu' | 'generate' | 'edit') is for the guided tour.
  */
-export default function SupplementTab({ root, censored, onProgress, active = true, closing = false, onDrained }) {
+export default function SupplementTab({
+  root, censored, onProgress, active = true, closing = false, onDrained, initialView,
+}) {
   const sup = useSupplement();
-  const mosInfo = useMosInfo();
-  const [missingOnly, setMissingOnly] = useState(false);
+  const [view, setView] = useState(initialView || 'menu');
+  useEffect(() => { if (initialView) setView(initialView); }, [initialView]);
+  const [missingOnly, setMissingOnly] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [mode, setMode] = useState('amend'); // 'amend' | 'replace'
   const [status, setStatus] = useState(null); // { kind: 'success' | 'danger', text }
   const [filter, setFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
@@ -37,10 +41,11 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
   // the second half (50-100%) of the import's progress.
   const [importing, setImporting] = useState(false);
   const promptRef = useRef(null);
+  const fileRef = useRef(null);
 
   const lins = useMemo(() => uniqueLins(root), [root]);
   const fmsNames = useMemo(() => new Map(lins.map((l) => [l.code, l.name])), [lins]);
-  const mos = useMemo(() => uniqueMos(root, (m) => mosInfo(m).officialTitle), [root, mosInfo]);
+  const mos = useMemo(() => uniqueMos(root, (m) => sup.getMos(m)?.name), [root, sup]);
   const linsCovered = lins.filter((l) => sup.lin.has(l.code)).length;
   const mosCovered = mos.filter((m) => sup.mos.has(m.code)).length;
   const promptLins = missingOnly ? lins.filter((l) => !sup.lin.has(l.code)) : lins;
@@ -63,18 +68,19 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
   // a new filter or a replaced table (whose rows all have new ids), and keeps
   // what it has shown when rows are only edited or appended.
   //
-  // While the tab is hidden it holds no rows at all. The stats modal keeps
+  // While the tab (or its Edit Table view) is hidden it holds no rows at all. The data modal keeps
   // this tab mounted so an import can finish in the background, and a fully
   // loaded table left in the hidden DOM had to be laid out all at once the
   // moment the tab was shown again -- seconds of freeze for a big table. Now
   // showing the tab starts the stream over, with its progress on screen.
-  const streamKey = `${active}|${filter}|${typeFilter}|${sup.rows[0]?.id || ''}`;
+  const editing = active && view === 'edit';
+  const streamKey = `${editing}|${filter}|${typeFilter}|${sup.rows[0]?.id || ''}`;
   const { shown: streamedRows, done: allShown, progress: rowFraction } = useStreamed(
-    active ? shownRows : NO_ROWS,
+    editing ? shownRows : NO_ROWS,
     streamKey,
   );
 
-  useEffect(() => { if (allShown) setImporting(false); }, [allShown]);
+  useEffect(() => { if (allShown) setImporting(false); }, [allShown, importing]);
 
   // Closing the modal with a big table showing: tearing down a thousand rows
   // in one go froze the page for a moment, so the table is hidden at once and
@@ -97,7 +103,7 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
   }, [drain]);
   const visibleRows = drain ? streamedRows.slice(0, drain.left) : streamedRows;
 
-  // Reported to the stats modal, which shows it on this tab and above the page.
+  // Reported to the data modal, which shows it on this tab and above the page.
   let progress = null;
   if (censored) progress = null;
   else if (drain) progress = { label: 'Closing…', pct: (1 - drain.left / drain.from) * 100 };
@@ -161,7 +167,7 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
       setBusy({ label: 'Parsing CSV…', pct: 20 });
       await afterPaint();
       const { rows, skipped } = parseSupplementCsv(text);
-      const replacing = mode === 'replace' || !hasTable;
+      const replacing = !hasTable;
       setBusy({ label: `Updating the table and map with ${rows.length} rows…`, pct: 40 });
       await afterPaint();
       sup.setRows((cur) => (replacing ? rows : amendRows(cur, rows)));
@@ -190,8 +196,14 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
     setStatus(null);
   };
 
+  const back = (
+    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setView('menu')}>
+      <i className="bi bi-arrow-left me-1" />Back
+    </button>
+  );
+
   return (
-    <div>
+    <div className="sup-tab">
       <div className="p-2 mb-3 border rounded bg-body-tertiary small d-flex flex-wrap align-items-center gap-3" data-tour="sup-coverage">
         <span>
           <strong className="text-body">{linsCovered}</strong>
@@ -208,183 +220,185 @@ export default function SupplementTab({ root, censored, onProgress, active = tru
         <span className="text-body-secondary">in this unit are in the Supplement Table ({sup.rows.length} rows)</span>
       </div>
 
-      <section data-tour="sup-prompt">
-        <h3 className="h6 fw-semibold mb-1">1. Copy this prompt into any AI chat</h3>
-        <p className="small text-body-secondary mb-2">
-          It lists every LIN and MOS in the unit and asks for a CSV with <code>TYPE</code>, <code>CODE</code>,{' '}
-          <code>NAME</code>, <code>TAG</code> and <code>DESCRIPTION</code> columns. For large units, an AI may stop partway — ask it to
-          continue, or import what you get and re-copy with “only codes not in the table”.
-        </p>
-        <textarea
-          ref={promptRef}
-          className="form-control eq-prompt mb-2"
-          readOnly
-          value={prompt}
-          aria-label="AI prompt"
-          onFocus={(e) => e.target.select()}
-        />
-        <div className="d-flex flex-wrap align-items-center gap-2 mb-4">
-          <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
-            <i className={`bi ${copied ? 'bi-check2' : 'bi-clipboard'} me-1`} />{copied ? 'Copied' : 'Copy prompt'}
-          </button>
+      <input
+        ref={fileRef}
+        type="file"
+        className="d-none"
+        accept=".csv,text/csv,.txt,text/plain"
+        aria-label="Load Supplement Table CSV"
+        onChange={onFile}
+      />
+      {status && (
+        <div className={`alert alert-${status.kind} small py-2 mb-3`} role="status">
+          {status.text}
+        </div>
+      )}
+
+      {view === 'menu' && (
+        <div className="sup-menu" data-tour="sup-menu">
           <button
             type="button"
-            className="btn btn-outline-secondary btn-sm"
-            onClick={() => downloadText(prompt, 'supplement-table-prompt.txt', 'text/plain')}
+            className="btn btn-outline-secondary sup-big-btn"
+            onClick={() => fileRef.current?.click()}
+            disabled={!!busy}
+            data-tour="sup-load"
           >
-            <i className="bi bi-download me-1" />Download .txt
+            <i className="bi bi-folder2-open" aria-hidden="true" />
+            <span className="sup-big-title">Load Table</span>
+            <span className="sup-big-desc">Open a .csv file. New codes are added and matching ones overwritten.</span>
           </button>
-          <div className="form-check form-check-inline small ms-sm-2 mb-0" data-tour="sup-missing">
-            <input
-              id="sup-missing-only"
-              className="form-check-input"
-              type="checkbox"
-              checked={missingOnly}
-              onChange={(e) => setMissingOnly(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="sup-missing-only">
-              Only codes not in the table ({missing})
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section data-tour="sup-import">
-        <h3 className="h6 fw-semibold mb-1">2. Import the CSV the AI returns</h3>
-        <p className="small text-body-secondary mb-2">
-          Save the AI's answer as a <code>.csv</code> file and choose it below. The table is saved inside the
-          .fmsmodel.json when you export the model.
-        </p>
-        {hasTable && (
-          <div className="d-flex flex-wrap gap-3 small mb-2" role="radiogroup" aria-label="Import mode">
-            <div className="form-check mb-0">
-              <input
-                id="sup-mode-amend"
-                className="form-check-input"
-                type="radio"
-                name="sup-mode"
-                checked={mode === 'amend'}
-                onChange={() => setMode('amend')}
-              />
-              <label className="form-check-label" htmlFor="sup-mode-amend">
-                Amend current table <span className="text-body-secondary">(adds new codes, overwrites matching ones)</span>
-              </label>
-            </div>
-            <div className="form-check mb-0">
-              <input
-                id="sup-mode-replace"
-                className="form-check-input"
-                type="radio"
-                name="sup-mode"
-                checked={mode === 'replace'}
-                onChange={() => setMode('replace')}
-              />
-              <label className="form-check-label" htmlFor="sup-mode-replace">
-                Replace current table
-              </label>
-            </div>
-          </div>
-        )}
-        <input
-          type="file"
-          className="form-control form-control-sm"
-          accept=".csv,text/csv,.txt,text/plain"
-          aria-label="Import Supplement Table CSV"
-          onChange={onFile}
-          disabled={!!busy}
-        />
-        {status && (
-          <div className={`alert alert-${status.kind} small py-2 mt-2 mb-0`} role="status">
-            {status.text}
-          </div>
-        )}
-      </section>
-
-      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4 mb-2" data-tour="sup-table-head">
-        <h3 className="h6 fw-semibold mb-0">3. Supplement Table</h3>
-        <div className="d-flex flex-wrap gap-2">
-          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addRow}>
-            <i className="bi bi-plus-lg me-1" />Add row
+          <button type="button" className="btn btn-outline-secondary sup-big-btn" onClick={() => setView('generate')}>
+            <i className="bi bi-stars" aria-hidden="true" />
+            <span className="sup-big-title">Generate Table</span>
+            <span className="sup-big-desc">Copy a prompt for any AI chat that writes the table for this unit.</span>
           </button>
-          <button
-            type="button"
-            className="btn btn-outline-info btn-sm"
-            disabled={!hasTable}
-            onClick={() => downloadText(toCsv(sup.rows), 'supplement-table.csv', 'text/csv')}
-          >
-            <i className="bi bi-filetype-csv me-1" />Export CSV
-          </button>
-          <button type="button" className="btn btn-outline-danger btn-sm" disabled={!hasTable} onClick={clear}>
-            <i className="bi bi-trash me-1" />Clear
+          <button type="button" className="btn btn-outline-secondary sup-big-btn" onClick={() => setView('edit')}>
+            <i className="bi bi-pencil-square" aria-hidden="true" />
+            <span className="sup-big-title">Edit Table</span>
+            <span className="sup-big-desc">Check and edit every row, add your own, or export it as CSV.</span>
           </button>
         </div>
-      </div>
+      )}
 
-      <div data-tour="sup-rows">
-        {hasTable ? (
-          <>
-            <div className="input-group input-group-sm mb-2">
-              <select
-                className="form-select flex-grow-0 sup-type-filter"
-                aria-label="Filter by type"
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-              >
-                <option value="ALL">All</option>
-                <option value="LIN">LIN</option>
-                <option value="MOS">MOS</option>
-              </select>
-              <span className="input-group-text"><i className="bi bi-search" /></span>
-              <input
-                type="search"
-                className="form-control"
-                placeholder="Filter by code, name or description…"
-                aria-label="Filter Supplement Table"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-            </div>
-            {/* Hidden while closing: rows removed from a table still on screen
-                made the browser re-lay out all the rest after every chunk. */}
-            <div className="table-responsive stats-table-container sup-table" hidden={!!drain}>
-              <table className="table table-sm table-dark table-borderless align-middle mb-0">
-                <thead className="sticky-top border-bottom">
-                  <tr>
-                    <th scope="col" style={{ width: '96px' }}>Type</th>
-                    <th scope="col" style={{ width: '104px' }}>Code</th>
-                    <th scope="col" style={{ width: '24%' }}>Name</th>
-                    <th scope="col" style={{ width: '168px' }}>Tag</th>
-                    <th scope="col">Description</th>
-                    <th scope="col" style={{ width: '36px' }}><span className="visually-hidden">Delete</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleRows.map((r) => (
-                    <SupRow key={r.id} row={r} fmsName={fmsNames.get(r.code)} onUpdate={update} onRemove={remove} />
-                  ))}
-                  {!allShown && !drain && (
-                    <tr>
-                      <td colSpan={6} className="text-center text-body-secondary small py-2">
-                        <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
-                        Loading rows… {streamedRows.length} of {shownRows.length}
-                      </td>
-                    </tr>
-                  )}
-                  {!shownRows.length && (
-                    <tr>
-                      <td colSpan={6} className="text-center text-body-secondary py-4">No rows match the filter.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : (
-          <p className="small text-body-secondary mb-0">
-            The table is empty. Import a CSV above, or add rows by hand.
+      {view === 'generate' && (
+        <section className="sup-view" data-tour="sup-prompt">
+          <div className="d-flex align-items-center gap-2 mb-2">
+            {back}
+            <h3 className="h6 fw-semibold mb-0">Generate Table: copy this prompt into any AI chat</h3>
+          </div>
+          <p className="small text-body-secondary mb-2">
+            It lists every LIN and MOS in the unit and asks for a CSV with <code>TYPE</code>, <code>CODE</code>,{' '}
+            <code>NAME</code>, <code>TAG</code> and <code>DESCRIPTION</code> columns. Save the AI's answer as
+            a <code>.csv</code> file and open it with Load Table. For large units, an AI may stop partway — ask it to
+            continue, or load what you get and re-copy with “only codes not in the table”.
           </p>
-        )}
-      </div>
+          <textarea
+            ref={promptRef}
+            className="form-control eq-prompt mb-2"
+            readOnly
+            value={prompt}
+            aria-label="AI prompt"
+            onFocus={(e) => e.target.select()}
+          />
+          <div className="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
+              <i className={`bi ${copied ? 'bi-check2' : 'bi-clipboard'} me-1`} />{copied ? 'Copied' : 'Copy prompt'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm"
+              onClick={() => downloadText(prompt, 'supplement-table-prompt.txt', 'text/plain')}
+            >
+              <i className="bi bi-download me-1" />Download .txt
+            </button>
+            <div className="form-check form-check-inline small ms-sm-2 mb-0" data-tour="sup-missing">
+              <input
+                id="sup-missing-only"
+                className="form-check-input"
+                type="checkbox"
+                checked={missingOnly}
+                onChange={(e) => setMissingOnly(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="sup-missing-only">
+                Only codes not in the table ({missing})
+              </label>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {view === 'edit' && (
+        <div className="sup-view sup-edit">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2" data-tour="sup-table-head">
+            <div className="d-flex align-items-center gap-2">
+              {back}
+              <h3 className="h6 fw-semibold mb-0">Edit Table</h3>
+            </div>
+            <div className="d-flex flex-wrap gap-2">
+              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={addRow}>
+                <i className="bi bi-plus-lg me-1" />Add row
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-info btn-sm"
+                disabled={!hasTable}
+                onClick={() => downloadText(toCsv(sup.rows), 'supplement-table.csv', 'text/csv')}
+              >
+                <i className="bi bi-filetype-csv me-1" />Export CSV
+              </button>
+              <button type="button" className="btn btn-outline-danger btn-sm" disabled={!hasTable} onClick={clear}>
+                <i className="bi bi-trash me-1" />Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="sup-edit-body" data-tour="sup-rows">
+            {hasTable ? (
+              <>
+                <div className="input-group input-group-sm mb-2">
+                  <select
+                    className="form-select flex-grow-0 sup-type-filter"
+                    aria-label="Filter by type"
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                  >
+                    <option value="ALL">All</option>
+                    <option value="LIN">LIN</option>
+                    <option value="MOS">MOS</option>
+                  </select>
+                  <span className="input-group-text"><i className="bi bi-search" /></span>
+                  <input
+                    type="search"
+                    className="form-control"
+                    placeholder="Filter by code, name or description…"
+                    aria-label="Filter Supplement Table"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  />
+                </div>
+                {/* Hidden while closing: rows removed from a table still on screen
+                    made the browser re-lay out all the rest after every chunk. */}
+                <div className="table-responsive stats-table-container sup-table" hidden={!!drain}>
+                  <table className="table table-sm table-dark table-borderless align-middle mb-0">
+                    <thead className="sticky-top border-bottom">
+                      <tr>
+                        <th scope="col" style={{ width: '96px' }}>Type</th>
+                        <th scope="col" style={{ width: '104px' }}>Code</th>
+                        <th scope="col" style={{ width: '24%' }}>Name</th>
+                        <th scope="col" style={{ width: '168px' }}>Tag</th>
+                        <th scope="col">Description</th>
+                        <th scope="col" style={{ width: '36px' }}><span className="visually-hidden">Delete</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleRows.map((r) => (
+                        <SupRow key={r.id} row={r} fmsName={fmsNames.get(r.code)} onUpdate={update} onRemove={remove} />
+                      ))}
+                      {!allShown && !drain && (
+                        <tr>
+                          <td colSpan={6} className="text-center text-body-secondary small py-2">
+                            <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />
+                            Loading rows… {streamedRows.length} of {shownRows.length}
+                          </td>
+                        </tr>
+                      )}
+                      {!shownRows.length && (
+                        <tr>
+                          <td colSpan={6} className="text-center text-body-secondary py-4">No rows match the filter.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            ) : (
+              <p className="small text-body-secondary mb-0">
+                The table is empty. Load a CSV, generate one, or add rows by hand.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -71,6 +71,8 @@ export default function App() {
   const [statsOpen, setStatsOpen] = useState(false);
   // Tab the stats modal should open on; null keeps the one it remembers.
   const [statsTab, setStatsTab] = useState(null);
+  // And the Supplement Table view it should show ('menu' | 'generate' | 'edit').
+  const [statsSupView, setStatsSupView] = useState(null);
   const [treeOpen, setTreeOpen] = useState(false);
   const [warningsOpen, setWarningsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -427,6 +429,7 @@ export default function App() {
         setSearchQuery('');
       }
       setStatsTab(ui.stats || null);
+      setStatsSupView(ui.sup || null);
       setStatsOpen(!!ui.stats);
       setTreeOpen(!!ui.tree);
       setLegendOpen(!!ui.legend);
@@ -598,9 +601,10 @@ export default function App() {
         <StatsModal
           open={statsOpen}
           initialTab={statsTab}
+          initialSupView={statsSupView}
           model={displayModel}
           censored={settings.censor}
-          onClose={() => { setStatsOpen(false); setStatsTab(null); }}
+          onClose={() => { setStatsOpen(false); setStatsTab(null); setStatsSupView(null); }}
           onSearch={openSearch}
         />
 

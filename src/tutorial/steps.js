@@ -16,6 +16,7 @@
 //                           on steps that set a unit or billet focus
 //                 search    true, or a query string to prefill
 //                 stats     'personnel' | 'equipment' | 'info'
+//                 sup       Supplement Table view: 'menu' | 'generate' | 'edit'
 //                 tree, legend, settings, exportOpen, mos (MOS detail modal)
 //  - scroll     scroll the target into view (targets inside scrolling panels)
 //  - tryIt      a suggestion shown on the card. Everything inside the
@@ -91,7 +92,7 @@ export const OVERVIEW = [
   },
   {
     id: 'stats',
-    title: 'Stats',
+    title: 'Data',
     body: 'Totals for the whole structure: strength, a breakdown of every MOS, every equipment line, and the Supplement Table that adds names and descriptions.',
     target: '[aria-label="Unit Data"] .modal-content',
     ui: { stats: 'personnel' },
@@ -234,7 +235,7 @@ export const CHAPTERS = [
       {
         id: 'panel-mos-detail',
         title: 'MOS details',
-        body: 'Clicking an MOS anywhere (the side panel, the Legend or Stats) opens this window: its title, branch, how many billets there are in the unit, and a Search billets button.',
+        body: 'Clicking an MOS anywhere (the side panel, the Legend or Data) opens this window: its title, branch, how many billets there are in the unit, and a Search billets button.',
         target: '.eq-detail-modal .modal-content',
         when: (ctx) => !!ctx.demo.mos,
         ui: { focus: 'billet', mos: true },
@@ -312,7 +313,7 @@ export const CHAPTERS = [
   },
   {
     id: 'stats',
-    title: 'Stats',
+    title: 'Data',
     icon: 'bi-bar-chart',
     blurb: 'Personnel and equipment for the whole structure.',
     steps: [
@@ -334,7 +335,7 @@ export const CHAPTERS = [
         id: 'stats-equipment',
         title: 'Equipment',
         body: 'Every equipment line, grouped by category, with ERC P (pacing) items first. The filter matches nomenclature, LIN, ERC or category code. Click a LIN for its details. Some items are similar enough in name that they get grouped into a single category.',
-        target: '[aria-label="Unit Statistics"] .modal-body',
+        target: '[aria-label="Unit Data"] .modal-body',
         ui: { stats: 'equipment' },
       },
       {
@@ -380,23 +381,22 @@ export const CHAPTERS = [
         body: 'An AI may stop partway through a long list. You can either: 1) Ask it to continue, or 2) load what it has generated so far, tick this box and copy the prompt again. The newly generated prompt asks only for the data in the table that is still missing.',
         target: '[data-tour="sup-missing"]',
         scroll: true,
-        ui: { stats: 'info' },
+        ui: { stats: 'info', sup: 'generate' },
       },
       {
         id: 'sup-import',
-        title: 'Step 2 · Import the answer',
-        body: 'Save the AI’s answer as a .csv or .txt file and choose it here. Once the table has rows, you also choose between Amend (adds new codes and overwrites matching ones) and Replace (starts the table over). A message confirms how many LIN and MOS rows came in, and how many unusable rows were skipped.',
-        target: '[data-tour="sup-import"]',
-        scroll: true,
-        ui: { stats: 'info' },
+        title: 'Step 2 · Load the answer',
+        body: 'Save the AI’s answer as a .csv or .txt file and open it with Load Table. New codes are added and matching ones overwritten. A message confirms how many LIN and MOS rows came in, and how many unusable rows were skipped.',
+        target: '[data-tour="sup-load"]',
+        ui: { stats: 'info', sup: 'menu' },
       },
       {
         id: 'sup-table-head',
         title: 'Step 3 · The table',
-        body: 'AI can get certain equipment wrong. This is where the 10% (you) comes in. You can edit the imported table like a spreadsheet. You can also export CSV files after you have edited them, to keep or share with others and import them again later.',
+        body: 'AI can get certain equipment wrong. This is where the 10% (you) comes in. Edit Table lets you edit the table like a spreadsheet. You can also export CSV files after you have edited them, to keep or share with others and import them again later.',
         target: '[data-tour="sup-table-head"]',
         scroll: true,
-        ui: { stats: 'info' },
+        ui: { stats: 'info', sup: 'edit' },
       },
       {
         id: 'sup-rows',
@@ -404,13 +404,13 @@ export const CHAPTERS = [
         body: 'Imported rows are here, and every cell can be edited. Changes are automatically saved. For equipment, the Tag field sets which group it falls under in the "Contained equipment" table. Leave it on Auto to have the tool automatically guess it. The × deletes a row.',
         target: '[data-tour="sup-rows"]',
         scroll: true,
-        ui: { stats: 'info' },
+        ui: { stats: 'info', sup: 'edit' },
       },
       {
         id: 'sup-where',
         title: 'Where it shows up',
-        body: 'Data in the Supplement Table replace the original FMSWeb data everywhere on the site. Note: This table is not saved once you leave the site. Remember to export it if you want to save it for another MTOE.',
-        ui: { stats: 'info' },
+        body: 'Data in the Supplement Table replace the original FMSWeb data everywhere on the site. Note: Your changes are not saved once you leave the site. Use Export CSV in Edit Table to keep a copy, and Load Table to bring it back.',
+        ui: { stats: 'info', sup: 'menu' },
       },
     ],
   },

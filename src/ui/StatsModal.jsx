@@ -22,7 +22,7 @@ import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
  *  - Clicking a LIN or nomenclature opens the equipment detail modal.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
-export default function StatsModal({ open, initialTab, model, censored, onClose, onSearch }) {
+export default function StatsModal({ open, initialTab, initialSupView, model, censored, onClose, onSearch }) {
   const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'info'
   // Opened on a particular tab (the guided tour); otherwise the last one stays.
   // A name that isn't a tab is ignored rather than leaving the body blank.
@@ -208,7 +208,8 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
         aria-label="Unit Data"
         onMouseDown={(e) => { if (e.target === e.currentTarget) requestClose(); }}
       >
-        <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down ${tab === 'info' ? 'modal-xl' : 'modal-lg'}`}>
+        {/* One size for every tab, so switching tabs doesn't resize the modal. */}
+        <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down modal-xl data-modal">
           <div className="modal-content">
             <div className="modal-header d-flex align-items-center justify-content-between py-2">
               <div className="d-flex align-items-center gap-2 overflow-hidden">
@@ -257,14 +258,14 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
               </ul>
             </div>
 
-            <div className="modal-body p-3">
+            <div className="modal-body p-3 d-flex flex-column">
               {activeProgress && (
                 <div className="stats-progress">
                   <ProgressStrip label={activeProgress.label} pct={activeProgress.pct} />
                 </div>
               )}
               {tab === 'personnel' && (
-                <div>
+                <div className="data-pane">
                   {/* General Strength Text Summary */}
                   <div className="p-2 mb-3 border rounded bg-body-tertiary text-body-secondary small d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
@@ -333,7 +334,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
               )}
 
               {tab === 'equipment' && (
-                <div>
+                <div className="data-pane">
                   <div className="input-group input-group-sm mb-2">
                     <span className="input-group-text"><i className="bi bi-search" /></span>
                     <input
@@ -367,7 +368,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
                     </span>
                   </div>
 
-                  <div className="table-responsive stats-table-container" style={{ maxHeight: '420px' }}>
+                  <div className="table-responsive stats-table-container">
                     <table className="table table-sm table-dark table-borderless table-hover align-middle mb-0">
                       <thead className="sticky-top border-bottom">
                         <tr>
@@ -490,7 +491,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
               )}
 
               {infoMounted && (
-                <div hidden={tab !== 'info'}>
+                <div className="data-sup" hidden={tab !== 'info'}>
                   <SupplementTab
                     root={root}
                     censored={censored}
@@ -498,6 +499,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
                     active={tab === 'info'}
                     closing={closing}
                     onDrained={onClose}
+                    initialView={initialSupView}
                   />
                 </div>
               )}

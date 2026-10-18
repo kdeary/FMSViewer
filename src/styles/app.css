@@ -1013,8 +1013,39 @@ body { overflow: hidden; }
   height: 260px; resize: vertical; white-space: pre-wrap;
 }
 
+/* The data modal keeps one size whichever tab is showing. */
+@media (min-width: 576px) {
+  .data-modal .modal-content { height: min(820px, 100%); }
+}
+/* The Supplement Table tab fills the modal body: its menu buttons stretch to
+   the full height, and the Generate and Edit views scroll inside it. */
+/* Personnel and Equipment: the table takes whatever height the body has left. */
+.data-pane { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.data-pane > .stats-table-container { flex: 1 1 auto; min-height: 12rem; max-height: none; }
+.data-sup { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.sup-tab { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.sup-view { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.sup-edit, .sup-edit-body { display: flex; flex-direction: column; }
+.sup-edit-body { flex: 1 1 auto; min-height: 0; }
+.sup-menu { flex: 1 1 auto; min-height: 10rem; display: flex; gap: 1rem; }
+.sup-big-btn {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 1rem; text-wrap: balance;
+}
+.sup-big-btn .bi { font-size: 2.5rem; line-height: 1; }
+.sup-big-title { font-size: 1.15rem; font-weight: 600; }
+.sup-big-desc { font-size: 0.8125rem; opacity: 0.75; max-width: 18rem; }
+@media (max-width: 575.98px) {
+  .sup-menu { gap: 0.5rem; }
+  .sup-big-btn { padding: 0.75rem 0.4rem; }
+  .sup-big-btn .bi { font-size: 1.75rem; }
+  .sup-big-title { font-size: 0.95rem; }
+  .sup-big-desc { display: none; }
+}
+
 /* Supplement Table: inputs that read as plain cells until hovered or focused. */
-.sup-table { max-height: 460px; }
+.sup-table { flex: 1 1 auto; min-height: 12rem; max-height: none; }
 .sup-table td { vertical-align: top; }
 .sup-cell { background: transparent; border-color: transparent; }
 .sup-cell:hover { border-color: var(--bs-border-color); }
