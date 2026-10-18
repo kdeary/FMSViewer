@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSupplement, useDetail, useDetailActions } from '../view/Supplement.jsx';
 import { useMosInfo } from '../view/MosPalette.jsx';
-import { useMosSpec } from '../view/useMosSpec.js';
 import { TAG_ICONS } from '../model/equipmentTags.js';
 
 /**
@@ -110,7 +109,6 @@ function EquipmentDetail({ item, onClose }) {
 function MosDetail({ mos, model, onClose, onSearch }) {
   const sup = useSupplement();
   const info = useMosInfo()(mos);
-  const spec = useMosSpec(mos);
   const data = sup.getMos(mos);
   const root = model?.byId.get(model.rootId);
   const count = root?.topMos?.find((m) => m.mos === mos)?.n || 0;
@@ -135,12 +133,6 @@ function MosDetail({ mos, model, onClose, onSearch }) {
             {info.title || '—'}
             {data?.name && <span className="text-body-secondary fw-normal"> (Supplement Table)</span>}
           </dd>
-          {info.officialTitle && info.officialTitle !== info.title && (
-            <>
-              <dt className="col-4 text-body-secondary fw-normal">Official title</dt>
-              <dd className="col-8 mb-0">{info.officialTitle}</dd>
-            </>
-          )}
           <dt className="col-4 text-body-secondary fw-normal">Branch</dt>
           <dd className="col-8 mb-0">{info.label || '—'}</dd>
           <dt className="col-4 text-body-secondary fw-normal">In this unit</dt>
@@ -148,14 +140,6 @@ function MosDetail({ mos, model, onClose, onSearch }) {
           <dt className="col-4 text-body-secondary fw-normal">Description</dt>
           <dd className="col-8 mb-0 eq-detail-desc">{data?.description || '—'}</dd>
         </dl>
-
-        {spec && (
-          <section className="mt-3">
-            <h3 className="h6 mb-1">Major duties</h3>
-            <p className="small mb-1 eq-detail-desc">{spec.duties}</p>
-            <p className="text-body-secondary small mb-0">{spec.version}</p>
-          </section>
-        )}
 
         <SupplementNote has={!!data} what="MOS" />
       </div>

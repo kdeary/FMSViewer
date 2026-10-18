@@ -3,7 +3,6 @@ import MosBar from '../view/MosBar.jsx';
 import ImagePlaceholder from '../view/ImagePlaceholder.jsx';
 import { KIND_STYLE } from '../model/taxonomy.js';
 import { useMosInfo } from '../view/MosPalette.jsx';
-import { useMosSpec } from '../view/useMosSpec.js';
 import { titleCut } from '../model/taxonomy.js';
 import { exportNodeToExcel } from '../model/exportExcel.js';
 import { withBusyToast } from '../view/busy.js';
@@ -25,7 +24,6 @@ export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
     return next;
   });
   const { openMos } = useDetailActions();
-  const spec = useMosSpec(node && node.kind === 'BL' ? node.mos : null);
   if (!node) return null;
   const r = node.roll;
   const isBillet = node.kind === 'BL';
@@ -99,17 +97,6 @@ export default function SidePanel({ node, model, onClose, onGo, onSearch }) {
               <span className="text-body-secondary fw-normal small">(Supplement Table)</span>
             </h3>
             <p className="small mb-0">{mosInfo(node.mos).description}</p>
-          </section>
-        )}
-
-        {isBillet && spec && (
-          <section className="mos-spec">
-            <h3 className="h6 mt-4 mb-2">
-              Major duties{' '}
-              <span className="text-body-secondary fw-normal font-monospace">{spec.mos}</span>
-            </h3>
-            <p className="small mb-1">{spec.duties}</p>
-            <p className="text-body-secondary mb-0 mos-spec-src">{spec.version}</p>
           </section>
         )}
 

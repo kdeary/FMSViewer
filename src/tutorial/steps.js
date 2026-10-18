@@ -377,7 +377,7 @@ export const CHAPTERS = [
       {
         id: 'sup-missing',
         title: 'Big units: finish in rounds',
-        body: 'An AI may stop partway through a long list. You can either: 1) Ask it to continue, or 2) import what it generated have so far, tick this box and copy the prompt again. The newly generated prompt asks only for the data in the table that is still missing.',
+        body: 'An AI may stop partway through a long list. You can either: 1) Ask it to continue, or 2) load what it has generated so far, tick this box and copy the prompt again. The newly generated prompt asks only for the data in the table that is still missing.',
         target: '[data-tour="sup-missing"]',
         scroll: true,
         ui: { stats: 'info' },

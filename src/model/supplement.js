@@ -67,9 +67,9 @@ export function uniqueLins(root) {
 }
 
 /** Every distinct MOS, with whatever title is already known for it (maybe none). */
-export function uniqueMos(root, officialTitle) {
+export function uniqueMos(root, knownTitle) {
   return (root?.topMos || [])
-    .map(({ mos }) => ({ code: normCode(mos), name: officialTitle(mos) || '' }))
+    .map(({ mos }) => ({ code: normCode(mos), name: knownTitle(mos) || '' }))
     .filter((m) => m.code)
     .sort((a, b) => a.code.localeCompare(b.code));
 }

@@ -51,6 +51,7 @@ function loadSettings() {
 }
 import { hydrate, parseModelFile, toBlob, suggestedFileName } from './model/modelFile.js';
 import { censorModel } from './model/censor.js';
+import { withDefaultRows } from './model/defaultSupplement.js';
 
 export default function App() {
   const [stage, setStage] = useState('idle'); // idle | parsing | ready
@@ -124,7 +125,7 @@ export default function App() {
   const showModel = useCallback((m, rows, name) => {
     pendingFit.current = true;
     setModel(m);
-    setSupplementRows(rows);
+    setSupplementRows(withDefaultRows(rows));
     setFileName(name);
     setFocusId(m.rootId);
     setSelectedId(null); setPanelOpen(false);

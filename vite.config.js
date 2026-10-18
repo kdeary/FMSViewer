@@ -48,7 +48,7 @@ function spaFallback() {
 // that runs from a double-click, off a USB stick or a shared drive, with no
 // server and no network. Browsers won't load module scripts, workers or
 // fetches from file:// URLs, so nothing can be a separate file: images, fonts
-// and the MOS data are inlined as data: URLs (assetsInlineLimit), the lazy
+// and the default Supplement Table are inlined as data: URLs (assetsInlineLimit), the lazy
 // chunks folded into the main one (inlineDynamicImports), the parse worker
 // inlined as a blob (below), and the script and styles written into the page.
 function portable() {

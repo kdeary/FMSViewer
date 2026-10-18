@@ -742,7 +742,6 @@ body { overflow: hidden; }
 
 /* Duties run long -- a looser measure keeps a 300-word paragraph readable. */
 .mos-spec p { line-height: 1.5; text-wrap: pretty; }
-.mos-spec-src { font-size: 0.6875rem; }
 
 /* Above the search panel, which shares this edge: the legend is a small
    reference card and being covered by a full-height panel hides it entirely. */
