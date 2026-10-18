@@ -99,18 +99,15 @@ export default function TreeModal({ open, model, onClose, onGo }) {
             <div className="modal-body p-3">
               {/* Controls bar */}
               <div className="d-flex align-items-center justify-content-between gap-2 mb-3 bg-body-tertiary p-2 rounded border" data-tour="tree-controls">
-                <div className="form-check form-switch mb-0 small ms-1">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="treeUnitsOnlySwitch"
-                    checked={unitsOnly}
-                    onChange={(e) => setUnitsOnly(e.target.checked)}
-                  />
-                  <label className="form-check-label fw-semibold" htmlFor="treeUnitsOnlySwitch">
-                    Units only
-                  </label>
-                </div>
+                <select
+                  className="form-select form-select-sm w-auto fw-semibold"
+                  aria-label="Show in tree"
+                  value={unitsOnly ? 'units' : 'all'}
+                  onChange={(e) => setUnitsOnly(e.target.value === 'units')}
+                >
+                  <option value="units">Units only</option>
+                  <option value="all">Units &amp; Billets</option>
+                </select>
 
                 <div className="btn-group btn-group-sm" role="group">
                   <button

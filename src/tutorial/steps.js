@@ -297,7 +297,7 @@ export const CHAPTERS = [
       {
         id: 'tree-controls',
         title: 'Units only vs Units & Billets',
-        body: 'The "Units only" switch on the left side hides the individual billets so you see just the unit skeleton. Expand All and Collapse All open or close every branch at once.',
+        body: 'Choosing "Units only" in the menu on the left hides the individual billets so you see just the unit skeleton. Expand All and Collapse All open or close every branch at once.',
         target: '[data-tour="tree-controls"]',
         ui: { tree: true },
       },
