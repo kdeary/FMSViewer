@@ -37,7 +37,7 @@ export default function TopBar({
           </div>
           <IconButton icon="bi-search" text="Search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
           <IconButton icon="bi-diagram-3" text="Tree" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
-          <IconButton icon="bi-bar-chart" text="Stats" label="Unit statistics" onClick={onOpenStats} />
+          <IconButton icon="bi-bar-chart" text="Data" label="Unit data" onClick={onOpenStats} />
           <IconButton icon="bi-palette" text="Legend" label="MOS legend" onClick={onToggleLegend} active={legendOpen} />
           <IconButton icon="bi-gear" text="Settings" label="Settings" onClick={onOpenSettings} />
           <IconButton

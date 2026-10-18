@@ -8,7 +8,7 @@ import { useStreamed } from '../view/useStreamed.js';
 import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
 
 /**
- * Unit Statistics Modal.
+ * Unit Data Modal (the toolbar's "Data" button).
  * Has multiple tabs:
  *  - "Personnel": Text strength summary & full MOS breakdown table (Code, Title [no parentheticals], Count).
  *    Clicking an MOS row opens its detail modal; the row's Search button searches for it.
@@ -205,7 +205,7 @@ export default function StatsModal({ open, initialTab, model, censored, onClose,
         tabIndex="-1"
         role="dialog"
         aria-modal="true"
-        aria-label="Unit Statistics"
+        aria-label="Unit Data"
         onMouseDown={(e) => { if (e.target === e.currentTarget) requestClose(); }}
       >
         <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down ${tab === 'info' ? 'modal-xl' : 'modal-lg'}`}>

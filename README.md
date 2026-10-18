@@ -87,7 +87,7 @@ npm run deploy
 3. Use the mouse wheel to zoom, or click and drag to pan across the interactive canvas.
 4. Click the Tree button in the top bar to open the vertical accordion tree view.
 5. Click the Search button to locate specific units, MOS codes, or paragraph numbers.
-6. Click the Stats button to view personnel strength rollups and MOS breakdowns.
+6. Click the Data button to view personnel strength rollups and MOS breakdowns.
 
 ## Technology Stack
 
