@@ -19,13 +19,13 @@ function downloadText(text, name, type) {
  * Data modal tab for the Supplement Table. It opens on three big buttons:
  *  - Load Table: pick a CSV (this app's export, or an AI's answer) and amend
  *    the table with it.
- *  - Generate Table: a copyable prompt listing every LIN and MOS in the unit,
- *    which any LLM turns into a TYPE,CODE,NAME,TAG,DESCRIPTION CSV.
+ *  - Generate Table: a copyable prompt listing every LIN and MOS in the unit
+ *    (a LIN with the crews holding it), which any LLM turns into a TYPE,CODE,NAME,TAG,DESCRIPTION CSV.
  *  - Edit Table: the table itself, every cell editable, exportable back to CSV.
  * `initialView` ('menu' | 'generate' | 'edit') is for the guided tour.
  */
 export default function SupplementTab({
-  root, censored, onProgress, active = true, closing = false, onDrained, initialView,
+  root, byId, censored, onProgress, active = true, closing = false, onDrained, initialView,
 }) {
   const sup = useSupplement();
   const [view, setView] = useState(initialView || 'menu');
@@ -43,7 +43,7 @@ export default function SupplementTab({
   const promptRef = useRef(null);
   const fileRef = useRef(null);
 
-  const lins = useMemo(() => uniqueLins(root), [root]);
+  const lins = useMemo(() => uniqueLins(root, byId), [root, byId]);
   const fmsNames = useMemo(() => new Map(lins.map((l) => [l.code, l.name])), [lins]);
   const mos = useMemo(() => uniqueMos(root, (m) => sup.getMos(m)?.name), [root, sup]);
   const linsCovered = lins.filter((l) => sup.lin.has(l.code)).length;

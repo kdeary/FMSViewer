@@ -928,13 +928,9 @@ body { overflow: hidden; }
   background: var(--bs-body-bg);
 }
 
-/* -------------------------------------------------------------- tree modal */
+/* ------------------------------------------------- data modal: Units tab */
 
-.tree-container {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
+.tree-container { padding: 0.5rem; }
 
 .tree-accordion-item {
   margin-bottom: 0.25rem;
@@ -1035,6 +1031,15 @@ body { overflow: hidden; }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
+/* Same-named crews in a unit share one full-width row, scrolling sideways. */
+.veh-group {
+  grid-column: 1 / -1; min-width: 0;
+  padding: 0.4rem 0.5rem 0.5rem; border: 1px dashed var(--bs-border-color); border-radius: 0.5rem;
+  background: var(--bs-tertiary-bg);
+}
+.veh-group-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.875rem; }
+.veh-group-row { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.15rem; }
+.veh-group-row > .veh-card { flex: 0 0 14rem; }
 .veh-card {
   display: flex; flex-direction: column; gap: 0.3rem; min-width: 0;
   padding: 0.5rem 0.6rem; border: 1px solid var(--bs-border-color); border-radius: 0.375rem;
@@ -1047,9 +1052,10 @@ body { overflow: hidden; }
 .veh-card-lines li { display: flex; align-items: baseline; gap: 0.35rem; min-width: 0; }
 .veh-line-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .veh-nomen { font-weight: 500; }
-.veh-lin { margin-left: auto; font-size: 0.75rem; color: var(--bs-secondary-color); flex: none; }
 .veh-card-lines .bi { flex: none; }
 .veh-crew-modal .eq-accordion { margin-top: 0.75rem !important; }
+.veh-crew-summary { padding: 0.6rem 0.75rem; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); background: var(--bs-tertiary-bg); }
+.veh-crew-summary .veh-card-lines { gap: 0.3rem; }
 
 /* The Supplement Table tab fills the modal body: its menu buttons stretch to
    the full height, and the Generate and Edit views scroll inside it. */

@@ -5,12 +5,14 @@ import { titleCut } from '../model/taxonomy.js';
 import { useSupplement, useDetail } from '../view/Supplement.jsx';
 import SupplementTab from './SupplementTab.jsx';
 import VehiclesTab from './VehiclesTab.jsx';
+import UnitsTab from './UnitsTab.jsx';
 import { useStreamed } from '../view/useStreamed.js';
 import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
 
 /**
  * Unit Data Modal (the toolbar's "Data" button).
  * Has multiple tabs:
+ *  - "Units": the unit breakdown as an expandable outline; a name flies the map to it (see UnitsTab).
  *  - "Personnel": Text strength summary & full MOS breakdown table (Code, Title [no parentheticals], Count).
  *    Clicking an MOS row opens its detail modal; the row's Search button searches for it.
  *  - "Equipment": Scrollable table of all unit equipment grouped by Equipment Category (6-char clean code).
@@ -25,12 +27,12 @@ import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
  *  - Clicking a LIN or nomenclature opens the equipment detail modal.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
-export default function StatsModal({ open, initialTab, initialSupView, model, censored, onClose, onSearch }) {
-  const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'vehicles' | 'info'
+export default function StatsModal({ open, initialTab, initialSupView, model, censored, onClose, onSearch, onGo }) {
+  const [tab, setTab] = useState('units'); // 'units' | 'personnel' | 'equipment' | 'vehicles' | 'info'
   // Opened on a particular tab (the guided tour); otherwise the last one stays.
   // A name that isn't a tab is ignored rather than leaving the body blank.
   useEffect(() => {
-    if (open && ['personnel', 'equipment', 'vehicles', 'info'].includes(initialTab)) setTab(initialTab);
+    if (open && ['units', 'personnel', 'equipment', 'vehicles', 'info'].includes(initialTab)) setTab(initialTab);
   }, [open, initialTab]);
   const [expandedCats, setExpandedCats] = useState(new Set());
   const [eqQuery, setEqQuery] = useState('');
@@ -202,6 +204,8 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
   if (!open || !root) return null;
 
   const r = root.roll;
+  // Units and Vehicles show a node on the map; the modal gets out of the way.
+  const goAndClose = onGo && ((id) => { onGo(id); onClose(); });
 
   return (
     <>
@@ -230,6 +234,15 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
 
             <div className="modal-header border-bottom-0 py-1 bg-body-tertiary">
               <ul className="nav nav-tabs card-header-tabs" data-tour="stats-tabs">
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className={`nav-link ${tab === 'units' ? 'active' : ''}`}
+                    onClick={() => setTab('units')}
+                  >
+                    Units
+                  </button>
+                </li>
                 <li className="nav-item">
                   <button
                     type="button"
@@ -278,6 +291,8 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
                   <ProgressStrip label={activeProgress.label} pct={activeProgress.pct} />
                 </div>
               )}
+              {tab === 'units' && <UnitsTab model={model} onGo={goAndClose} />}
+
               {tab === 'personnel' && (
                 <div className="data-pane">
                   {/* General Strength Text Summary */}
@@ -504,12 +519,19 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
                 </div>
               )}
 
-              {tab === 'vehicles' && <VehiclesTab model={model} onSubModal={setSubModal} />}
+              {tab === 'vehicles' && (
+                <VehiclesTab
+                  model={model}
+                  onSubModal={setSubModal}
+                  onGo={goAndClose}
+                />
+              )}
 
               {infoMounted && (
                 <div className="data-sup" hidden={tab !== 'info'}>
                   <SupplementTab
                     root={root}
+                    byId={model.byId}
                     censored={censored}
                     onProgress={setSupProgress}
                     active={tab === 'info'}

@@ -9,7 +9,6 @@ import SettingsModal from './ui/SettingsModal.jsx';
 import StatsModal from './ui/StatsModal.jsx';
 import ExportModal from './ui/ExportModal.jsx';
 import WarningsModal from './ui/WarningsModal.jsx';
-import TreeModal from './ui/TreeModal.jsx';
 import AlternateFormatModal from './ui/AlternateFormatModal.jsx';
 import DetailModals from './ui/DetailModals.jsx';
 import UpdateToast from './ui/UpdateToast.jsx';
@@ -73,7 +72,6 @@ export default function App() {
   const [statsTab, setStatsTab] = useState(null);
   // And the Supplement Table view it should show ('menu' | 'generate' | 'edit').
   const [statsSupView, setStatsSupView] = useState(null);
-  const [treeOpen, setTreeOpen] = useState(false);
   const [warningsOpen, setWarningsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -217,7 +215,7 @@ export default function App() {
   // replaces it. What was floating over the map is closed.
   const leaveView = useCallback(() => {
     setStage('idle'); setError(''); setProgress(null);
-    setStatsOpen(false); setTreeOpen(false); setWarningsOpen(false);
+    setStatsOpen(false); setWarningsOpen(false);
     setSettingsOpen(false); setExportOpen(false);
     setSearchPicking(false);
     setTourOpen(false); setOfferOpen(false);
@@ -330,7 +328,7 @@ export default function App() {
       // The target is only an element when something is focused -- a bare
       // keypress on the document would otherwise blow up on .matches().
       if (e.target instanceof Element && e.target.matches('input, textarea, button')) return;
-      if (settingsOpen || exportOpen || treeOpen || statsOpen || warningsOpen) return; // a modal owns the keyboard while it's up
+      if (settingsOpen || exportOpen || statsOpen || warningsOpen) return; // a modal owns the keyboard while it's up
       if (e.key === 'Escape') goUp();
       else if (e.key === 'f' || e.key === 'F') fitAll();
       else if (e.key === '+' || e.key === '=') zoomBy(1.4, size.w / 2, size.h / 2);
@@ -338,7 +336,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [goUp, fitAll, zoomBy, size, settingsOpen, exportOpen, treeOpen, statsOpen, warningsOpen]);
+  }, [goUp, fitAll, zoomBy, size, settingsOpen, exportOpen, statsOpen, warningsOpen]);
 
   // Root -> focused node, for the breadcrumb trail.
   const path = useMemo(() => {
@@ -431,7 +429,6 @@ export default function App() {
       setStatsTab(ui.stats || null);
       setStatsSupView(ui.sup || null);
       setStatsOpen(!!ui.stats);
-      setTreeOpen(!!ui.tree);
       setLegendOpen(!!ui.legend);
       setSettingsOpen(!!ui.settings);
       setExportOpen(!!ui.exportOpen);
@@ -501,8 +498,6 @@ export default function App() {
           onOpenSettings={() => setSettingsOpen(true)}
           searchOpen={searchOpen}
           onToggleSearch={() => { setSearchOpen((v) => !v); setSearchPicking(false); }}
-          treeOpen={treeOpen}
-          onOpenTree={() => setTreeOpen(true)}
           onOpenStats={() => setStatsOpen(true)}
           onOpenWarnings={() => setWarningsOpen(true)}
           onOpenTutorial={startTour}
@@ -606,6 +601,7 @@ export default function App() {
           censored={settings.censor}
           onClose={() => { setStatsOpen(false); setStatsTab(null); setStatsSupView(null); }}
           onSearch={openSearch}
+          onGo={goTo}
         />
 
         <WarningsModal
@@ -621,13 +617,6 @@ export default function App() {
           censored={settings.censor}
           onExportModel={exportModel}
           onClose={() => setExportOpen(false)}
-        />
-
-        <TreeModal
-          open={treeOpen}
-          model={displayModel}
-          onGo={goTo}
-          onClose={() => setTreeOpen(false)}
         />
 
         <DetailModals model={displayModel} onSearch={openSearch} />

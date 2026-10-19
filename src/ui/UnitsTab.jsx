@@ -1,39 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { titleCut, KIND_STYLE } from '../model/taxonomy.js';
 
 /**
- * Clickable Tree Modal showing vertical accordions of unit breakdown.
+ * Data modal tab: the unit breakdown as vertical accordions. A unit's name
+ * or its Go button flies the map to it (`onGo`, which also closes the modal).
  */
-export default function TreeModal({ open, model, onClose, onGo }) {
+export default function UnitsTab({ model, onGo }) {
   const [unitsOnly, setUnitsOnly] = useState(true);
-  const [expandedIds, setExpandedIds] = useState(new Set());
-
-  // Close modal on Escape key press
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
-  }, [open, onClose]);
-
-  const root = useMemo(() => {
-    if (!model || !model.rootId) return null;
-    return model.byId.get(model.rootId);
-  }, [model]);
-
-  // Expand root and immediate top-level children when opened
-  useEffect(() => {
-    if (!open || !model || !model.rootId) return;
-    const init = new Set();
-    init.add(model.rootId);
-    const rootNode = model.byId.get(model.rootId);
-    if (rootNode) {
-      for (const cid of rootNode.childIds) {
-        init.add(cid);
-      }
-    }
-    setExpandedIds(init);
-  }, [model, open]);
+  // The root and its immediate children start open.
+  const [expandedIds, setExpandedIds] = useState(() => {
+    const rootNode = model?.byId.get(model.rootId);
+    return new Set(rootNode ? [rootNode.id, ...rootNode.childIds] : []);
+  });
 
   // Compute set of all node IDs that have expandable children
   const allExpandableIds = useMemo(() => {
@@ -69,93 +47,60 @@ export default function TreeModal({ open, model, onClose, onGo }) {
     });
   };
 
-  if (!open || !model || !root) return null;
+  if (!model?.byId.has(model.rootId)) return null;
 
   return (
-    <>
-      <div
-        className="modal d-block"
-        tabIndex="-1"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Unit Breakdown Tree"
-        onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      >
-        <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
-          <div className="modal-content">
-            <div className="modal-header py-2 px-3">
-              <div className="d-flex align-items-center gap-2">
-                <i className="bi bi-diagram-3-fill text-info fs-5" />
-                <div>
-                  <h2 className="modal-title h5 mb-0">Unit Breakdown Tree</h2>
-                  <span className="text-body-secondary small">
-                    {titleCut(root.title)} ({model.meta.nodeCount} total nodes)
-                  </span>
-                </div>
-              </div>
-              <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
-            </div>
+    <div className="data-pane">
+      {/* Controls bar */}
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2" data-tour="tree-controls">
+        <div className="d-flex align-items-center gap-2">
+          <select
+            className="form-select form-select-sm w-auto fw-semibold"
+            aria-label="Show in tree"
+            value={unitsOnly ? 'units' : 'all'}
+            onChange={(e) => setUnitsOnly(e.target.value === 'units')}
+          >
+            <option value="units">Units only</option>
+            <option value="all">Units &amp; Billets</option>
+          </select>
+          <span className="text-body-secondary small d-none d-md-inline">
+            Click a name or <i className="bi bi-geo-alt-fill text-info mx-1" />Go to show it on the map.
+          </span>
+        </div>
 
-            <div className="modal-body p-3">
-              {/* Controls bar */}
-              <div className="d-flex align-items-center justify-content-between gap-2 mb-3 bg-body-tertiary p-2 rounded border" data-tour="tree-controls">
-                <select
-                  className="form-select form-select-sm w-auto fw-semibold"
-                  aria-label="Show in tree"
-                  value={unitsOnly ? 'units' : 'all'}
-                  onChange={(e) => setUnitsOnly(e.target.value === 'units')}
-                >
-                  <option value="units">Units only</option>
-                  <option value="all">Units &amp; Billets</option>
-                </select>
-
-                <div className="btn-group btn-group-sm" role="group">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={handleExpandAll}
-                    title="Expand all tree branches"
-                  >
-                    <i className="bi bi-arrows-expand me-1" /> Expand All
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={handleCollapseAll}
-                    title="Collapse all tree branches"
-                  >
-                    <i className="bi bi-arrows-collapse me-1" /> Collapse All
-                  </button>
-                </div>
-              </div>
-
-              {/* Vertical Tree Accordion Container */}
-              <div className="tree-container pe-1">
-                <TreeItem
-                  nodeId={model.rootId}
-                  model={model}
-                  expandedIds={expandedIds}
-                  onToggleExpand={toggleExpand}
-                  onGo={(id) => { onGo(id); onClose(); }}
-                  unitsOnly={unitsOnly}
-                  isRoot={true}
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer py-2 px-3">
-              <span className="text-body-secondary small me-auto">
-                Click unit name or <i className="bi bi-geo-alt-fill text-info mx-1" /> Go to focus unit on map.
-              </span>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>
-                Close
-              </button>
-            </div>
-          </div>
+        <div className="btn-group btn-group-sm" role="group">
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={handleExpandAll}
+            title="Expand all tree branches"
+          >
+            <i className="bi bi-arrows-expand me-1" /> Expand All
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={handleCollapseAll}
+            title="Collapse all tree branches"
+          >
+            <i className="bi bi-arrows-collapse me-1" /> Collapse All
+          </button>
         </div>
       </div>
-      <div className="modal-backdrop show" />
-    </>
+
+      {/* Vertical Tree Accordion Container */}
+      <div className="stats-table-container tree-container">
+        <TreeItem
+          nodeId={model.rootId}
+          model={model}
+          expandedIds={expandedIds}
+          onToggleExpand={toggleExpand}
+          onGo={(id) => onGo?.(id)}
+          unitsOnly={unitsOnly}
+          isRoot={true}
+        />
+      </div>
+    </div>
   );
 }
 

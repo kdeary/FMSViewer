@@ -15,9 +15,9 @@
 //                 panel     false hides the side panel, which otherwise shows
 //                           on steps that set a unit or billet focus
 //                 search    true, or a query string to prefill
-//                 stats     'personnel' | 'equipment' | 'info'
+//                 stats     'units' | 'personnel' | 'equipment' | 'vehicles' | 'info'
 //                 sup       Supplement Table view: 'menu' | 'generate' | 'edit'
-//                 tree, legend, settings, exportOpen, mos (MOS detail modal)
+//                 legend, settings, exportOpen, mos (MOS detail modal)
 //  - scroll     scroll the target into view (targets inside scrolling panels)
 //  - tryIt      a suggestion shown on the card. Everything inside the
 //               spotlight is live on every step; this just points it out
@@ -79,23 +79,16 @@ export const OVERVIEW = [
   {
     id: 'toolbar',
     title: 'The toolbar',
-    body: 'Every tool is in this row: New, Search, Tree, Data, Legend, Settings and this tutorial.',
+    body: 'Every tool is in this row: New, Search, Data, Legend, Settings and this tutorial.',
     target: '.topbar-tools',
     ui: { focus: 'root', panel: false },
   },
   {
-    id: 'tree',
-    title: 'Tree',
-    body: 'The whole hierarchy as an expandable outline. Click a unit in it to fly there on the map.',
-    target: '[aria-label="Unit Breakdown Tree"] .modal-content',
-    ui: { tree: true },
-  },
-  {
     id: 'stats',
     title: 'Data',
-    body: 'Totals for the whole structure: strength, a breakdown of every MOS, every equipment line, and the Supplement Table that adds names and descriptions.',
+    body: 'The whole structure as data: an outline of its units, strength and every MOS, every equipment line, every vehicle, and the Supplement Table that adds names and descriptions.',
     target: '[aria-label="Unit Data"] .modal-content',
-    ui: { stats: 'personnel' },
+    ui: { stats: 'units' },
   },
   {
     id: 'legend',
@@ -283,46 +276,38 @@ export const CHAPTERS = [
     ],
   },
   {
-    id: 'tree',
-    title: 'Tree',
-    icon: 'bi-diagram-3',
-    blurb: 'The hierarchy as an outline.',
+    id: 'stats',
+    title: 'Data',
+    icon: 'bi-bar-chart',
+    blurb: 'Units, personnel, equipment and vehicles for the whole structure.',
     steps: [
       {
-        id: 'tree-overview',
-        title: 'Unit Breakdown Tree',
+        id: 'stats-tabs',
+        title: 'Five tabs',
+        body: 'Units, Personnel, Equipment, Vehicles and Supplement Table. All five cover the whole structure you loaded. The Supplement Table has a section of its own in this tutorial.',
+        target: '[data-tour="stats-tabs"]',
+        ui: { stats: 'units' },
+      },
+      {
+        id: 'stats-units',
+        title: 'Units',
         body: 'The same structure as the map, laid out as an outline you can expand level by level.',
-        target: '[aria-label="Unit Breakdown Tree"] .modal-content',
-        ui: { tree: true },
+        target: '[aria-label="Unit Data"] .modal-body',
+        ui: { stats: 'units' },
       },
       {
         id: 'tree-controls',
         title: 'Units only vs Units & Billets',
         body: 'Choosing "Units only" in the menu on the left hides the individual billets so you see just the unit skeleton. Expand All and Collapse All open or close every branch at once.',
         target: '[data-tour="tree-controls"]',
-        ui: { tree: true },
+        ui: { stats: 'units' },
       },
       {
         id: 'tree-go',
         title: 'Jump to a unit',
-        body: 'Click a unit’s name, or its pin, to close the tree and fly to that unit on the map.',
+        body: 'Click a unit’s name, or its Go button, to close the Data window and fly to that unit on the map.',
         target: '.tree-container',
-        ui: { tree: true },
-      },
-    ],
-  },
-  {
-    id: 'stats',
-    title: 'Data',
-    icon: 'bi-bar-chart',
-    blurb: 'Personnel and equipment for the whole structure.',
-    steps: [
-      {
-        id: 'stats-tabs',
-        title: 'Four tabs',
-        body: 'Personnel, Equipment, Vehicles and Supplement Table. All four cover the whole structure you loaded. The Supplement Table has a section of its own in this tutorial.',
-        target: '[data-tour="stats-tabs"]',
-        ui: { stats: 'personnel' },
+        ui: { stats: 'units' },
       },
       {
         id: 'stats-personnel',

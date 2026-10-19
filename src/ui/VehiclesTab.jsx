@@ -12,9 +12,9 @@ import { AssignedEquipment } from './EquipmentSection.jsx';
  * Clicking a card opens the crew's equipment.
  *
  * `onSubModal(open)` tells the data modal when the crew modal is up, so
- * Escape closes only that.
+ * Escape closes only that. `onGo(id)` shows a crew on the map.
  */
-export default function VehiclesTab({ model, onSubModal }) {
+export default function VehiclesTab({ model, onSubModal, onGo }) {
   const sup = useSupplement();
   const tree = useMemo(() => buildVehicleTree(
     model,
@@ -73,7 +73,7 @@ export default function VehiclesTab({ model, onSubModal }) {
       <div className="stats-table-container veh-tree">
         <VehicleUnit unit={tree} open={open} onToggle={toggle} onPick={setCrew} sup={sup} />
       </div>
-      {crew && <CrewModal card={crew} model={model} onClose={() => setCrew(null)} sup={sup} />}
+      {crew && <CrewModal card={crew} model={model} onClose={() => setCrew(null)} onGo={onGo} sup={sup} />}
     </div>
   );
 }
@@ -99,7 +99,22 @@ function VehicleUnit({ unit, open, onToggle, onPick, sup }) {
         <div className="veh-unit-body">
           {unit.cards.length > 0 && (
             <div className="veh-cards">
-              {unit.cards.map((card) => <VehicleCard key={card.id} card={card} onPick={onPick} sup={sup} />)}
+              {groupByName(unit.cards, sup).map(({ name, cards }) => (cards.length === 1
+                ? <VehicleCard key={cards[0].id} card={cards[0]} onPick={onPick} sup={sup} />
+                : (
+                  <div key={`g-${cards[0].id}`} className="veh-group" role="group" aria-label={name}>
+                    <div className="veh-group-head">
+                      <span className="veh-unit-title">{name}</span>
+                      <span className="badge bg-primary-subtle text-primary-emphasis" title="Vehicles in this group">
+                        <i className="bi bi-truck me-1" aria-hidden="true" />
+                        {cards.reduce((sum, c) => sum + c.qty, 0)}
+                      </span>
+                    </div>
+                    <div className="veh-group-row">
+                      {cards.map((card) => <VehicleCard key={card.id} card={card} onPick={onPick} sup={sup} />)}
+                    </div>
+                  </div>
+                )))}
             </div>
           )}
           {unit.children.map((child) => (
@@ -114,52 +129,68 @@ function VehicleUnit({ unit, open, onToggle, onPick, sup }) {
 // A unit's own vehicle has no crew, so its nomenclature is its name.
 const cardName = (card, sup) => card.name || sup.displayName(card.vehicles[0]);
 
+/** A unit's cards gathered by name, each group where its first card was. */
+function groupByName(cards, sup) {
+  const groups = new Map();
+  for (const card of cards) {
+    const name = cardName(card, sup);
+    const key = name.toUpperCase();
+    if (!groups.has(key)) groups.set(key, { name, cards: [] });
+    groups.get(key).cards.push(card);
+  }
+  return [...groups.values()];
+}
+
+/**
+ * A card's vehicles, trailers, main system and weapon, one line each with its
+ * tag's icon; lines that have nothing to show are left out. With `onOpen`
+ * (in the crew modal) each name opens that item's details.
+ */
+function CardLines({ card, sup, onOpen }) {
+  const lines = [
+    ...card.vehicles.map((item) => ['Vehicle', item]),
+    ...card.trailers.map((item) => ['Trailer', item]),
+    ...(card.largeSystem ? [['Large Systems/Kits', card.largeSystem]] : []),
+    ...(card.weapon ? [['Weapon', card.weapon]] : []),
+  ];
+  return (
+    <ul className="veh-card-lines">
+      {lines.map(([tag, item], i) => {
+        const text = sup.displayName(item) || item.lin || '—';
+        return (
+          <li key={i} className={tag === 'Vehicle' ? 'veh-nomen' : undefined} title={tag}>
+            <i className={`bi ${TAG_ICONS[tag]}`} aria-hidden="true" />
+            {onOpen
+              ? <button type="button" className="eq-link veh-line-text" onClick={() => onOpen(item)}>{text}</button>
+              : <span className="veh-line-text">{text}</span>}
+            {item.qty > 1 && <span className="eq-qty">×{item.qty}</span>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function VehicleCard({ card, onPick, sup }) {
   const name = cardName(card, sup);
-  const line = (tag, item, label) => (
-    <li>
-      <i className={`bi ${TAG_ICONS[tag]}`} aria-hidden="true" />
-      {label && <span className="text-body-secondary">{label}</span>}
-      <span className="veh-line-text">{sup.displayName(item) || item.lin || '—'}</span>
-      {item.qty > 1 && <span className="eq-qty">×{item.qty}</span>}
-    </li>
-  );
-
   return (
     <button type="button" className="veh-card" onClick={() => onPick(card)} title={`${name}: show the crew's equipment`}>
       <span className="veh-card-name">
         {name}
         {card.ownerKind === 'UN' && <span className="veh-card-note"> · unit vehicle</span>}
       </span>
-      <ul className="veh-card-lines">
-        {card.vehicles.map((v, i) => (
-          <li key={`v-${i}`} className="veh-nomen">
-            <i className={`bi ${TAG_ICONS.Vehicle}`} aria-hidden="true" />
-            <span className="veh-line-text">{sup.displayName(v) || v.lin || '—'}</span>
-            {v.qty > 1 && <span className="eq-qty">×{v.qty}</span>}
-            {v.lin && <code className="veh-lin">{v.lin}</code>}
-          </li>
-        ))}
-        {card.trailers.length
-          ? card.trailers.map((t, i) => <React.Fragment key={`t-${i}`}>{line('Trailer', t, 'Trailer:')}</React.Fragment>)
-          : (
-            <li className="text-body-secondary">
-              <i className={`bi ${TAG_ICONS.Trailer}`} aria-hidden="true" />No trailer
-            </li>
-          )}
-        {card.largeSystem && line('Large Systems/Kits', card.largeSystem, 'System:')}
-        {card.weapon && line('Weapon', card.weapon, 'Weapon:')}
-      </ul>
+      <CardLines card={card} sup={sup} />
     </button>
   );
 }
 
 /**
- * The crew's equipment, in the side panel's Assigned equipment accordion.
+ * The card's lines again, then the crew's equipment in the side panel's
+ * Assigned equipment accordion.
  * Stacks over the data modal and under the equipment detail modal, which a
  * nomenclature opens.
  */
-function CrewModal({ card, model, onClose, sup }) {
+function CrewModal({ card, model, onClose, onGo, sup }) {
   const { detailOpen } = useDetail();
   const name = cardName(card, sup);
   const [listOpen, setListOpen] = useState(true);
@@ -188,15 +219,28 @@ function CrewModal({ card, model, onClose, sup }) {
           <div className="modal-content">
             <div className="modal-header py-2">
               <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                <h2 className="modal-title h5 mb-0 text-truncate">{name}</h2>
-                <div className="small text-body-secondary text-truncate">{card.unitTitle}</div>
+                <h2 className="modal-title h5 mb-0">{name}</h2>
+                <div className="small text-body-secondary">{card.unitTitle}</div>
               </div>
               <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
             </div>
-            <div className="modal-body pt-0">
+            <div className="modal-body pb-0">
+              <div className="veh-crew-summary">
+                <CardLines card={card} sup={sup} onOpen={sup.open} />
+              </div>
               <AssignedEquipment node={node} open={listOpen} onToggle={() => setListOpen((v) => !v)} />
             </div>
             <div className="modal-footer py-2 border-top-0">
+              {onGo && (
+                <button
+                  type="button"
+                  className="btn btn-outline-info btn-sm me-auto"
+                  onClick={() => onGo(card.nodeId)}
+                  title={card.ownerKind === 'UN' ? 'Show this unit on the map' : 'Show this crew on the map'}
+                >
+                  <i className="bi bi-geo-alt-fill me-1" aria-hidden="true" />Show on map
+                </button>
+              )}
               <button type="button" className="btn btn-secondary btn-sm" onClick={onClose}>Close</button>
             </div>
           </div>

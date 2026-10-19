@@ -26,7 +26,7 @@ function IconButton({ icon, text, label, onClick, active, variant = 'secondary',
 
 export default function TopBar({
   path, onGo, onExport, onReset, legendOpen, onToggleLegend, warnings, onOpenSettings,
-  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, treeOpen, onOpenTree, onOpenTutorial,
+  searchOpen, onToggleSearch, onOpenStats, onOpenWarnings, onOpenTutorial,
 }) {
   return (
     <nav className="navbar bg-body-tertiary border-bottom topbar py-1">
@@ -36,7 +36,6 @@ export default function TopBar({
             <IconButton icon="bi-file-earmark-plus" text="New" label="New: back to the home page to open another spreadsheet" onClick={onReset} />
           </div>
           <IconButton icon="bi-search" text="Search" label="Search within a unit" onClick={onToggleSearch} active={searchOpen} />
-          <IconButton icon="bi-diagram-3" text="Tree" label="Unit breakdown tree" onClick={onOpenTree} active={treeOpen} />
           <IconButton icon="bi-bar-chart" text="Data" label="Unit data" onClick={onOpenStats} />
           <IconButton icon="bi-palette" text="Legend" label="MOS legend" onClick={onToggleLegend} active={legendOpen} />
           <IconButton icon="bi-gear" text="Settings" label="Settings" onClick={onOpenSettings} />

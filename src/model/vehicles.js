@@ -18,20 +18,20 @@ export function crewVehicleName(title) {
 const isPacing = (item) => String(item.erc || '').trim().toUpperCase() === 'P';
 // Words for the weapon itself, as against its mount, sight or tools, which share its tag.
 const WEAPON_RE = /MACH(INE)? ?GUN|\bMG\b|\bGUN\b|LAUNCHER|\bLCHR\b|\bMK ?19\b|\bM2A?1?\b|\bM240|\bM249|HOWITZER|MORTAR|JAVELIN|\bTOW\b|RIFLE|CARBINE/i;
-const ACCESSORY_RE = /MOUNT|\bMT\b|SIGHT|OPTIC|TELESCOPE|\bAN\/P[AEV][QSV]|NIGHT VIS|ILLUMINATOR|AMMO|TOOL|\bKIT\b/i;
+const ACCESSORY_RE = /MOUNT|\bMT\b|SIGHT|SCOPE|OPTIC|THERMAL|NIGHT|\bNV[DGS]?\b|IMAG(ER|ING)|LASER|AIMING|ILLUMINATOR|RANGE ?FINDER|BINOC|\bAN\/[PT][AEV][QSV]|TRIPOD|BIPOD|PINTLE|CRADLE|TRAVERS|BARREL|SUPPRESS|ADAPTER|BLANK|CLEANING|AMMO|TOOL|\bKIT\b|\bCASE\b|\bBAG\b/i;
+
+/** A gun, launcher or the like -- not a sight, mount or other accessory tagged with it. */
+const isRealWeapon = (text) => WEAPON_RE.test(text) && !ACCESSORY_RE.test(text);
 
 /**
  * The item that best stands for a crew's tag group: pacing (ERC P) items
- * first, then for weapons the gun itself over its mount or sight, then the
- * order the sheet lists them.
+ * first, then the order the sheet lists them.
  */
-function primaryOf(items, weapon, names) {
+function primaryOf(items) {
   let best = null;
   let bestScore = Infinity;
   items.forEach((item, i) => {
-    const text = names(item);
-    let score = (isPacing(item) ? 0 : 2000) + i;
-    if (weapon) score += (WEAPON_RE.test(text) ? 0 : 500) + (ACCESSORY_RE.test(text) ? 1000 : 0);
+    const score = (isPacing(item) ? 0 : items.length) + i;
     if (score < bestScore) { best = item; bestScore = score; }
   });
   return best;
@@ -40,10 +40,12 @@ function primaryOf(items, weapon, names) {
 /**
  * @param model  the loaded structure ({ byId, rootId })
  * @param tagOf  (item) => tag, from the Supplement Table context
- * @param names  (item) => every name it goes by (FMS and Supplement Table), for picking primaries
+ * @param names  (item) => every name it goes by (FMS and Supplement Table), for telling weapons from their sights
  * @returns the root unit's entry, or null when there are no vehicles:
  *   { id, title, uic, total, cards, children }
- *   cards: { id, name, ownerKind, unitTitle, vehicles, trailers, largeSystem, weapon, equipment, qty }
+ *   cards: { id, nodeId, name, ownerKind, unitTitle, vehicles, trailers, largeSystem, weapon, equipment, qty }
+ *   `nodeId` is the crew's (or, for a unit's own vehicle, the unit's) node.
+ *   `weapon` is only ever a real weapon, never a sight or mount alone.
  *   `equipment` is everything the crew holds, vehicles included.
  *   `total` is every vehicle in the unit and below it; `qty` a card's own.
  */
@@ -65,13 +67,14 @@ export function buildVehicleTree(model, tagOf, names = (item) => item.name || ''
     if (!vehicles.length) return null;
     return {
       id: node.id,
+      nodeId: node.id,
       name: node.kind === 'CR' ? crewVehicleName(node.title) : titleCut(node.title),
       ownerKind: node.kind,
       unitTitle: titleCut(unit.title),
       vehicles,
       trailers: byTag.get('Trailer') || [],
-      largeSystem: primaryOf(byTag.get('Large Systems/Kits') || [], false, names),
-      weapon: primaryOf(byTag.get('Weapon') || [], true, names),
+      largeSystem: primaryOf(byTag.get('Large Systems/Kits') || []),
+      weapon: primaryOf((byTag.get('Weapon') || []).filter((item) => isRealWeapon(names(item)))),
       equipment: node.equipment,
       qty: vehicles.reduce((sum, v) => sum + v.qty, 0),
     };
@@ -87,6 +90,7 @@ export function buildVehicleTree(model, tagOf, names = (item) => item.name || ''
       if (tagOf(item) !== 'Vehicle') continue;
       cards.push({
         id: `${unit.id}|${item.lin || item.name}`,
+        nodeId: unit.id,
         name: '',
         ownerKind: 'UN',
         unitTitle: titleCut(unit.title),

@@ -7,7 +7,7 @@ FMSViewer is an interactive web-based force structure visualization tool designe
 ## Key Features
 
 - Interactive Map Canvas: Smooth pan, zoom, and dynamic level-of-detail rendering for organizational structures.
-- Unit Breakdown Tree: Vertical accordion tree view accessible via the top bar to inspect unit hierarchies and personnel totals.
+- Unit Breakdown: Vertical accordion outline, on the Data window's Units tab, to inspect unit hierarchies and personnel totals.
 - File Parsing: Supports direct import of FMSWeb spreadsheet exports (.xlsx, .xls, .csv) and pre-parsed model files (.json).
 - Search and Filtering: Real-time search across unit names, UICs, MOS codes, and paragraph numbers.
 - Statistics and MOS Analytics: Detailed personnel strength rollups and MOS distribution summaries.
@@ -85,9 +85,8 @@ npm run deploy
 1. Open the application in your browser.
 2. Drag and drop an FMSWeb spreadsheet file or click to select a file.
 3. Use the mouse wheel to zoom, or click and drag to pan across the interactive canvas.
-4. Click the Tree button in the top bar to open the vertical accordion tree view.
-5. Click the Search button to locate specific units, MOS codes, or paragraph numbers.
-6. Click the Data button to view personnel strength rollups and MOS breakdowns.
+4. Click the Search button to locate specific units, MOS codes, or paragraph numbers.
+5. Click the Data button for the unit outline (Units tab), personnel strength rollups and MOS breakdowns.
 
 ## Technology Stack
 

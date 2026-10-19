@@ -56,15 +56,48 @@ export function unpackRows(list) {
   return Array.isArray(list) ? list.filter((r) => r && r.code).map(makeRow) : [];
 }
 
-/** Every distinct LIN in the structure, with the name the FMS gives it. */
-export function uniqueLins(root) {
+// A crew's own name, without the "1ST SQD:"-style prefix. Parentheses stay:
+// they often name the vehicle's model, which is what the prompt is after.
+const crewName = (title) => {
+  const raw = String(title || '');
+  return raw.slice(raw.lastIndexOf(':') + 1).trim() || raw.trim();
+};
+
+/**
+ * Every distinct LIN in the structure, with the name the FMS gives it and,
+ * when `byId` is given, the names of the crews that hold it themselves (a
+ * vehicle's crew, say -- not the kit of the Soldiers in it).
+ */
+export function uniqueLins(root, byId) {
   const seen = new Map();
   for (const item of root?.allEq || []) {
     const lin = normCode(item.lin);
-    if (lin && !seen.has(lin)) seen.set(lin, { code: lin, name: item.name || '' });
+    if (lin && !seen.has(lin)) seen.set(lin, { code: lin, name: item.name || '', crews: [] });
+  }
+  if (byId && root) {
+    const stack = [root.id];
+    while (stack.length) {
+      const node = byId.get(stack.pop());
+      if (!node) continue;
+      for (let i = node.childIds.length - 1; i >= 0; i--) stack.push(node.childIds[i]); // sheet order
+      if (node.kind !== 'CR') continue;
+      const name = crewName(node.title);
+      for (const item of node.equipment || []) {
+        const entry = seen.get(normCode(item.lin));
+        if (entry && name && !entry.crews.includes(name)) entry.crews.push(name);
+      }
+    }
   }
   return [...seen.values()].sort((a, b) => a.code.localeCompare(b.code));
 }
+
+// A LIN held by many crews lists only the first few; that is enough of a hint.
+const MAX_CREWS = 3;
+const linLine = ({ code, name, crews = [] }) => {
+  if (!crews.length) return `${code} | ${name}`;
+  const more = crews.length > MAX_CREWS ? ` (+${crews.length - MAX_CREWS} more)` : '';
+  return `${code} | ${name} | ${crews.slice(0, MAX_CREWS).join('; ')}${more}`;
+};
 
 /** Every distinct MOS, with whatever title is already known for it (maybe none). */
 export function uniqueMos(root, knownTitle) {
@@ -75,10 +108,10 @@ export function uniqueMos(root, knownTitle) {
 }
 
 export function buildPrompt(lins, mos) {
-  const linList = lins.length ? lins.map(({ code, name }) => `${code} | ${name}`).join('\n') : '(none)';
+  const linList = lins.length ? lins.map(linLine).join('\n') : '(none)';
   const mosList = mos.length ? mos.map(({ code, name }) => (name ? `${code} | ${name}` : code)).join('\n') : '(none)';
   return `You are a U.S. Army force management, equipment and personnel expert. Below are two lists from a unit's Force Management System (FMS) authorization document:
-1. Line Item Numbers (LINs), each followed by the generic name the FMS gives it.
+1. Line Item Numbers (LINs), each followed by the generic name the FMS gives it and, when a vehicle crew (or other crew) holds it, the names of those crews. A crew's name often tells you the exact vehicle or system, e.g. "TRK CREW (M1083)" or "PALADIN CREW" - use it to pick the right model.
 2. Military Occupational Specialty (MOS) / Area of Concentration codes, some followed by a known title.
 
 Produce ONE CSV file with exactly these five columns, in this order, with this header row:
@@ -108,7 +141,7 @@ Output format:
 - Wrap every NAME, TAG and DESCRIPTION value in double quotes, and escape any double quote inside a value by doubling it ("").
 - No commentary before or after the CSV.
 
-LINs (LIN | FMS name)
+LINs (LIN | FMS name | crews that hold it, if any)
 ${linList}
 
 MOSs (MOS | known title)
