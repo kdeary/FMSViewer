@@ -4,6 +4,7 @@ import { getEquipmentCategory } from '../model/rollups.js';
 import { titleCut } from '../model/taxonomy.js';
 import { useSupplement, useDetail } from '../view/Supplement.jsx';
 import SupplementTab from './SupplementTab.jsx';
+import VehiclesTab from './VehiclesTab.jsx';
 import { useStreamed } from '../view/useStreamed.js';
 import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
 
@@ -17,23 +18,27 @@ import ProgressStrip, { TabProgress } from './ProgressStrip.jsx';
  *    Sorted with ERC "P" priority first, then category count ASCENDING.
  *    A search bar filters items by nomenclature, LIN, ERC or category code; while
  *    filtering, matching categories auto-expand so hits are visible without clicking.
+ *  - "Vehicles": every vehicle as a tree of units with a total at each echelon, one
+ *    card per vehicle, named for its crew (see VehiclesTab).
  *  - "Supplement Table": AI prompt for LIN / MOS names and descriptions, the CSV import for its
  *    answer, and the editable table itself.
  *  - Clicking a LIN or nomenclature opens the equipment detail modal.
  *  - Clicking any MOS or Equipment row auto-populates the search panel with field tags (MOS:56M, LIN:T73827, CAT:CARBIN).
  */
 export default function StatsModal({ open, initialTab, initialSupView, model, censored, onClose, onSearch }) {
-  const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'info'
+  const [tab, setTab] = useState('personnel'); // 'personnel' | 'equipment' | 'vehicles' | 'info'
   // Opened on a particular tab (the guided tour); otherwise the last one stays.
   // A name that isn't a tab is ignored rather than leaving the body blank.
   useEffect(() => {
-    if (open && ['personnel', 'equipment', 'info'].includes(initialTab)) setTab(initialTab);
+    if (open && ['personnel', 'equipment', 'vehicles', 'info'].includes(initialTab)) setTab(initialTab);
   }, [open, initialTab]);
   const [expandedCats, setExpandedCats] = useState(new Set());
   const [eqQuery, setEqQuery] = useState('');
   const mosInfo = useMosInfo();
   const eqInfo = useSupplement();
   const { detailOpen } = useDetail();
+  // The Vehicles tab's crew modal, which owns Escape while it's up.
+  const [subModal, setSubModal] = useState(false);
 
 
   useEffect(() => { if (!open) setEqQuery(''); }, [open]);
@@ -61,11 +66,11 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
 
   useEffect(() => {
     // The equipment detail modal stacks on top of this one and owns Escape while it's up.
-    if (!open || detailOpen) return undefined;
+    if (!open || detailOpen || subModal) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [open, requestClose, detailOpen]);
+  }, [open, requestClose, detailOpen, subModal]);
 
   const root = useMemo(() => {
     if (!model || !model.rootId) return null;
@@ -243,6 +248,15 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
                   >
                     Equipment ({categorizedEquipment.length} Categories)
                     {tab === 'equipment' && tabProgress.equipment && <TabProgress pct={tabProgress.equipment.pct} />}
+                  </button>
+                </li>
+                <li className="nav-item">
+                  <button
+                    type="button"
+                    className={`nav-link ${tab === 'vehicles' ? 'active' : ''}`}
+                    onClick={() => setTab('vehicles')}
+                  >
+                    Vehicles
                   </button>
                 </li>
                 <li className="nav-item">
@@ -489,6 +503,8 @@ export default function StatsModal({ open, initialTab, initialSupView, model, ce
                   </div>
                 </div>
               )}
+
+              {tab === 'vehicles' && <VehiclesTab model={model} onSubModal={setSubModal} />}
 
               {infoMounted && (
                 <div className="data-sup" hidden={tab !== 'info'}>

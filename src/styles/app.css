@@ -1015,8 +1015,42 @@ body { overflow: hidden; }
 
 /* The data modal keeps one size whichever tab is showing. */
 @media (min-width: 576px) {
-  .data-modal .modal-content { height: min(820px, 100%); }
+  .data-modal > .modal-content { height: min(820px, 100%); }
 }
+/* Vehicles tab: a tree of unit sections, each with a grid of vehicle cards. */
+.veh-tree { padding: 0.5rem; }
+.veh-unit + .veh-unit { margin-top: 0.35rem; }
+.veh-unit-head {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%;
+  padding: 0.35rem 0.5rem; border: 0; border-radius: 0.375rem;
+  background: var(--bs-tertiary-bg); color: inherit; text-align: left;
+}
+.veh-unit-head:hover, .veh-unit-head:focus-visible { background: var(--bs-secondary-bg); }
+.veh-unit-title { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.veh-unit-body {
+  margin: 0.35rem 0 0 0.6rem; padding-left: 0.6rem;
+  border-left: 1px solid var(--bs-border-color);
+}
+.veh-cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.veh-card {
+  display: flex; flex-direction: column; gap: 0.3rem; min-width: 0;
+  padding: 0.5rem 0.6rem; border: 1px solid var(--bs-border-color); border-radius: 0.375rem;
+  background: var(--bs-body-bg); color: inherit; font-size: 0.8125rem; text-align: left;
+}
+.veh-card:hover, .veh-card:focus-visible { border-color: var(--accent-ink); background: var(--bs-tertiary-bg); }
+.veh-card-name { display: block; font-size: 0.9375rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.veh-card-note { font-size: 0.75rem; font-weight: 400; color: var(--bs-secondary-color); }
+.veh-card-lines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.veh-card-lines li { display: flex; align-items: baseline; gap: 0.35rem; min-width: 0; }
+.veh-line-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.veh-nomen { font-weight: 500; }
+.veh-lin { margin-left: auto; font-size: 0.75rem; color: var(--bs-secondary-color); flex: none; }
+.veh-card-lines .bi { flex: none; }
+.veh-crew-modal .eq-accordion { margin-top: 0.75rem !important; }
+
 /* The Supplement Table tab fills the modal body: its menu buttons stretch to
    the full height, and the Generate and Edit views scroll inside it. */
 /* Personnel and Equipment: the table takes whatever height the body has left. */

@@ -319,8 +319,8 @@ export const CHAPTERS = [
     steps: [
       {
         id: 'stats-tabs',
-        title: 'Three tabs',
-        body: 'Personnel, Equipment and Supplement Table. All three cover the whole structure you loaded. The Supplement Table has a section of its own in this tutorial.',
+        title: 'Four tabs',
+        body: 'Personnel, Equipment, Vehicles and Supplement Table. All four cover the whole structure you loaded. The Supplement Table has a section of its own in this tutorial.',
         target: '[data-tour="stats-tabs"]',
         ui: { stats: 'personnel' },
       },
@@ -337,6 +337,13 @@ export const CHAPTERS = [
         body: 'Every equipment line, grouped by category, with ERC P (pacing) items first. The filter matches nomenclature, LIN, ERC or category code. Click a LIN for its details. Some items are similar enough in name that they get grouped into a single category.',
         target: '[aria-label="Unit Data"] .modal-body',
         ui: { stats: 'equipment' },
+      },
+      {
+        id: 'stats-vehicles',
+        title: 'Vehicles',
+        body: 'Every vehicle, as a tree of units with a total at each echelon. Each card is named for its crew, then shows the vehicle, its trailer, and its main system and weapon. Click a card for all of the crew’s equipment. Vehicles are found by their equipment tag, so the Supplement Table makes this list complete.',
+        target: '[aria-label="Unit Data"] .modal-body',
+        ui: { stats: 'vehicles' },
       },
       {
         id: 'stats-supplement',
